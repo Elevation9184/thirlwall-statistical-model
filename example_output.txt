@@ -1,0 +1,98 @@
+=== 1. Chance alarms per year, England and Wales   [article: Step one, table of rules] ===
+   CUSUM h: NICU E10=2.92 E50=4.45
+   CUSUM h: LNU E10=2.19 E50=3.57
+   CUSUM h: SCU E10=1.39 E50=2.51
+A    Annual check, 2-sigma                                   alarm unit-yrs  11.3  episodes  10.8
+B    Annual check, 3-sigma                                   alarm unit-yrs   3.1  episodes   3.0
+C    Rolling 12m, monthly, 2-sigma                           alarm unit-yrs  31.5  episodes  30.2
+D    Rolling 12m, monthly, doubling heuristic                alarm unit-yrs  34.0  episodes  33.5
+E10  Risk-adjusted CUSUM, 1 false alarm per 10 unit-years    alarm unit-yrs  17.1  episodes  17.5
+E50  Risk-adjusted CUSUM, 1 false alarm per 50 unit-years    alarm unit-yrs   3.5  episodes   3.5
+
+=== 2. Rota review of chance alarms, system-weighted shares   [article: Step two, table] ===
+A    careless 0.79  naive 0.58  exact-correct 0.024  | flag episodes/yr   6.2  distinct nurses/yr   6.2
+       NICU: careless 1.00 naive 0.68 correct 0.035
+       LNU: careless 0.71 naive 0.53 correct 0.013
+       SCU: careless 0.31 naive 0.32 correct 0.018
+B    careless 0.87  naive 0.60  exact-correct 0.031  | flag episodes/yr   1.8  distinct nurses/yr   1.8
+       NICU: careless 1.00 naive 0.69 correct 0.028
+       LNU: careless 0.69 naive 0.46 correct 0.037
+       SCU: careless 0.40 naive 0.32 correct 0.040
+C    careless 0.76  naive 0.55  exact-correct 0.023  | flag episodes/yr  16.7  distinct nurses/yr  16.4
+       NICU: careless 1.00 naive 0.69 correct 0.031
+       LNU: careless 0.68 naive 0.51 correct 0.018
+       SCU: careless 0.26 naive 0.26 correct 0.014
+D    careless 0.66  naive 0.49  exact-correct 0.015  | flag episodes/yr  16.6  distinct nurses/yr  16.2
+       NICU: careless 1.00 naive 0.69 correct 0.029
+       LNU: careless 0.64 naive 0.49 correct 0.011
+       SCU: careless 0.46 naive 0.32 correct 0.041
+E10  careless 0.63  naive 0.50  exact-correct 0.018  | flag episodes/yr   8.7  distinct nurses/yr   8.6
+       NICU: careless 0.95 naive 0.73 correct 0.026
+       LNU: careless 0.64 naive 0.49 correct 0.015
+       SCU: careless 0.27 naive 0.28 correct 0.015
+E50  careless 0.75  naive 0.52  exact-correct 0.021  | flag episodes/yr   1.8  distinct nurses/yr   1.8
+       NICU: careless 0.98 naive 0.70 correct 0.024
+       LNU: careless 0.79 naive 0.53 correct 0.014
+       SCU: careless 0.46 naive 0.33 correct 0.030
+
+=== 3. Offender adds expected deaths for 12 months; caught within 12 months [bg = no offender]   [article: Step three, detection table and background result] ===
++4 A    NICU: 0.24 [bg 0.12] (offender flagged 0.11)  LNU: 0.40 [bg 0.06] (offender flagged 0.59)  SCU: 0.66 [bg 0.03] (offender flagged 0.83)
++4 B    NICU: 0.10 [bg 0.04] (offender flagged 0.12)  LNU: 0.17 [bg 0.01] (offender flagged 0.61)  SCU: 0.38 [bg 0.00] (offender flagged 0.89)
++4 C    NICU: 0.40 [bg 0.27] (offender flagged 0.04)  LNU: 0.55 [bg 0.18] (offender flagged 0.29)  SCU: 0.73 [bg 0.08] (offender flagged 0.53)
++4 D    NICU: 0.11 [bg 0.07] (offender flagged 0.07)  LNU: 0.67 [bg 0.33] (offender flagged 0.23)  SCU: 0.77 [bg 0.07] (offender flagged 0.54)
++4 E10  NICU: 0.25 [bg 0.08] (offender flagged 0.07)  LNU: 0.55 [bg 0.07] (offender flagged 0.40)  SCU: 0.83 [bg 0.06] (offender flagged 0.56)
++4 E50  NICU: 0.08 [bg 0.01] (offender flagged 0.13)  LNU: 0.23 [bg 0.01] (offender flagged 0.57)  SCU: 0.53 [bg 0.00] (offender flagged 0.78)
++7 A    NICU: 0.36 [bg 0.12] (offender flagged 0.36)  LNU: 0.71 [bg 0.06] (offender flagged 0.86)  SCU: 0.92 [bg 0.03] (offender flagged 0.97)
++7 B    NICU: 0.17 [bg 0.04] (offender flagged 0.34)  LNU: 0.44 [bg 0.01] (offender flagged 0.89)  SCU: 0.77 [bg 0.00] (offender flagged 0.98)
++7 C    NICU: 0.52 [bg 0.27] (offender flagged 0.14)  LNU: 0.79 [bg 0.18] (offender flagged 0.48)  SCU: 0.94 [bg 0.09] (offender flagged 0.64)
++7 D    NICU: 0.17 [bg 0.07] (offender flagged 0.17)  LNU: 0.86 [bg 0.33] (offender flagged 0.39)  SCU: 0.96 [bg 0.07] (offender flagged 0.65)
++7 E10  NICU: 0.43 [bg 0.08] (offender flagged 0.21)  LNU: 0.84 [bg 0.07] (offender flagged 0.58)  SCU: 0.98 [bg 0.06] (offender flagged 0.69)
++7 E50  NICU: 0.19 [bg 0.02] (offender flagged 0.30)  LNU: 0.60 [bg 0.01] (offender flagged 0.78)  SCU: 0.88 [bg 0.00] (offender flagged 0.87)
+
+=== 4. Falsely flagged unit-years per detected offender-year (+4); years per detection   [article: Step three, base-rate table] ===
+A    p=1:   1513:1 ( 134y)  p=3:    504:1 (  45y)  p=10:    151:1 (  13y)  p=30:     50:1 (   4y)
+B    p=1:    854:1 ( 279y)  p=3:    284:1 (  93y)  p=10:     85:1 (  28y)  p=30:     28:1 (   9y)
+C    p=1:   3223:1 ( 102y)  p=3:   1074:1 (  34y)  p=10:    322:1 (  10y)  p=30:    107:1 (   3y)
+D    p=1:   3525:1 ( 104y)  p=3:   1175:1 (  35y)  p=10:    352:1 (  10y)  p=30:    117:1 (   3y)
+E10  p=1:   1794:1 ( 105y)  p=3:    598:1 (  35y)  p=10:    179:1 (  10y)  p=30:     60:1 (   3y)
+E50  p=1:    743:1 ( 213y)  p=3:    248:1 (  71y)  p=10:     74:1 (  21y)  p=30:     25:1 (   7y)
+   prevalence proportional to staff, p=3/10k: A: 624:1  B: 376:1  C: 1216:1  D: 1642:1  E10: 764:1  E50: 362:1
+
+=== 5. P(flagged nurse is the offender | alarm and naive flag), +4   [article: Step three, closing paragraph] ===
+A    p=1: 0.07%  p=3: 0.22%  p=10: 0.73%  p=30: 2.15%
+B    p=1: 0.14%  p=3: 0.40%  p=10: 1.33%  p=30: 3.88%
+C    p=1: 0.02%  p=3: 0.06%  p=10: 0.19%  p=30: 0.57%
+D    p=1: 0.02%  p=3: 0.06%  p=10: 0.19%  p=30: 0.58%
+E10  p=1: 0.05%  p=3: 0.14%  p=10: 0.46%  p=30: 1.37%
+E50  p=1: 0.17%  p=3: 0.50%  p=10: 1.64%  p=30: 4.72%
+
+=== 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, q table] ===
+A    q=1: 6.2 (6.2)  q=0.5: 3.1 (3.1)  q=0.25: 1.6 (1.6)  q=0.1: 0.6 (0.6)
+B    q=1: 1.8 (1.8)  q=0.5: 0.9 (0.9)  q=0.25: 0.4 (0.4)  q=0.1: 0.2 (0.2)
+C    q=1: 16.7 (16.4)  q=0.5: 8.4 (8.2)  q=0.25: 4.2 (4.1)  q=0.1: 1.7 (1.6)
+D    q=1: 16.6 (16.2)  q=0.5: 8.3 (8.1)  q=0.25: 4.1 (4.0)  q=0.1: 1.7 (1.6)
+E10  q=1: 8.7 (8.6)  q=0.5: 4.3 (4.3)  q=0.25: 2.2 (2.2)  q=0.1: 0.9 (0.9)
+E50  q=1: 1.8 (1.8)  q=0.5: 0.9 (0.9)  q=0.25: 0.5 (0.5)  q=0.1: 0.2 (0.2)
+
+=== 7. Robustness: pure Poisson, true baseline known   [article: Step one, robustness check] ===
+C: 13.4 alarm unit-years per year
+D: 16.4 alarm unit-years per year
+
+=== 8. Exactly 4 offender deaths, not an expected 4, p = 3/10k   [article: Step three, exact-count result] ===
+  A: 476:1 (expected-4 model 504:1)  B: 333:1 (expected-4 model 284:1)  C: 1021:1 (expected-4 model 1074:1)  D: 1047:1 (expected-4 model 1175:1)  E10: 554:1 (expected-4 model 598:1)  E50: 276:1 (expected-4 model 248:1)
+
+=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, p = 3/10k   [article: Step three, trade-off chart] ===
+  false alarms per unit-year | national false alarms/yr | caught within 12m NICU LNU SCU | LNU with no offender | false:true | years per detection
+  1 in      5 |  35.00 | 0.388 0.697 0.910 | 0.155 |    992:1 |     28
+  1 in     10 |  17.50 | 0.247 0.545 0.832 | 0.068 |    615:1 |     35
+  1 in     20 |   8.75 | 0.152 0.399 0.716 | 0.027 |    400:1 |     46
+  1 in     50 |   3.50 | 0.077 0.235 0.529 | 0.007 |    247:1 |     71
+  1 in    100 |   1.75 | 0.045 0.147 0.390 | 0.002 |    182:1 |    104
+  1 in    200 |   0.88 | 0.025 0.084 0.270 | 0.000 |    143:1 |    163
+  1 in    500 |   0.35 | 0.012 0.036 0.153 | 0.000 |    111:1 |    317
+  1 in   1000 |   0.17 | 0.006 0.019 0.098 | 0.000 |     92:1 |    527
+  1 in   2000 |   0.09 | 0.003 0.009 0.058 | 0.000 |     83:1 |    944
+  1 in   5000 |   0.04 | 0.002 0.003 0.027 | 0.000 |     74:1 |   2117
+  1 in  10000 |   0.02 | 0.001 0.002 0.014 | 0.000 |     73:1 |   4155
+
+Total elapsed wall time: 173.05 s (Numba)
