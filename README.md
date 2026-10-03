@@ -1,6 +1,6 @@
 # Thirlwall Statistical Model
 
-This repository contains the code and technical notes behind *The Arithmetic of Suspicion*. It explores **one statistical interpretation** of what could happen if a mortality-monitoring alarm leads to a retrospective search of staff attendance in the context of the Thirlwall Inquiry's recommendations.
+This repository contains [*The Arithmetic of Suspicion*](The%20Arithmetic%20of%20Suspicion.pdf), its simulation code, and technical notes. The article explores **one statistical interpretation** of what could happen if a mortality-monitoring alarm leads to a retrospective search of staff attendance in the context of the Thirlwall Inquiry's recommendations.
 
 A mortality chart can tell you where to look. It cannot tell you whom to blame. This model quantifies that distinction under explicit assumptions. Its outputs are not evidence about any particular person or unit, or a forecast of how a trust will act. The code is provided so that others can test different assumptions and interpretations.
 
@@ -16,6 +16,7 @@ It does not forecast how often trusts will make that step. The share of alarms f
 
 ## Files
 
+- [`The Arithmetic of Suspicion.pdf`](The%20Arithmetic%20of%20Suspicion.pdf) — reader-facing article, including the model results and a separate policy discussion.
 - [`thirlwall_statistical_model.py`](thirlwall_statistical_model.py) — the complete simulation.
 - [`MODEL.md`](MODEL.md) — technical specification, outcome definitions, and limits.
 - [`requirements.txt`](requirements.txt) — exact package versions for the reference environment.
@@ -35,7 +36,7 @@ python thirlwall_statistical_model.py --quick    # reduced run, noisier
 python thirlwall_statistical_model.py --seed 1   # different random seed
 ```
 
-If `python` selects a different interpreter, use the path or launcher for Python 3.14 instead. The default seed is `20261002`. The full run prints nine numbered sections and its elapsed wall time; [`example_output.txt`](example_output.txt) records the rounded results from the reference environment. The script produces the model outputs used for the article's tables and discussion. It does not produce the article's prose or presentation graphics.
+If `python` selects a different interpreter, use the path or launcher for Python 3.14 instead. The default seed is `20261002`. The full run prints nine numbered sections and its elapsed wall time; [`example_output.txt`](example_output.txt) records the rounded results from the reference environment. The script produces the model outputs used for the article's tables and discussion. The article's staffing and camera discussion also draws on external sources and explicit extrapolations; those claims are not outputs of this simulation. The script does not produce the article's prose or presentation graphics.
 
 Quick mode uses roughly one tenth as many simulations. It is useful for exploring changes, but its estimates are noisier, especially in the rare-event end of the CUSUM threshold sweep. Use the full run for comparisons. Report the seed, software versions, and any changed inputs; another environment may produce different Monte Carlo values.
 
