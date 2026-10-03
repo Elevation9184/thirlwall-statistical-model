@@ -1,3 +1,5 @@
-numpy>=1.22
-scipy>=1.8
-numba>=0.59  # optional: speeds up the CUSUM loops; the model runs without it and gives identical results
+# Reference run: Python 3.14.0. Install all three for the recorded environment.
+# The script can use a NumPy fallback if Numba is unavailable.
+numpy==2.3.5
+scipy==1.16.3
+numba==0.63.0
