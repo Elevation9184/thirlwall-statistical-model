@@ -33,10 +33,10 @@ The full run with the default seed (20261002) reproduces every figure in the art
 
 | Machine | With Numba | NumPy only |
 | --- | --- | --- |
-| Windows desktop | 1.6 minutes | not measured |
+| Windows desktop | 1.6 minutes | 2.0 minutes |
 | Two-core Linux cloud machine, Python 3.13 | 2.7 minutes | 2.7 minutes |
 
-A quick run took 17 seconds on the cloud machine, with or without Numba. On that machine NumPy's vectorised loops already ran as fast as the compiled ones; how much Numba saves depends on the processor and the Python build. Both machines reproduced the article's figures exactly.
+A quick run took 17 seconds on the cloud machine, with or without Numba. Numba saved about a fifth of the run time on the Windows desktop and nothing on the cloud machine, where NumPy's vectorised loops already ran as fast as the compiled ones. All four runs reproduced the article's figures exactly.
 
 ## Where each figure comes from
 
