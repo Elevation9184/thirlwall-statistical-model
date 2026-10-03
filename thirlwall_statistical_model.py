@@ -22,7 +22,7 @@ calculations for the rota tests. It asks two questions:
 Running it
 ----------
     pip install -r requirements.txt
-    python thirlwall_statistical_model.py            # full run, about 3 minutes
+    python thirlwall_statistical_model.py            # full run, about 2 to 3 minutes
     python thirlwall_statistical_model.py --quick    # reduced run, under 20 seconds, noisier
 
 Numba, if installed, compiles the CUSUM loops. If it is not installed, the code falls

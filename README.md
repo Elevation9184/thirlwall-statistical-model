@@ -29,14 +29,14 @@ The full run with the default seed (20261002) reproduces every figure in the art
 
 **Numba.** If [Numba](https://numba.pydata.org/) is installed, the CUSUM loops are compiled; if not, the code falls back to plain NumPy. The results are identical either way. The first run with Numba also spends a few seconds compiling, and caches the result for later runs.
 
-**Run times** measured on a two-core Linux cloud machine with Python 3.13:
+**Run times, full run:**
 
-| Run | With Numba | NumPy only |
+| Machine | With Numba | NumPy only |
 | --- | --- | --- |
-| Full | 2.7 minutes | 2.7 minutes |
-| Quick | 17 seconds | 17 seconds |
+| Windows desktop | 1.6 minutes | not measured |
+| Two-core Linux cloud machine, Python 3.13 | 2.7 minutes | 2.7 minutes |
 
-On that machine NumPy's vectorised loops already ran as fast as the compiled ones. Numba may help more elsewhere, depending on the processor and the Python build.
+A quick run took 17 seconds on the cloud machine, with or without Numba. On that machine NumPy's vectorised loops already ran as fast as the compiled ones; how much Numba saves depends on the processor and the Python build. Both machines reproduced the article's figures exactly.
 
 ## Where each figure comes from
 
