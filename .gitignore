@@ -1,2 +1,6 @@
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+run_output.txt
