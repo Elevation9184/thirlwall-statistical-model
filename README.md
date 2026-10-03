@@ -20,12 +20,23 @@ Requires Python 3.9 or later.
 
 ```
 pip install -r requirements.txt
-python thirlwall_statistical_model.py            # full run, about 10 minutes
-python thirlwall_statistical_model.py --quick    # about 40 seconds, noisier
+python thirlwall_statistical_model.py            # full run
+python thirlwall_statistical_model.py --quick    # reduced run, noisier
 python thirlwall_statistical_model.py --seed 1   # a different random seed
 ```
 
-The full run with the default seed (20261002) reproduces every figure in the article. Quick mode runs about a tenth of the simulations: its central figures land close to the full run's, but the extreme tail of the threshold sweep becomes unreliable.
+The full run with the default seed (20261002) reproduces every figure in the article. Quick mode runs about a tenth of the simulations: its central figures land close to the full run's, but the extreme tail of the threshold sweep becomes unreliable. The run prints its elapsed time at the end.
+
+**Numba.** If [Numba](https://numba.pydata.org/) is installed, the CUSUM loops are compiled; if not, the code falls back to plain NumPy. The results are identical either way. The first run with Numba also spends a few seconds compiling, and caches the result for later runs.
+
+**Run times** measured on a two-core Linux cloud machine with Python 3.13:
+
+| Run | With Numba | NumPy only |
+| --- | --- | --- |
+| Full | 2.7 minutes | 2.7 minutes |
+| Quick | 17 seconds | 17 seconds |
+
+On that machine NumPy's vectorised loops already ran as fast as the compiled ones. Numba may help more elsewhere, depending on the processor and the Python build.
 
 ## Where each figure comes from
 
@@ -94,7 +105,7 @@ Each block of output is labelled with the part of the article it supports.
 
 ## Version history
 
-The model was revised five times after rounds of adversarial review of the code and the article draft. Working versions were named `sim.py` to `sim5.py`; this file is `sim5.py` renamed, with documentation and command-line options added. Its calculations and default seed are unchanged.
+The model was revised five times after rounds of adversarial review of the code and the article draft. Working versions were named `sim.py` to `sim5.py`; this file is `sim5.py` renamed and documented, with command-line options added and two speed changes: optional Numba compilation of the CUSUM loops, and detection runs that check only the first twelve months of monitoring, the only months whose alarms they use. Its calculations, random-number sequence and default seed are unchanged, and a full run gives the same figures as `sim5.py` to the last digit.
 
 | Version | Main changes |
 | --- | --- |

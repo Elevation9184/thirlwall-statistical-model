@@ -22,8 +22,12 @@ calculations for the rota tests. It asks two questions:
 Running it
 ----------
     pip install -r requirements.txt
-    python thirlwall_statistical_model.py            # full run, about 10 minutes
-    python thirlwall_statistical_model.py --quick    # reduced run, about 1 minute, noisier
+    python thirlwall_statistical_model.py            # full run, about 3 minutes
+    python thirlwall_statistical_model.py --quick    # reduced run, under 20 seconds, noisier
+
+Numba, if installed, compiles the CUSUM loops. If it is not installed, the code falls
+back to plain NumPy and gives identical results. How much Numba saves depends on the
+machine; README.md gives measured run times.
 
 The full run with the default seed reproduces every figure in the article. Each block
 of output is labelled with the part of the article it supports.
@@ -37,9 +41,17 @@ national totals; README.md gives the sources and the reasoning.
 
 Licence: MIT (see LICENSE).
 """
+from time import perf_counter
+
+_run_start = perf_counter()
+
 import argparse
 import numpy as np
 from scipy import stats
+try:
+    from numba import njit
+except ImportError:
+    njit = None
 
 parser = argparse.ArgumentParser(description="Thirlwall Statistical Model")
 parser.add_argument("--quick", action="store_true",
@@ -114,11 +126,10 @@ def make_paths(mean, n, months, extra=0.0):
         x = x + rng.poisson(extra / 12, size=(n, months))
     return x, mu
 
-def cusum_run(x, mu, h):
-    """Return crossings per path and first-crossing month (inf if none)."""
-    n, T = x.shape
+def _cusum_run_numpy(inc, h):
+    """Vectorised fallback for CUSUM paths when Numba is unavailable."""
+    n, T = inc.shape
     S = np.zeros(n); count = np.zeros(n); first = np.full(n, np.inf)
-    inc = x * LN2 - mu
     for t in range(T):
         S = np.maximum(0, S + inc[:, t])
         a = S >= h
@@ -127,10 +138,70 @@ def cusum_run(x, mu, h):
         S[a] = 0
     return count, first
 
-NULL = {t: make_paths(T["mean"], N_CAL, MON) for t, T in TYPES.items()}
+def _crossing_total_numpy(inc, h):
+    """Count all crossings without allocating per-path first-crossing arrays."""
+    S = np.zeros(inc.shape[0]); total = 0
+    for t in range(inc.shape[1]):
+        S = np.maximum(0.0, S + inc[:, t])
+        alarm = S >= h
+        total += int(alarm.sum())
+        S[alarm] = 0.0
+    return total
+
+def _cusum_run_loop(inc, h):
+    """Path-major loop; Numba compiles this when installed."""
+    n, months = inc.shape
+    count = np.zeros(n); first = np.full(n, np.inf)
+    for i in range(n):
+        S = 0.0
+        for t in range(months):
+            S = max(0.0, S + inc[i, t])
+            if S >= h:
+                count[i] += 1.0
+                if first[i] == np.inf:
+                    first[i] = t
+                S = 0.0
+    return count, first
+
+def _crossing_total_loop(inc, h):
+    n, months = inc.shape
+    total = 0
+    for i in range(n):
+        S = 0.0
+        for t in range(months):
+            S = max(0.0, S + inc[i, t])
+            if S >= h:
+                total += 1
+                S = 0.0
+    return total
+
+if njit is not None:
+    _cusum_run_jit = njit(cache=True)(_cusum_run_loop)
+    _crossing_total_jit = njit(cache=True)(_crossing_total_loop)
+else:
+    _cusum_run_jit = _crossing_total_jit = None
+
+def cusum_run(x, mu, h):
+    """Return crossings per path and first-crossing month (inf if none)."""
+    inc = x * LN2 - mu
+    if _cusum_run_jit is not None:
+        return _cusum_run_jit(inc, h)
+    return _cusum_run_numpy(inc, h)
+
+# These paths are reused at every calibration threshold; compute increments once.
+NULL_INC = {}
+for t, T in TYPES.items():
+    x_null, mu_null = make_paths(T["mean"], N_CAL, MON)
+    NULL_INC[t] = x_null * LN2 - mu_null
+del x_null, mu_null
+
 def crossing_rate(t, h):
-    c, _ = cusum_run(*NULL[t], h)
-    return c.sum() / (N_CAL * YEARS)
+    inc = NULL_INC[t]
+    if _crossing_total_jit is not None:
+        total = _crossing_total_jit(inc, h)
+    else:
+        total = _crossing_total_numpy(inc, h)
+    return total / (N_CAL * YEARS)
 
 def calibrate(t, target):
     lo, hi = np.log(0.05), np.log(60.0)
@@ -148,19 +219,20 @@ for tag, target in (("E10", 0.10), ("E50", 0.02)):
         H[(tag, t)] = calibrate(t, target)
 
 # ---------------- alarm checks ----------------
-def checks(x, rule, mu=None, t_type=None):
+def checks(x, rule, mu=None, t_type=None, monitor_months=MON):
     """List of (monitoring_month, alarmed, window_start_abs, window_end_abs)."""
-    cs = np.concatenate([[0], np.cumsum(x)])
     out = []
+    if rule in ("A", "B", "C", "D"):
+        cs = np.concatenate([[0], np.cumsum(x[:PRE + monitor_months])])
     if rule in ("A", "B"):
         q = 0.977 if rule == "A" else 0.9987
-        for y in range(MON // 12):
+        for y in range(monitor_months // 12):
             t1 = PRE + 12 * y + 12
             c = cs[t1] - cs[t1 - 12]
             base = max((cs[t1 - 12] - cs[t1 - 48]) / 3, 0.5)
             out.append((12 * y + 11, c > stats.poisson.ppf(q, base), t1 - 12, t1))
     elif rule in ("C", "D"):
-        t1 = np.arange(PRE + 1, PRE + MON + 1)
+        t1 = np.arange(PRE + 1, PRE + monitor_months + 1)
         c = cs[t1] - cs[t1 - 12]
         base = np.maximum((cs[t1 - 12] - cs[t1 - 48]) / 3, 0.5)
         al = c > stats.poisson.ppf(0.977, base) if rule == "C" else (c >= 2 * base) & (c >= 4)
@@ -168,7 +240,7 @@ def checks(x, rule, mu=None, t_type=None):
     else:  # CUSUM with perfect risk adjustment; window = months since last reset
         h = H[(rule, t_type)]
         S, start = 0.0, PRE
-        for t in range(PRE, PRE + MON):
+        for t in range(PRE, PRE + monitor_months):
             S = max(0.0, S + x[t] * LN2 - mu[t])
             if S == 0.0:
                 start = t + 1
@@ -263,7 +335,7 @@ for extra in (4, 7):
                 x = bg + off
                 f = rng.choice(EXPOSURE, size=T["staff"] - 1, p=EXP_P)
                 f = np.append(f, OFFENDER_F)            # offender is the last nurse
-                chk = checks(x, r, mu, t)
+                chk = checks(x, r, mu, t, monitor_months=12)
                 first = next(((m, s, e) for m, a, s, e in chk if a), None)
                 if first is None or first[0] >= 12:
                     continue
@@ -282,7 +354,7 @@ for extra in (4, 7):
             bg_hit = 0
             for _ in range(reps):
                 bg0, _, mu0 = sim_unit(T["mean"])
-                f0 = next((m for m, a, *_ in checks(bg0, r, mu0, t) if a), None)
+                f0 = next((m for m, a, *_ in checks(bg0, r, mu0, t, monitor_months=12) if a), None)
                 bg_hit += f0 is not None and f0 < 12
             det[(extra, r, t)] = dict(d=hit / reps, bg=bg_hit / reps,
                                       flag_off=flag_off / max(hit, 1),
@@ -355,7 +427,7 @@ def exact_robustness():
             hit = 0
             for _ in range(DET_REPS // 2):
                 bg, off, mu = sim_unit(T["mean"], 4)
-                first = next((m for m, a, *_ in checks(bg + off, r, mu, t) if a), None)
+                first = next((m for m, a, *_ in checks(bg + off, r, mu, t, monitor_months=12) if a), None)
                 hit += first is not None and first < 12
             d[t] = hit / (DET_REPS // 2)
         p = 3e-4
@@ -385,3 +457,6 @@ for target in (0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 
     SWEEP.append((target, alarms, dets, bgs, alarms / true_, 1 / true_))
     print(f"  1 in {1/target:6.0f} | {alarms:6.2f} | {dets['NICU']:.3f} {dets['LNU']:.3f} {dets['SCU']:.3f} | "
           f"{bgs['LNU']:.3f} | {alarms/true_:6.0f}:1 | {1/true_:6.0f}")
+
+print(f"\nTotal elapsed wall time: {perf_counter() - _run_start:.2f} s "
+      f"({'Numba' if njit is not None else 'NumPy fallback, Numba not installed'})")
