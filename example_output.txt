@@ -3,37 +3,44 @@
    CUSUM h: LNU E10=2.19 E50=3.57
    CUSUM h: SCU E10=1.39 E50=2.51
 A    Annual check, 2-sigma                                   alarm unit-yrs  11.3  episodes  10.8
+       share of unit-years with an alarm: NICU 0.114  LNU 0.058  SCU 0.028
 B    Annual check, 3-sigma                                   alarm unit-yrs   3.1  episodes   3.0
+       share of unit-years with an alarm: NICU 0.043  LNU 0.012  SCU 0.003
 C    Rolling 12m, monthly, 2-sigma                           alarm unit-yrs  31.5  episodes  30.2
+       share of unit-years with an alarm: NICU 0.278  LNU 0.177  SCU 0.088
 D    Rolling 12m, monthly, doubling heuristic                alarm unit-yrs  34.0  episodes  33.5
+       share of unit-years with an alarm: NICU 0.071  LNU 0.328  SCU 0.067
 E10  Risk-adjusted CUSUM, 1 false alarm per 10 unit-years    alarm unit-yrs  17.1  episodes  17.5
+       share of unit-years with an alarm: NICU 0.095  LNU 0.100  SCU 0.097
 E50  Risk-adjusted CUSUM, 1 false alarm per 50 unit-years    alarm unit-yrs   3.5  episodes   3.5
+       share of unit-years with an alarm: NICU 0.018  LNU 0.021  SCU 0.020
 
 === 2. Rota review of chance alarms, system-weighted shares   [article: Step two, table] ===
+   careless = average-exposure test; naive = own-exposure test; correct = maximum-adjusted test (see MODEL.md)
 A    careless 0.79  naive 0.58  exact-correct 0.024  | flag episodes/yr   6.2  distinct nurses/yr   6.2
-       NICU: careless 1.00 naive 0.68 correct 0.035
-       LNU: careless 0.71 naive 0.53 correct 0.013
-       SCU: careless 0.31 naive 0.32 correct 0.018
+       NICU: careless 1.00 naive 0.68 correct 0.035  | median deaths reviewed 30, median top-nurse attendance 13
+       LNU: careless 0.71 naive 0.53 correct 0.013  | median deaths reviewed 8, median top-nurse attendance 4
+       SCU: careless 0.31 naive 0.32 correct 0.018  | median deaths reviewed 4, median top-nurse attendance 2
 B    careless 0.87  naive 0.60  exact-correct 0.031  | flag episodes/yr   1.8  distinct nurses/yr   1.8
-       NICU: careless 1.00 naive 0.69 correct 0.028
-       LNU: careless 0.69 naive 0.46 correct 0.037
-       SCU: careless 0.40 naive 0.32 correct 0.040
+       NICU: careless 1.00 naive 0.69 correct 0.028  | median deaths reviewed 34, median top-nurse attendance 14
+       LNU: careless 0.69 naive 0.46 correct 0.037  | median deaths reviewed 10, median top-nurse attendance 5
+       SCU: careless 0.40 naive 0.32 correct 0.040  | median deaths reviewed 5, median top-nurse attendance 3
 C    careless 0.76  naive 0.55  exact-correct 0.023  | flag episodes/yr  16.7  distinct nurses/yr  16.4
-       NICU: careless 1.00 naive 0.69 correct 0.031
-       LNU: careless 0.68 naive 0.51 correct 0.018
-       SCU: careless 0.26 naive 0.26 correct 0.014
+       NICU: careless 1.00 naive 0.69 correct 0.031  | median deaths reviewed 28, median top-nurse attendance 12
+       LNU: careless 0.68 naive 0.51 correct 0.018  | median deaths reviewed 8, median top-nurse attendance 4
+       SCU: careless 0.26 naive 0.26 correct 0.014  | median deaths reviewed 3, median top-nurse attendance 2
 D    careless 0.66  naive 0.49  exact-correct 0.015  | flag episodes/yr  16.6  distinct nurses/yr  16.2
-       NICU: careless 1.00 naive 0.69 correct 0.029
-       LNU: careless 0.64 naive 0.49 correct 0.011
-       SCU: careless 0.46 naive 0.32 correct 0.041
+       NICU: careless 1.00 naive 0.69 correct 0.029  | median deaths reviewed 31, median top-nurse attendance 13
+       LNU: careless 0.64 naive 0.49 correct 0.011  | median deaths reviewed 6, median top-nurse attendance 4
+       SCU: careless 0.46 naive 0.32 correct 0.041  | median deaths reviewed 4, median top-nurse attendance 2
 E10  careless 0.63  naive 0.50  exact-correct 0.018  | flag episodes/yr   8.7  distinct nurses/yr   8.6
-       NICU: careless 0.95 naive 0.73 correct 0.026
-       LNU: careless 0.64 naive 0.49 correct 0.015
-       SCU: careless 0.27 naive 0.28 correct 0.015
+       NICU: careless 0.95 naive 0.73 correct 0.026  | median deaths reviewed 12, median top-nurse attendance 7
+       LNU: careless 0.64 naive 0.49 correct 0.015  | median deaths reviewed 7, median top-nurse attendance 4
+       SCU: careless 0.27 naive 0.28 correct 0.015  | median deaths reviewed 3, median top-nurse attendance 2
 E50  careless 0.75  naive 0.52  exact-correct 0.021  | flag episodes/yr   1.8  distinct nurses/yr   1.8
-       NICU: careless 0.98 naive 0.70 correct 0.024
-       LNU: careless 0.79 naive 0.53 correct 0.014
-       SCU: careless 0.46 naive 0.33 correct 0.030
+       NICU: careless 0.98 naive 0.70 correct 0.024  | median deaths reviewed 20, median top-nurse attendance 9
+       LNU: careless 0.79 naive 0.53 correct 0.014  | median deaths reviewed 12, median top-nurse attendance 6
+       SCU: careless 0.46 naive 0.33 correct 0.030  | median deaths reviewed 7, median top-nurse attendance 3
 
 === 3. Offender adds expected deaths for 12 months; caught within 12 months [bg = no offender]   [article: Step three, detection table and background result] ===
 +4 A    NICU: 0.24 [bg 0.12] (offender flagged 0.11)  LNU: 0.40 [bg 0.06] (offender flagged 0.59)  SCU: 0.66 [bg 0.03] (offender flagged 0.83)
@@ -95,4 +102,4 @@ D: 16.4 alarm unit-years per year
   1 in   5000 |   0.04 | 0.002 0.003 0.027 | 0.000 |     74:1 |   2117
   1 in  10000 |   0.02 | 0.001 0.002 0.014 | 0.000 |     73:1 |   4155
 
-Total elapsed wall time: 173.05 s (Numba)
+Total elapsed wall time: 179.77 s (Numba)

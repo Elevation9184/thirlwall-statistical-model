@@ -7,7 +7,8 @@ Thirlwall Inquiry's recommendations on mortality monitoring and on suspicion of
 deliberate harm are joined together (Rob Goudie, October 2026).
 
 Repository:      https://github.com/Elevation9184/thirlwall-statistical-model
-Technical notes: README.md in the same repository.
+Technical notes: README.md (overview, running it) and MODEL.md (specification)
+                 in the same repository.
 
 What it is
 ----------
@@ -29,15 +30,17 @@ Numba, if installed, compiles the CUSUM loops. If it is not installed, the code 
 back to plain NumPy and gives identical results. How much Numba saves depends on the
 machine; README.md gives measured run times.
 
-The full run with the default seed reproduces every figure in the article. Each block
-of output is labelled with the part of the article it supports.
+With the default seed and the reference environment in requirements.txt, the full run
+reproduces every figure in the article; example_output.txt records that run. Other
+package versions may shift Monte Carlo values slightly. Each block of output is
+labelled with the part of the article it supports.
 
 Changing the assumptions
 ------------------------
 All inputs are set in the block headed "Model inputs" below: unit numbers, death rates,
 staffing, shift patterns, year-to-year variation, monitoring rules, the offender's
 effect and the base rates. They are modelling assumptions anchored to published
-national totals; README.md gives the sources and the reasoning.
+national totals; README.md gives the sources and MODEL.md the exact definitions.
 
 Licence: MIT (see LICENSE).
 """
@@ -275,6 +278,7 @@ per = {}   # per (rule, type): dict of rates
 for r in RULES:
     for t, T in TYPES.items():
         uy = ep = 0; sig_own = sig_avg = sig_adj = n_rev = 0; distinct = 0
+        ks, tops = [], []                                           # reviewed windows: deaths, top attendance
         for _ in range(REPS):
             bg, off, mu = sim_unit(T["mean"])
             f = rng.choice(EXPOSURE, size=T["staff"], p=EXP_P)          # persistent roster
@@ -289,6 +293,7 @@ for r in RULES:
                 cnt = rng.binomial(k, f)
                 i, top, pa, po, pj = rota_review(f, cnt, k)
                 n_rev += 1; sig_avg += pa < .05; sig_own += po < .05; sig_adj += pj < .05
+                ks.append(k); tops.append(int(top))
                 if po < .05:
                     flagged.add(i)
             distinct += len(flagged)
@@ -297,7 +302,9 @@ for r in RULES:
                            rev=n_rev / unit_years,
                            s_avg=sig_avg / max(n_rev, 1), s_own=sig_own / max(n_rev, 1),
                            s_adj=sig_adj / max(n_rev, 1),
-                           flag_ep=sig_own / unit_years, flag_distinct=distinct / unit_years)
+                           flag_ep=sig_own / unit_years, flag_distinct=distinct / unit_years,
+                           med_k=float(np.median(ks)) if ks else float("nan"),
+                           med_top=float(np.median(tops)) if tops else float("nan"))
 
 def sysw(r, key):            # system total per year
     return sum(TYPES[t]["n"] * per[(r, t)][key] for t in TYPES)
@@ -311,15 +318,19 @@ for t in TYPES:
         print(f"   CUSUM h: {t} E10={H[('E10', t)]:.2f} E50={H[('E50', t)]:.2f}")
 for r in RULES:
     print(f"{r:4s} {LABEL[r]:55s} alarm unit-yrs {sysw(r,'alpha'):5.1f}  episodes {sysw(r,'ep'):5.1f}")
+    print("       share of unit-years with an alarm: "
+          + "  ".join(f"{t} {per[(r, t)]['alpha']:.3f}" for t in TYPES))
 
 print("\n=== 2. Rota review of chance alarms, system-weighted shares   [article: Step two, table] ===")
+print("   careless = average-exposure test; naive = own-exposure test; correct = maximum-adjusted test (see MODEL.md)")
 for r in RULES:
     print(f"{r:4s} careless {sysshare(r,'s_avg'):.2f}  naive {sysshare(r,'s_own'):.2f}  "
           f"exact-correct {sysshare(r,'s_adj'):.3f}  | flag episodes/yr {sysw(r,'flag_ep'):5.1f}  "
           f"distinct nurses/yr {sysw(r,'flag_distinct'):5.1f}")
     for t in TYPES:
         d = per[(r, t)]
-        print(f"       {t}: careless {d['s_avg']:.2f} naive {d['s_own']:.2f} correct {d['s_adj']:.3f}")
+        print(f"       {t}: careless {d['s_avg']:.2f} naive {d['s_own']:.2f} correct {d['s_adj']:.3f}"
+              f"  | median deaths reviewed {d['med_k']:.0f}, median top-nurse attendance {d['med_top']:.0f}")
 
 # ---------------- 3: detection with an offender on the roster ----------------
 print("\n=== 3. Offender adds expected deaths for 12 months; caught within 12 months [bg = no offender]   [article: Step three, detection table and background result] ===")

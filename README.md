@@ -39,7 +39,7 @@ If `python` selects a different interpreter, use the path or launcher for Python
 
 Quick mode uses roughly one tenth as many simulations. It is useful for exploring changes, but its estimates are noisier, especially in the rare-event end of the CUSUM threshold sweep. Use the full run for comparisons. Report the seed, software versions, and any changed inputs; another environment may produce different Monte Carlo values.
 
-Numba is included in the reference requirements and compiles the CUSUM loops on first use. The code has a NumPy fallback if Numba is unavailable. Both paths implement the same calculation. Compilation, hardware, and package versions affect elapsed time, which is not a reproducibility target. Observed full-run times were about 1.6 minutes with Numba and 2.0 minutes with the NumPy fallback on a Windows desktop; a two-core Linux machine took about 2.7 minutes in either mode. A quick Linux run took about 17 seconds. These are examples, not promised run times.
+Numba is included in the reference requirements and compiles the CUSUM loops on first use. The code has a NumPy fallback if Numba is unavailable. Both paths implement the same calculation. Compilation, hardware, and package versions affect elapsed time, which is not a reproducibility target. Observed full-run times were about 1.6 minutes with Numba and 2.0 minutes with the NumPy fallback on a Windows desktop, though the run recorded in [`example_output.txt`](example_output.txt) took about 3 minutes; a two-core Linux machine took about 2.7 minutes in either mode. A quick Linux run took about 17 seconds. These are examples, not promised run times.
 
 ## Reading the output
 
@@ -47,8 +47,8 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 
 | Output block | What it reports | Article |
 | --- | --- | --- |
-| 1 | Chance alarms per year, nationally, under each monitoring rule | Step one: table of rules |
-| 2 | How often the most-present nurse looks significant under the average-exposure, naive own-exposure, and maximum-adjusted tests | Step two: table |
+| 1 | Chance alarms per year, nationally, under each monitoring rule; share of unit-years with an alarm by unit type | Step one: table of rules and discussion |
+| 2 | How often the most-present nurse looks significant under the average-exposure, naive own-exposure, and maximum-adjusted tests; median deaths reviewed and median top-nurse attendance by unit type | Step two: table |
 | 3 | How often a unit with an offender is flagged within a year; how often the rota review names her; background flagging with no offender | Step three: detection table and background result |
 | 4 | Falsely flagged unit-years per detected offender-year, at four base rates; staff-weighted sensitivity | Step three: base-rate table |
 | 5 | Scenario-based probability that a naively flagged nurse is the offender | Step three: closing paragraph |
@@ -77,9 +77,9 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 
 **Rota tests.** After an alarm, the deaths in the triggering window are matched to the rota and the most-present nurse is tested three ways:
 
-- **Average exposure:** compare her attendance with the average nurse's assumed exposure.
-- **Own exposure, naive:** compare it with her own exposure as though she had been named before looking at the rota.
-- **Maximum adjusted:** under the model's independent-attendance assumption, calculate the probability that the most-present nurse on the whole roster would do at least this well: P(max X_j ≥ m) = 1 − ∏ P(X_j < m), with X_j ~ Binomial(k, f_j). Because attendance counts are whole numbers, this test is conservative at a nominal 5% level. A real rota, with fixed staffing, teams and night shifts, would need a test built on the rota itself.
+- **Average exposure** (the article's "careless test"; `careless` in the output): compare her attendance with the average nurse's assumed exposure.
+- **Own exposure, naive** (the article's "naive test"; `naive`): compare it with her own exposure as though she had been named before looking at the rota.
+- **Maximum adjusted** (the article's "correct test"; `exact-correct` or `correct`): under the model's independent-attendance assumption, calculate the probability that the most-present nurse on the whole roster would do at least this well: P(max X_j ≥ m) = 1 − ∏ P(X_j < m), with X_j ~ Binomial(k, f_j). Because attendance counts are whole numbers, this test is conservative at a nominal 5% level. A real rota, with fixed staffing, teams and night shifts, would need a test built on the rota itself.
 
 The nurse-flagging episode and distinct-nurse estimates elsewhere in the output use the **naive own-exposure** test at p < 0.05. The maximum-adjusted test is exact only under the specified synthetic roster model.
 
@@ -97,7 +97,7 @@ The nurse-flagging episode and distinct-nurse estimates elsewhere in the output 
 - The base rate is a set of scenarios, not an estimate.
 - The tables compare falsely flagged unit-years with detected offender-years; the threshold sweep counts chart crossings. These are distinct measures.
 - At the strictest settings of the threshold sweep, calibration rests on as few as 50 simulated crossings, so those points are approximate.
-- In output block 5, the offender side counts the first flagged alarm in her year, while the background side counts every flagged episode. This asymmetry matters when interpreting that probability.
+- In output block 5, the offender side counts the first flagged alarm in her year, while the background side counts every flagged episode. A check during review, using matched event definitions, found its numerical effect negligible at these base rates (a few hundredths of a percentage point).
 - Paediatric wards, which the report's monitoring also covers, are not modelled.
 
 ## Sources for the inputs

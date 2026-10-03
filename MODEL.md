@@ -33,19 +33,19 @@ E10 and E50 are idealised Poisson CUSUM rules for a doubling of deaths. At month
 
 For each unit type, thresholds are calibrated on one fixed set of 50,000 ten-year null paths, or 500,000 simulated unit-years. E10 targets 0.10 crossings per unit-year and E50 targets 0.02. The code also sweeps targets from 0.20 down to 0.0001 crossings per unit-year. These are *crossing* rates: a year with multiple crossings contributes multiple events to calibration. The rarest target corresponds to only about 50 expected crossings in 500,000 unit-years per type, so its estimated performance has appreciable Monte Carlo uncertainty.
 
-An **alarm unit-year** is a monitoring year with at least one alarm. An **alarm episode** starts when an alarmed check follows a non-alarmed check. Consecutive alarmed checks belong to one episode. These counts are reported separately.
+An **alarm unit-year** is a monitoring year with at least one alarm. An **alarm episode** starts when an alarmed check follows a non-alarmed check. Consecutive alarmed checks belong to one episode. These counts are reported separately. Block 1 also prints, for each rule, the share of unit-years with an alarm in each unit type (`alpha_t` below).
 
 ## Rota review after an alarm
 
 The synthetic roster persists throughout each unit's ten-year monitoring path. Nurses' attendance fractions are drawn from three values: 0.21 for 50% of nurses, 0.13 for 35%, and 0.27 for 15%. Given a review window with `k` deaths, each nurse's attendance count is drawn independently as `Binomial(k, f_j)`, where `f_j` is her assigned fraction. Episodes with fewer than two deaths do not enter the rota-significance review.
 
-The most-present nurse is then tested three ways:
+The most-present nurse is then tested three ways. The article calls these the careless, naive and correct tests; the output labels them `careless`, `naive` and `exact-correct` (or `correct`).
 
 1. **Average exposure:** compare her count with `Binomial(k, mean(f))`.
 2. **Own exposure, naive:** compare it with `Binomial(k, f_j)` as though she had been named before looking at the rota.
 3. **Maximum adjusted:** under this synthetic independent-attendance model, calculate `1 - product_j P(Binomial(k, f_j) < m)`, where `m` is the observed maximum attendance count. This allows for having selected the highest count from the entire roster.
 
-The printed nurse-flagging episode and distinct-nurse rates use the *naive own-exposure* test at `p < 0.05`. The maximum-adjusted test is exact **conditional on this model's independent roster probabilities**; it is not a test for an actual rota with fixed shifts, teams, and correlated attendance.
+Block 2 also prints, for each rule and unit type, the median number of deaths in a reviewed window and the median attendance of the most-present nurse. The printed nurse-flagging episode and distinct-nurse rates use the *naive own-exposure* test at `p < 0.05`. The maximum-adjusted test is exact **conditional on this model's independent roster probabilities**; it is not a test for an actual rota with fixed shifts, teams, and correlated attendance.
 
 ## Offender and detection scenarios
 
