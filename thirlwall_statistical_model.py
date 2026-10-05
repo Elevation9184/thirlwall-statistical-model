@@ -321,7 +321,7 @@ def sysshare(r, key):        # system-weighted share among reviewed episodes
     num = sum(TYPES[t]["n"] * per[(r, t)]["rev"] * per[(r, t)][key] for t in TYPES)
     return num / sysw(r, "rev")
 
-print("=== 1. Chance alarms per year, England and Wales   [article: Step one, table of rules] ===")
+print("=== 1. Chance alarms per year, England and Wales   [article: Step one, Table 1] ===")
 for t in TYPES:
     if ("E10", t) in H:
         print(f"   CUSUM h: {t} E10={H[('E10', t)]:.2f} E50={H[('E50', t)]:.2f}")
@@ -330,7 +330,7 @@ for r in RULES:
     print("       share of unit-years with an alarm: "
           + "  ".join(f"{t} {per[(r, t)]['alpha']:.3f}" for t in TYPES))
 
-print("\n=== 2. Rota review of chance alarms, system-weighted shares   [article: Step two, table] ===")
+print("\n=== 2. Rota review of chance alarms, system-weighted shares   [article: Step two, Table 2] ===")
 print("   careless = average-exposure test; naive = own-exposure test; correct = maximum-adjusted test (see MODEL.md)")
 for r in RULES:
     print(f"{r:4s} careless {sysshare(r,'s_avg'):.2f}  naive {sysshare(r,'s_own'):.2f}  "
@@ -342,7 +342,7 @@ for r in RULES:
               f"  | median deaths reviewed {d['med_k']:.0f}, median top-nurse attendance {d['med_top']:.0f}")
 
 # ---------------- 3: detection with an offender on the roster ----------------
-print("\n=== 3. Offender adds expected deaths for 12 months; caught within 12 months [bg = no offender]   [article: Step three, detection table and background result] ===")
+print("\n=== 3. Offender adds expected deaths for 12 months; caught within 12 months [bg = no offender]   [article: Step three, Table 3 and background result] ===")
 det = {}
 for extra in (4, 7):
     for r in RULES:
@@ -405,7 +405,7 @@ def ft_table(weights):
         print(f"{r:4s} " + "  ".join(f"p={p}: {false_true(r,p,weights)[0]:6.0f}:1 ({false_true(r,p,weights)[1]:5.0f}y)"
                                      for p in BASE_RATES))
 
-print("\n=== 4. Falsely flagged unit-years per detected offender-year (+4); national years per detection   [article: Step three, base-rate table] ===")
+print("\n=== 4. Falsely flagged unit-years per detected offender-year (+4); national years per detection   [article: Step three, Table 4] ===")
 print("   base rates per 10,000 unit-years as rates per nurse-year: "
       + "  ".join(f"p={p}: 1 in {nurse_years_per_offender_year(p):,.0f}" for p in BASE_RATES))
 print("   main case, risk in proportion to staff:")
@@ -429,7 +429,7 @@ for label, weights in (("main case, risk in proportion to staff", W_STAFF), ("se
         print(f"{r:4s} " + "  ".join(f"p={b}: {posterior(r, b, weights)*100:.3f}%" for b in BASE_RATES))
 
 # ---------------- 6: nurses in the frame by q ----------------
-print("\n=== 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, q table] ===")
+print("\n=== 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, Table 5] ===")
 for r in RULES:
     fe, fd = sysw(r, "flag_ep"), sysw(r, "flag_distinct")
     print(f"{r:4s} " + "  ".join(f"q={q}: {fe*q:.1f} ({fd*q:.1f})" for q in Q))
@@ -478,7 +478,7 @@ print("  " + "  ".join(f"{r}: {ex[r]:.0f}:1 (expected-4 model {false_true(r,1)[0
 # ---------------- 9: CUSUM threshold sweep (fixed paths) ----------------
 OFF = {t: make_paths(T["mean"], N_DET, 12, extra=4) for t, T in TYPES.items()}
 BG = {t: make_paths(T["mean"], N_DET, 12) for t, T in TYPES.items()}
-print("\n=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, risk in proportion to staff   [article: Step three, trade-off chart] ===")
+print("\n=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, risk in proportion to staff   [article: Step three, Figure 2] ===")
 print("  false alarms per unit-year | national false alarms/yr | caught within 12m NICU LNU SCU | LNU with no offender"
       + "".join(f" | p={p}: false:true, years per detection" for p in REFERENCE_RATES))
 SWEEP = []

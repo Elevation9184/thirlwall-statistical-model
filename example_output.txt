@@ -1,4 +1,4 @@
-=== 1. Chance alarms per year, England and Wales   [article: Step one, table of rules] ===
+=== 1. Chance alarms per year, England and Wales   [article: Step one, Table 1] ===
    CUSUM h: NICU E10=2.92 E50=4.45
    CUSUM h: LNU E10=2.19 E50=3.57
    CUSUM h: SCU E10=1.39 E50=2.51
@@ -15,7 +15,7 @@ E10  Risk-adjusted CUSUM, 1 false alarm per 10 unit-years    alarm unit-yrs  17.
 E50  Risk-adjusted CUSUM, 1 false alarm per 50 unit-years    alarm unit-yrs   3.5  episodes   3.5
        share of unit-years with an alarm: NICU 0.018  LNU 0.021  SCU 0.020
 
-=== 2. Rota review of chance alarms, system-weighted shares   [article: Step two, table] ===
+=== 2. Rota review of chance alarms, system-weighted shares   [article: Step two, Table 2] ===
    careless = average-exposure test; naive = own-exposure test; correct = maximum-adjusted test (see MODEL.md)
 A    careless 0.79  naive 0.58  exact-correct 0.024  | flag episodes/yr   6.2  distinct nurses/yr   6.2
        NICU: careless 1.00 naive 0.68 correct 0.035  | median deaths reviewed 30, median top-nurse attendance 13
@@ -42,7 +42,7 @@ E50  careless 0.75  naive 0.52  exact-correct 0.021  | flag episodes/yr   1.8  d
        LNU: careless 0.79 naive 0.53 correct 0.014  | median deaths reviewed 12, median top-nurse attendance 6
        SCU: careless 0.46 naive 0.33 correct 0.030  | median deaths reviewed 7, median top-nurse attendance 3
 
-=== 3. Offender adds expected deaths for 12 months; caught within 12 months [bg = no offender]   [article: Step three, detection table and background result] ===
+=== 3. Offender adds expected deaths for 12 months; caught within 12 months [bg = no offender]   [article: Step three, Table 3 and background result] ===
 +4 A    NICU: 0.24 [bg 0.12] (offender flagged 0.11)  LNU: 0.40 [bg 0.06] (offender flagged 0.59)  SCU: 0.66 [bg 0.03] (offender flagged 0.83)
 +4 B    NICU: 0.10 [bg 0.04] (offender flagged 0.12)  LNU: 0.17 [bg 0.01] (offender flagged 0.61)  SCU: 0.38 [bg 0.00] (offender flagged 0.89)
 +4 C    NICU: 0.40 [bg 0.27] (offender flagged 0.04)  LNU: 0.55 [bg 0.18] (offender flagged 0.29)  SCU: 0.73 [bg 0.08] (offender flagged 0.53)
@@ -56,7 +56,7 @@ E50  careless 0.75  naive 0.52  exact-correct 0.021  | flag episodes/yr   1.8  d
 +7 E10  NICU: 0.43 [bg 0.08] (offender flagged 0.21)  LNU: 0.84 [bg 0.07] (offender flagged 0.58)  SCU: 0.98 [bg 0.06] (offender flagged 0.69)
 +7 E50  NICU: 0.19 [bg 0.02] (offender flagged 0.30)  LNU: 0.60 [bg 0.01] (offender flagged 0.78)  SCU: 0.88 [bg 0.00] (offender flagged 0.87)
 
-=== 4. Falsely flagged unit-years per detected offender-year (+4); national years per detection   [article: Step three, base-rate table] ===
+=== 4. Falsely flagged unit-years per detected offender-year (+4); national years per detection   [article: Step three, Table 4] ===
    base rates per 10,000 unit-years as rates per nurse-year: p=0.1: 1 in 5,028,571  p=1: 1 in 502,857  p=3: 1 in 167,619  p=10: 1 in 50,286  p=30: 1 in 16,762
    main case, risk in proportion to staff:
 A    p=0.1:  18716:1 ( 1658y)  p=1:   1871:1 (  166y)  p=3:    624:1 (   55y)  p=10:    187:1 (   17y)  p=30:     62:1 (    6y)
@@ -89,7 +89,7 @@ D    p=0.1: 0.002%  p=1: 0.019%  p=3: 0.058%  p=10: 0.194%  p=30: 0.579%
 E10  p=0.1: 0.005%  p=1: 0.047%  p=3: 0.140%  p=10: 0.463%  p=30: 1.370%
 E50  p=0.1: 0.017%  p=1: 0.167%  p=3: 0.499%  p=10: 1.639%  p=30: 4.721%
 
-=== 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, q table] ===
+=== 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, Table 5] ===
 A    q=1: 6.2 (6.2)  q=0.5: 3.1 (3.1)  q=0.25: 1.6 (1.6)  q=0.1: 0.6 (0.6)
 B    q=1: 1.8 (1.8)  q=0.5: 0.9 (0.9)  q=0.25: 0.4 (0.4)  q=0.1: 0.2 (0.2)
 C    q=1: 16.7 (16.4)  q=0.5: 8.4 (8.2)  q=0.25: 4.2 (4.1)  q=0.1: 1.7 (1.6)
@@ -104,7 +104,7 @@ D: 16.4 alarm unit-years per year
 === 8. Exactly 4 offender deaths, not an expected 4, p = 1/10k, risk in proportion to staff   [article: Step three, exact-count result] ===
   A: 1845:1 (expected-4 model 1871:1)  B: 1318:1 (expected-4 model 1128:1)  C: 3580:1 (expected-4 model 3648:1)  D: 4559:1 (expected-4 model 4927:1)  E10: 2228:1 (expected-4 model 2294:1)  E50: 1293:1 (expected-4 model 1086:1)
 
-=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, risk in proportion to staff   [article: Step three, trade-off chart] ===
+=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, risk in proportion to staff   [article: Step three, Figure 2] ===
   false alarms per unit-year | national false alarms/yr | caught within 12m NICU LNU SCU | LNU with no offender | p=0.1: false:true, years per detection | p=1: false:true, years per detection
   1 in      5 |  35.00 | 0.388 0.697 0.910 | 0.155 |   35664:1     1019 |    3566:1      102
   1 in     10 |  17.50 | 0.247 0.545 0.832 | 0.068 |   23695:1     1354 |    2370:1      135
