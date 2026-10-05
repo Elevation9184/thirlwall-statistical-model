@@ -84,7 +84,15 @@ LABEL = {"A": "Annual check, 2-sigma", "B": "Annual check, 3-sigma",
          "C": "Rolling 12m, monthly, 2-sigma", "D": "Rolling 12m, monthly, doubling heuristic",
          "E10": "Risk-adjusted CUSUM, 1 false alarm per 10 unit-years",
          "E50": "Risk-adjusted CUSUM, 1 false alarm per 50 unit-years"}
-BASE_RATES = (1, 3, 10, 30)             # offender-years per 10,000 unit-years
+# Base rates, offender-years per 10,000 unit-years. Risk is spread across units in
+# proportion to their rosters, so each rate is also a rate per nurse-year (printed in
+# section 4); equal risk per unit is reported as a sensitivity check.
+#   0.1   national reference: about 1 in 5 million nurse-years, from UK convictions of
+#         nurses for serial patient murder since 1970 (Forrest 1995; Gill et al. 2022)
+#   1     neonatal reference: the one (disputed) neonatal case, taken at face value
+#   3-30  stress tests, deliberately pessimistic
+BASE_RATES = (0.1, 1, 3, 10, 30)
+REFERENCE_RATES = (0.1, 1)
 Q = (1, .5, .25, .1)                    # share of alarms followed by a rota search
 N_CAL = 50000                           # fixed null paths per type for CUSUM calibration
 N_DET = 50000                           # fixed paths per type for the threshold sweep
@@ -374,35 +382,50 @@ for extra in (4, 7):
         print(f"+{extra} {r:4s} " + "  ".join(row))
 
 # ---------------- 4: predictive value ----------------
-def false_true(r, p_10k, weights=None):
+# Risk allocation. Main case: each unit's chance of an offender is proportional to its
+# roster, holding the national offender-year rate fixed. Sensitivity: equal risk per unit.
+tot_staff = sum(T["n"] * T["staff"] for T in TYPES.values())
+tot_units = sum(T["n"] for T in TYPES.values())
+W_STAFF = {t: T["staff"] * tot_units / tot_staff for t, T in TYPES.items()}
+W_EQUAL = {t: 1.0 for t in TYPES}
+
+def false_true(r, p_10k, weights=W_STAFF):
     p = p_10k / 1e4
-    w = weights or {t: 1.0 for t in TYPES}
+    w = weights
     false_ = sum(TYPES[t]["n"] * per[(r, t)]["alpha"] * (1 - p * w[t]) for t in TYPES)
     true_ = sum(TYPES[t]["n"] * p * w[t] * det[(4, r, t)]["d"] for t in TYPES)
     return false_ / true_, 1 / true_
 
-print("\n=== 4. Falsely flagged unit-years per detected offender-year (+4); years per detection   [article: Step three, base-rate table] ===")
-for r in RULES:
-    print(f"{r:4s} " + "  ".join(f"p={p}: {false_true(r,p)[0]:6.0f}:1 ({false_true(r,p)[1]:4.0f}y)"
-                                 for p in BASE_RATES))
-# prevalence proportional to staff, same national total
-tot_staff = sum(T["n"] * T["staff"] for T in TYPES.values())
-tot_units = sum(T["n"] for T in TYPES.values())
-w_staff = {t: T["staff"] * tot_units / tot_staff for t, T in TYPES.items()}
-print("   prevalence proportional to staff, p=3/10k: "
-      + "  ".join(f"{r}: {false_true(r,3,w_staff)[0]:.0f}:1" for r in RULES))
+def nurse_years_per_offender_year(p_10k):
+    return tot_staff / (tot_units * p_10k / 1e4)
+
+def ft_table(weights):
+    for r in RULES:
+        print(f"{r:4s} " + "  ".join(f"p={p}: {false_true(r,p,weights)[0]:6.0f}:1 ({false_true(r,p,weights)[1]:5.0f}y)"
+                                     for p in BASE_RATES))
+
+print("\n=== 4. Falsely flagged unit-years per detected offender-year (+4); national years per detection   [article: Step three, base-rate table] ===")
+print("   base rates per 10,000 unit-years as rates per nurse-year: "
+      + "  ".join(f"p={p}: 1 in {nurse_years_per_offender_year(p):,.0f}" for p in BASE_RATES))
+print("   main case, risk in proportion to staff:")
+ft_table(W_STAFF)
+print("   sensitivity, equal risk per unit:")
+ft_table(W_EQUAL)
 
 # ---------------- 5: individual posterior ----------------
+def posterior(r, p_10k, weights=W_STAFF):
+    p = p_10k / 1e4
+    w = weights
+    num = sum(TYPES[t]["n"] * p * w[t] * det[(4, r, t)]["d"] * det[(4, r, t)]["flag_off"] for t in TYPES)
+    den_true = sum(TYPES[t]["n"] * p * w[t] * det[(4, r, t)]["d"] * det[(4, r, t)]["flag_any"] for t in TYPES)
+    den_false = sum(TYPES[t]["n"] * (1 - p * w[t]) * per[(r, t)]["flag_ep"] for t in TYPES)
+    return num / (den_true + den_false)
+
 print("\n=== 5. P(flagged nurse is the offender | alarm and naive flag), +4   [article: Step three, closing paragraph] ===")
-for r in RULES:
-    vals = []
-    for p_10k in BASE_RATES:
-        p = p_10k / 1e4
-        num = sum(TYPES[t]["n"] * p * det[(4, r, t)]["d"] * det[(4, r, t)]["flag_off"] for t in TYPES)
-        den_true = sum(TYPES[t]["n"] * p * det[(4, r, t)]["d"] * det[(4, r, t)]["flag_any"] for t in TYPES)
-        den_false = sum(TYPES[t]["n"] * (1 - p) * per[(r, t)]["flag_ep"] for t in TYPES)
-        vals.append(num / (den_true + den_false))
-    print(f"{r:4s} " + "  ".join(f"p={b}: {v*100:.2f}%" for b, v in zip(BASE_RATES, vals)))
+for label, weights in (("main case, risk in proportion to staff", W_STAFF), ("sensitivity, equal risk per unit", W_EQUAL)):
+    print(f"   {label}:")
+    for r in RULES:
+        print(f"{r:4s} " + "  ".join(f"p={b}: {posterior(r, b, weights)*100:.3f}%" for b in BASE_RATES))
 
 # ---------------- 6: nurses in the frame by q ----------------
 print("\n=== 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, q table] ===")
@@ -441,21 +464,22 @@ def exact_robustness():
                 first = next((m for m, a, *_ in checks(bg + off, r, mu, t, monitor_months=12) if a), None)
                 hit += first is not None and first < 12
             d[t] = hit / (DET_REPS // 2)
-        p = 3e-4
-        false_ = sum(TYPES[t]["n"] * per[(r, t)]["alpha"] * (1 - p) for t in TYPES)
-        true_ = sum(TYPES[t]["n"] * p * d[t] for t in TYPES)
+        p, w = 1e-4, W_STAFF
+        false_ = sum(TYPES[t]["n"] * per[(r, t)]["alpha"] * (1 - p * w[t]) for t in TYPES)
+        true_ = sum(TYPES[t]["n"] * p * w[t] * d[t] for t in TYPES)
         out[r] = false_ / true_
     EXACT = False
     return out
-print("\n=== 8. Exactly 4 offender deaths, not an expected 4, p = 3/10k   [article: Step three, exact-count result] ===")
+print("\n=== 8. Exactly 4 offender deaths, not an expected 4, p = 1/10k, risk in proportion to staff   [article: Step three, exact-count result] ===")
 ex = exact_robustness()
-print("  " + "  ".join(f"{r}: {ex[r]:.0f}:1 (expected-4 model {false_true(r,3)[0]:.0f}:1)" for r in RULES))
+print("  " + "  ".join(f"{r}: {ex[r]:.0f}:1 (expected-4 model {false_true(r,1)[0]:.0f}:1)" for r in RULES))
 
 # ---------------- 9: CUSUM threshold sweep (fixed paths) ----------------
 OFF = {t: make_paths(T["mean"], N_DET, 12, extra=4) for t, T in TYPES.items()}
 BG = {t: make_paths(T["mean"], N_DET, 12) for t, T in TYPES.items()}
-print("\n=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, p = 3/10k   [article: Step three, trade-off chart] ===")
-print("  false alarms per unit-year | national false alarms/yr | caught within 12m NICU LNU SCU | LNU with no offender | false:true | years per detection")
+print("\n=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, risk in proportion to staff   [article: Step three, trade-off chart] ===")
+print("  false alarms per unit-year | national false alarms/yr | caught within 12m NICU LNU SCU | LNU with no offender"
+      + "".join(f" | p={p}: false:true, years per detection" for p in REFERENCE_RATES))
 SWEEP = []
 for target in (0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001):
     alarms, dets, bgs = 0.0, {}, {}
@@ -464,10 +488,13 @@ for target in (0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 
         alarms += T["n"] * crossing_rate(t, h)
         dets[t] = np.mean(cusum_run(*OFF[t], h)[1] < 12)
         bgs[t] = np.mean(cusum_run(*BG[t], h)[1] < 12)
-    true_ = sum(TYPES[t]["n"] * 3e-4 * dets[t] for t in TYPES)
-    SWEEP.append((target, alarms, dets, bgs, alarms / true_, 1 / true_))
+    cols = []
+    for p_10k in REFERENCE_RATES:
+        true_ = sum(TYPES[t]["n"] * p_10k / 1e4 * W_STAFF[t] * dets[t] for t in TYPES)
+        cols.append(f" | {alarms/true_:7.0f}:1 {1/true_:8.0f}")
+    SWEEP.append((target, alarms, dets, bgs))
     print(f"  1 in {1/target:6.0f} | {alarms:6.2f} | {dets['NICU']:.3f} {dets['LNU']:.3f} {dets['SCU']:.3f} | "
-          f"{bgs['LNU']:.3f} | {alarms/true_:6.0f}:1 | {1/true_:6.0f}")
+          f"{bgs['LNU']:.3f}" + "".join(cols))
 
 print(f"\nTotal elapsed wall time: {perf_counter() - _run_start:.2f} s "
       f"({'Numba' if njit is not None else 'NumPy fallback, Numba not installed'})")

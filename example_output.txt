@@ -56,22 +56,38 @@ E50  careless 0.75  naive 0.52  exact-correct 0.021  | flag episodes/yr   1.8  d
 +7 E10  NICU: 0.43 [bg 0.08] (offender flagged 0.21)  LNU: 0.84 [bg 0.07] (offender flagged 0.58)  SCU: 0.98 [bg 0.06] (offender flagged 0.69)
 +7 E50  NICU: 0.19 [bg 0.02] (offender flagged 0.30)  LNU: 0.60 [bg 0.01] (offender flagged 0.78)  SCU: 0.88 [bg 0.00] (offender flagged 0.87)
 
-=== 4. Falsely flagged unit-years per detected offender-year (+4); years per detection   [article: Step three, base-rate table] ===
-A    p=1:   1513:1 ( 134y)  p=3:    504:1 (  45y)  p=10:    151:1 (  13y)  p=30:     50:1 (   4y)
-B    p=1:    854:1 ( 279y)  p=3:    284:1 (  93y)  p=10:     85:1 (  28y)  p=30:     28:1 (   9y)
-C    p=1:   3223:1 ( 102y)  p=3:   1074:1 (  34y)  p=10:    322:1 (  10y)  p=30:    107:1 (   3y)
-D    p=1:   3525:1 ( 104y)  p=3:   1175:1 (  35y)  p=10:    352:1 (  10y)  p=30:    117:1 (   3y)
-E10  p=1:   1794:1 ( 105y)  p=3:    598:1 (  35y)  p=10:    179:1 (  10y)  p=30:     60:1 (   3y)
-E50  p=1:    743:1 ( 213y)  p=3:    248:1 (  71y)  p=10:     74:1 (  21y)  p=30:     25:1 (   7y)
-   prevalence proportional to staff, p=3/10k: A: 624:1  B: 376:1  C: 1216:1  D: 1642:1  E10: 764:1  E50: 362:1
+=== 4. Falsely flagged unit-years per detected offender-year (+4); national years per detection   [article: Step three, base-rate table] ===
+   base rates per 10,000 unit-years as rates per nurse-year: p=0.1: 1 in 5,028,571  p=1: 1 in 502,857  p=3: 1 in 167,619  p=10: 1 in 50,286  p=30: 1 in 16,762
+   main case, risk in proportion to staff:
+A    p=0.1:  18716:1 ( 1658y)  p=1:   1871:1 (  166y)  p=3:    624:1 (   55y)  p=10:    187:1 (   17y)  p=30:     62:1 (    6y)
+B    p=0.1:  11278:1 ( 3680y)  p=1:   1128:1 (  368y)  p=3:    376:1 (  123y)  p=10:    113:1 (   37y)  p=30:     37:1 (   12y)
+C    p=0.1:  36488:1 ( 1158y)  p=1:   3648:1 (  116y)  p=3:   1216:1 (   39y)  p=10:    364:1 (   12y)  p=30:    121:1 (    4y)
+D    p=0.1:  49278:1 ( 1448y)  p=1:   4927:1 (  145y)  p=3:   1642:1 (   48y)  p=10:    492:1 (   14y)  p=30:    164:1 (    5y)
+E10  p=0.1:  22940:1 ( 1342y)  p=1:   2294:1 (  134y)  p=3:    764:1 (   45y)  p=10:    229:1 (   13y)  p=30:     76:1 (    4y)
+E50  p=0.1:  10865:1 ( 3115y)  p=1:   1086:1 (  312y)  p=3:    362:1 (  104y)  p=10:    109:1 (   31y)  p=30:     36:1 (   10y)
+   sensitivity, equal risk per unit:
+A    p=0.1:  15136:1 ( 1341y)  p=1:   1513:1 (  134y)  p=3:    504:1 (   45y)  p=10:    151:1 (   13y)  p=30:     50:1 (    4y)
+B    p=0.1:   8536:1 ( 2785y)  p=1:    854:1 (  279y)  p=3:    284:1 (   93y)  p=10:     85:1 (   28y)  p=30:     28:1 (    9y)
+C    p=0.1:  32237:1 ( 1023y)  p=1:   3223:1 (  102y)  p=3:   1074:1 (   34y)  p=10:    322:1 (   10y)  p=30:    107:1 (    3y)
+D    p=0.1:  35255:1 ( 1036y)  p=1:   3525:1 (  104y)  p=3:   1175:1 (   35y)  p=10:    352:1 (   10y)  p=30:    117:1 (    3y)
+E10  p=0.1:  17941:1 ( 1050y)  p=1:   1794:1 (  105y)  p=3:    598:1 (   35y)  p=10:    179:1 (   10y)  p=30:     60:1 (    3y)
+E50  p=0.1:   7430:1 ( 2130y)  p=1:    743:1 (  213y)  p=3:    248:1 (   71y)  p=10:     74:1 (   21y)  p=30:     25:1 (    7y)
 
 === 5. P(flagged nurse is the offender | alarm and naive flag), +4   [article: Step three, closing paragraph] ===
-A    p=1: 0.07%  p=3: 0.22%  p=10: 0.73%  p=30: 2.15%
-B    p=1: 0.14%  p=3: 0.40%  p=10: 1.33%  p=30: 3.88%
-C    p=1: 0.02%  p=3: 0.06%  p=10: 0.19%  p=30: 0.57%
-D    p=1: 0.02%  p=3: 0.06%  p=10: 0.19%  p=30: 0.58%
-E10  p=1: 0.05%  p=3: 0.14%  p=10: 0.46%  p=30: 1.37%
-E50  p=1: 0.17%  p=3: 0.50%  p=10: 1.64%  p=30: 4.72%
+   main case, risk in proportion to staff:
+A    p=0.1: 0.005%  p=1: 0.045%  p=3: 0.136%  p=10: 0.451%  p=30: 1.334%
+B    p=0.1: 0.008%  p=1: 0.078%  p=3: 0.233%  p=10: 0.771%  p=30: 2.264%
+C    p=0.1: 0.001%  p=1: 0.012%  p=3: 0.035%  p=10: 0.116%  p=30: 0.346%
+D    p=0.1: 0.001%  p=1: 0.011%  p=3: 0.034%  p=10: 0.112%  p=30: 0.335%
+E10  p=0.1: 0.003%  p=1: 0.029%  p=3: 0.086%  p=10: 0.285%  p=30: 0.845%
+E50  p=0.1: 0.009%  p=1: 0.095%  p=3: 0.284%  p=10: 0.936%  p=30: 2.735%
+   sensitivity, equal risk per unit:
+A    p=0.1: 0.007%  p=1: 0.074%  p=3: 0.221%  p=10: 0.731%  p=30: 2.154%
+B    p=0.1: 0.014%  p=1: 0.135%  p=3: 0.405%  p=10: 1.334%  p=30: 3.876%
+C    p=0.1: 0.002%  p=1: 0.019%  p=3: 0.057%  p=10: 0.190%  p=30: 0.568%
+D    p=0.1: 0.002%  p=1: 0.019%  p=3: 0.058%  p=10: 0.194%  p=30: 0.579%
+E10  p=0.1: 0.005%  p=1: 0.047%  p=3: 0.140%  p=10: 0.463%  p=30: 1.370%
+E50  p=0.1: 0.017%  p=1: 0.167%  p=3: 0.499%  p=10: 1.639%  p=30: 4.721%
 
 === 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, q table] ===
 A    q=1: 6.2 (6.2)  q=0.5: 3.1 (3.1)  q=0.25: 1.6 (1.6)  q=0.1: 0.6 (0.6)
@@ -85,21 +101,21 @@ E50  q=1: 1.8 (1.8)  q=0.5: 0.9 (0.9)  q=0.25: 0.5 (0.5)  q=0.1: 0.2 (0.2)
 C: 13.4 alarm unit-years per year
 D: 16.4 alarm unit-years per year
 
-=== 8. Exactly 4 offender deaths, not an expected 4, p = 3/10k   [article: Step three, exact-count result] ===
-  A: 476:1 (expected-4 model 504:1)  B: 333:1 (expected-4 model 284:1)  C: 1021:1 (expected-4 model 1074:1)  D: 1047:1 (expected-4 model 1175:1)  E10: 554:1 (expected-4 model 598:1)  E50: 276:1 (expected-4 model 248:1)
+=== 8. Exactly 4 offender deaths, not an expected 4, p = 1/10k, risk in proportion to staff   [article: Step three, exact-count result] ===
+  A: 1845:1 (expected-4 model 1871:1)  B: 1318:1 (expected-4 model 1128:1)  C: 3580:1 (expected-4 model 3648:1)  D: 4559:1 (expected-4 model 4927:1)  E10: 2228:1 (expected-4 model 2294:1)  E50: 1293:1 (expected-4 model 1086:1)
 
-=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, p = 3/10k   [article: Step three, trade-off chart] ===
-  false alarms per unit-year | national false alarms/yr | caught within 12m NICU LNU SCU | LNU with no offender | false:true | years per detection
-  1 in      5 |  35.00 | 0.388 0.697 0.910 | 0.155 |    992:1 |     28
-  1 in     10 |  17.50 | 0.247 0.545 0.832 | 0.068 |    615:1 |     35
-  1 in     20 |   8.75 | 0.152 0.399 0.716 | 0.027 |    400:1 |     46
-  1 in     50 |   3.50 | 0.077 0.235 0.529 | 0.007 |    247:1 |     71
-  1 in    100 |   1.75 | 0.045 0.147 0.390 | 0.002 |    182:1 |    104
-  1 in    200 |   0.88 | 0.025 0.084 0.270 | 0.000 |    143:1 |    163
-  1 in    500 |   0.35 | 0.012 0.036 0.153 | 0.000 |    111:1 |    317
-  1 in   1000 |   0.17 | 0.006 0.019 0.098 | 0.000 |     92:1 |    527
-  1 in   2000 |   0.09 | 0.003 0.009 0.058 | 0.000 |     83:1 |    944
-  1 in   5000 |   0.04 | 0.002 0.003 0.027 | 0.000 |     74:1 |   2117
-  1 in  10000 |   0.02 | 0.001 0.002 0.014 | 0.000 |     73:1 |   4155
+=== 9. Idealised CUSUM threshold sweep, fixed paths, +4 expected deaths, risk in proportion to staff   [article: Step three, trade-off chart] ===
+  false alarms per unit-year | national false alarms/yr | caught within 12m NICU LNU SCU | LNU with no offender | p=0.1: false:true, years per detection | p=1: false:true, years per detection
+  1 in      5 |  35.00 | 0.388 0.697 0.910 | 0.155 |   35664:1     1019 |    3566:1      102
+  1 in     10 |  17.50 | 0.247 0.545 0.832 | 0.068 |   23695:1     1354 |    2370:1      135
+  1 in     20 |   8.75 | 0.152 0.399 0.716 | 0.027 |   16375:1     1871 |    1637:1      187
+  1 in     50 |   3.50 | 0.077 0.235 0.529 | 0.007 |   10857:1     3102 |    1086:1      310
+  1 in    100 |   1.75 | 0.045 0.147 0.390 | 0.002 |    8362:1     4778 |     836:1      478
+  1 in    200 |   0.88 | 0.025 0.084 0.270 | 0.000 |    6849:1     7828 |     685:1      783
+  1 in    500 |   0.35 | 0.012 0.036 0.153 | 0.000 |    5612:1    16035 |     561:1     1603
+  1 in   1000 |   0.17 | 0.006 0.019 0.098 | 0.000 |    4858:1    27757 |     486:1     2776
+  1 in   2000 |   0.09 | 0.003 0.009 0.058 | 0.000 |    4497:1    51390 |     450:1     5139
+  1 in   5000 |   0.04 | 0.002 0.003 0.027 | 0.000 |    4003:1   114385 |     400:1    11438
+  1 in  10000 |   0.02 | 0.001 0.002 0.014 | 0.000 |    4014:1   229385 |     401:1    22938
 
-Total elapsed wall time: 179.77 s (Numba)
+Total elapsed wall time: 288.17 s (Numba)

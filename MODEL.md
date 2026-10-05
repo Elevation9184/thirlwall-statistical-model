@@ -1,6 +1,6 @@
 # Model specification and interpretation
 
-This document describes the calculations in [`thirlwall_statistical_model.py`](thirlwall_statistical_model.py), version 5. It accompanies the code so that a reader can reproduce the outputs and substitute other assumptions. The model explores what could happen if a mortality-monitoring signal were followed by a retrospective search of staff attendance. It does not assert that the Thirlwall Inquiry prescribed these particular thresholds or that trusts will use this pathway.
+This document describes the calculations in [`thirlwall_statistical_model.py`](thirlwall_statistical_model.py), version 6. It accompanies the code so that a reader can reproduce the outputs and substitute other assumptions. The model explores what could happen if a mortality-monitoring signal were followed by a retrospective search of staff attendance. It does not assert that the Thirlwall Inquiry prescribed these particular thresholds or that trusts will use this pathway.
 
 For the policy context, see the Inquiry's [recommendations, especially 6, 9, and 10](https://thirlwall.public-inquiry.uk/final-report-chapter/volume-iii/part-three/recommendations/) and [Chapter 35 on data and signals](https://thirlwall.public-inquiry.uk/final-report-chapter/volume-iii/part-two/chapter-35/). The simulation's decision rules and numerical inputs are documented below rather than attributed to the Inquiry.
 
@@ -55,18 +55,27 @@ In the detection runs, an offender is added as one nurse on the roster with atte
 
 ## Base-rate calculations and output sections
 
-The model evaluates 1, 3, 10, and 30 offender-years per 10,000 unit-years. These are **scenarios, not estimates of actual prevalence**. With `p` as a scenario fraction, `n_t` as the count of units of type `t`, `alpha_t` as the chance-alarm unit-year rate, and `d_t` as the +4 detection probability, section 4 calculates:
+The model evaluates 0.1, 1, 3, 10, and 30 offender-years per 10,000 unit-years. These are **scenarios, not estimates of actual prevalence**, but the first two are anchored to the record:
+
+- **0.1, national reference.** About one offender-year in 5 million nurse-years. Five UK nurses have been convicted of murdering two or more patients since 1970 (Allitt, Chua, Norris, Geen, Letby; the last three disputed). With roughly 650,000 to 770,000 registered nurses a year, the record spans about 36 million nurse-years: one convicted offender in about 7 million, with an exact Poisson 95% interval of one in 3 million to one in 22 million. This agrees in order of magnitude with the "very roughly 1 in 2 million per nurse per year" of Gill, Fenton and Lagnado ([Laws, 2022](https://www.mdpi.com/2075-471X/11/5/65)), taken from Forrest ([Medical Law International, 1995](https://journals.sagepub.com/doi/10.1177/096853329500100404)). Each case ran for a year or less, so an offender counts as at most one offender-year.
+- **1, neonatal reference.** The single neonatal case taken at face value, in about 440,000 neonatal nurse-years (the model's 8,800 nurses over 50 years). One event leaves this highly uncertain.
+- **3, 10, 30: stress tests**, deliberately pessimistic.
+
+Undetected offenders would make the true rate higher and wrongful convictions lower; the record measures neither.
+
+Because the references are rates per nurse, the **main case spreads risk across units in proportion to their rosters**, holding the national offender-year rate fixed. With `w_t = staff_t * sum_t n_t / sum_t (n_t * staff_t)` (1.99 for NICU, 0.80 for LNU, 0.40 for SCU), `p` as a scenario fraction, `n_t` as the count of units of type `t`, `alpha_t` as the chance-alarm unit-year rate, and `d_t` as the +4 detection probability, section 4 calculates:
 
 ```text
-false alarmed unit-years/year = sum_t n_t * (1 - p) * alpha_t
-detected offender-years/year = sum_t n_t * p * d_t
+false alarmed unit-years/year = sum_t n_t * (1 - p * w_t) * alpha_t
+detected offender-years/year = sum_t n_t * p * w_t * d_t
 false:true ratio = false alarmed unit-years / detected offender-years
-years per detection = 1 / detected offender-years/year
+years per detection = 1 / detected offender-years/year   (national, all 175 units)
+rate per nurse-year = p * sum_t n_t / sum_t (n_t * staff_t)
 ```
 
-The proportional-to-staff sensitivity run uses type-specific scenario weights while holding the national total offender-year rate fixed. Section 5 combines simulated nurse-flagging rates under offender and background paths to estimate the chance that a *naively flagged* nurse is the offender, conditional on this model and its base-rate scenario. It is not a case-specific probability.
+Section 4 prints each scenario as a rate per nurse-year, then the main case, then a sensitivity check with equal risk per unit (`w_t = 1`). The equal-risk figures are those reported as the main case in earlier versions. Changing the allocation or adding scenarios does not alter any simulated alarm or detection rate; only this arithmetic. Section 5 combines simulated nurse-flagging rates under offender and background paths to estimate the chance that a *naively flagged* nurse is the offender, conditional on this model and its base-rate scenario, under both allocations. It is not a case-specific probability.
 
-Section 6 treats `q` as the share of alarms followed by a rota search and scales nurse-flagging counts for `q = 1, 0.5, 0.25, 0.1`. It does not predict which alarm a manager will pursue. Section 7 removes year-to-year gamma variation and gives the unit its true Poisson baseline as a robustness comparison for C and D. Section 8 uses exactly four offender deaths. Section 9 uses fixed null and offender paths to compare CUSUM thresholds. In section 9, the false-alarm numerator counts *crossings* rather than alarmed unit-years, a slightly different denominator from section 4.
+Section 6 treats `q` as the share of alarms followed by a rota search and scales nurse-flagging counts for `q = 1, 0.5, 0.25, 0.1`. It does not predict which alarm a manager will pursue. Section 7 removes year-to-year gamma variation and gives the unit its true Poisson baseline as a robustness comparison for C and D. Section 8 uses exactly four offender deaths, at the neonatal reference with risk in proportion to staff. Section 9 uses fixed null and offender paths to compare CUSUM thresholds, reporting the ratio and national years per detection at both reference rates with risk in proportion to staff. In section 9, the false-alarm numerator counts *crossings* rather than alarmed unit-years, a slightly different denominator from section 4.
 
 ## Scope and ways to challenge the model
 

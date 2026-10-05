@@ -40,7 +40,7 @@ If `python` selects a different interpreter, use the path or launcher for Python
 
 Quick mode uses roughly one tenth as many simulations. It is useful for exploring changes, but its estimates are noisier, especially in the rare-event end of the CUSUM threshold sweep. Use the full run for comparisons. Report the seed, software versions, and any changed inputs; another environment may produce different Monte Carlo values.
 
-Numba is included in the reference requirements and compiles the CUSUM loops on first use. The code has a NumPy fallback if Numba is unavailable. Both paths implement the same calculation. Compilation, hardware, and package versions affect elapsed time, which is not a reproducibility target. Observed full-run times were about 1.6 minutes with Numba and 2.0 minutes with the NumPy fallback on a Windows desktop, though the run recorded in [`example_output.txt`](example_output.txt) took about 3 minutes; a two-core Linux machine took about 2.7 minutes in either mode. A quick Linux run took about 17 seconds. These are examples, not promised run times.
+Numba is included in the reference requirements and compiles the CUSUM loops on first use. The code has a NumPy fallback if Numba is unavailable. Both paths implement the same calculation. Compilation, hardware, and package versions affect elapsed time, which is not a reproducibility target. Observed full-run times were about 1.6 minutes with Numba and 2.0 minutes with the NumPy fallback on a Windows desktop, though the run recorded in [`example_output.txt`](example_output.txt) took about 5 minutes; a two-core Linux machine took about 2.7 minutes in either mode. A quick Linux run took about 17 seconds. These are examples, not promised run times.
 
 ## Reading the output
 
@@ -51,12 +51,12 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 | 1 | Chance alarms per year, nationally, under each monitoring rule; share of unit-years with an alarm by unit type | Step one: table of rules and discussion |
 | 2 | How often the most-present nurse looks significant under the average-exposure, naive own-exposure, and maximum-adjusted tests; median deaths reviewed and median top-nurse attendance by unit type | Step two: table |
 | 3 | How often a unit with an offender is flagged within a year; how often the rota review names her; background flagging with no offender | Step three: detection table and background result |
-| 4 | Falsely flagged unit-years per detected offender-year, at four base rates; staff-weighted sensitivity | Step three: base-rate table |
-| 5 | Scenario-based probability that a naively flagged nurse is the offender | Step three: closing paragraph |
+| 4 | Each base rate as a rate per nurse-year; falsely flagged unit-years per detected offender-year and national years per detection, at five base rates, with risk in proportion to staff (main case) and equal risk per unit (sensitivity) | Step three: base-rate table |
+| 5 | Scenario-based probability that a naively flagged nurse is the offender, under both allocations | Step three: closing paragraph |
 | 6 | Nurses put in the frame each year, by *q* | Step three: *q* table; The cost side |
 | 7 | Chance alarms with no case-mix variation and a known baseline | Step one: robustness check |
-| 8 | Exactly four offender deaths instead of an expected four | Step three: exact-count result |
-| 9 | Threshold sweep for the idealised chart: false alarms against detection | Step three: trade-off chart |
+| 8 | Exactly four offender deaths instead of an expected four, at the neonatal reference | Step three: exact-count result |
+| 9 | Threshold sweep for the idealised chart: false alarms against detection, at both reference rates | Step three: trade-off chart |
 
 ## Model structure
 
@@ -86,7 +86,7 @@ The nurse-flagging episode and distinct-nurse estimates elsewhere in the output 
 
 **Offender.** In detection runs, one nurse on the roster has a 21% attendance fraction, causes an expected 4 (or 7) extra deaths over the first twelve monitoring months (Poisson), and is present at every death she causes. Detection means the **unit** alarms within that year, whether or not her deaths caused the alarm. Identifying the offender in the rota review is a separate outcome. Block 3 also reports how often a background unit alarms with no offender present. Detection checks stop after month 12, while retaining 48 history months; CUSUM calibration still uses full ten-year null paths.
 
-**Base rates.** Four scenarios: 1, 3, 10 and 30 offender-years per 10,000 unit-years. They are assumptions for comparing consequences, not estimates of actual prevalence. A sensitivity run spreads the same national scenario rate in proportion to staff numbers.
+**Base rates.** Five scenarios: 0.1, 1, 3, 10 and 30 offender-years per 10,000 unit-years. The first two are reference points anchored to the record. The national reference, 0.1, is about one offender-year in 5 million nurse-years: five UK nurses convicted of murdering two or more patients since 1970, over some 36 million nurse-years, consistent with the rough 1 in 2 million per nurse-year of Gill, Fenton and Lagnado (2022), after Forrest (1995). The neonatal reference, 1, takes the single (disputed) neonatal case at face value. Rates of 3 to 30 are stress tests. All five are scenarios, not estimates of actual prevalence; [`MODEL.md`](MODEL.md) gives the derivation. Because the references are rates per nurse, the main results spread risk in proportion to each unit's roster; equal risk per unit is reported as a sensitivity check.
 
 ## Assumptions and limits
 
@@ -95,7 +95,7 @@ The nurse-flagging episode and distinct-nurse estimates elsewhere in the output 
 - Baselines are recent history, and true rates are held steady apart from year-to-year variation.
 - Rotas are simplified: presence at each death is independent. Real clustering of deaths at night and on busy shifts can make chance coincidences more likely.
 - Behaviour enters only through *q*, which is shown at four values rather than estimated.
-- The base rate is a set of scenarios, not an estimate.
+- The base rate is a set of scenarios anchored to the conviction record, not an estimate. Undetected offenders would raise the true rate and wrongful convictions lower it; the national reference also rests on an approximate count of nurse-years, and the neonatal reference on a single disputed case.
 - The tables compare falsely flagged unit-years with detected offender-years; the threshold sweep counts chart crossings. These are distinct measures.
 - At the strictest settings of the threshold sweep, calibration rests on as few as 50 simulated crossings, so those points are approximate.
 - In output block 5, the offender side counts the first flagged alarm in her year, while the background side counts every flagged episode. A check during review, using matched event definitions, found its numerical effect negligible at these base rates (a few hundredths of a percentage point).
@@ -107,11 +107,13 @@ The nurse-flagging episode and distinct-nurse estimates elsewhere in the output 
 - Number of UK neonatal units: [Mother&Baby, citing Bliss](https://motherandbaby.com/baby/baby-care/neonatal-unit-nurse-baby-definition)
 - Scottish units: [Scottish Perinatal Network](https://www.perinatalnetwork.nhs.scot/wp-content/uploads/2023/09/SPN-Neonatal-Care-Info_A5_2023_Digital_v3.pdf)
 - Thirlwall recommendations: [Recommendations](https://thirlwall.public-inquiry.uk/final-report-chapter/volume-iii/part-three/recommendations/) and [Chapter 35](https://thirlwall.public-inquiry.uk/final-report-chapter/volume-iii/part-two/chapter-35/)
+- Base-rate references: Forrest, [*Nurses Who Systematically Harm Their Patients*](https://journals.sagepub.com/doi/10.1177/096853329500100404) (Medical Law International, 1995); Gill, Fenton and Lagnado, [*Statistical Issues in Serial Killer Nurse Cases*](https://www.mdpi.com/2075-471X/11/5/65) (Laws, 2022)
+- NMC register size: [March 2024](https://nmc.org.uk/news/news-and-updates/more-nurses-midwives-and-nursing-associates-in-the-uk-than-ever-before) and [2002–2006](https://data.parliament.uk/DepositedPapers/Files/DEP2007-0319/DEP2007-0319.pdf)
 - Statistical background: Green, Gill, Mackenzie, Mortera and Thompson, [*Healthcare serial killer or coincidence?*](https://arxiv.org/abs/2210.00962v1) (Royal Statistical Society, 2022)
 
 ## Version history
 
-The model was revised five times during review of the code and article draft. Working versions were named `sim.py` to `sim5.py`. The published script adds command-line options, optional Numba compilation of the CUSUM loops, and a shorter checking horizon for the first-year detection runs. The longer null paths used to calibrate CUSUM are retained. The default seed remains `20261002`; [`example_output.txt`](example_output.txt) gives the published reference output.
+The model was revised six times during review of the code and article draft. Working versions were named `sim.py` to `sim5.py`; version 6 is the published script itself. The published script adds command-line options, optional Numba compilation of the CUSUM loops, and a shorter checking horizon for the first-year detection runs. The longer null paths used to calibrate CUSUM are retained. The default seed remains `20261002`; [`example_output.txt`](example_output.txt) gives the published reference output.
 
 | Version | Main changes |
 | --- | --- |
@@ -120,6 +122,7 @@ The model was revised five times during review of the code and article draft. Wo
 | 3 | Pooled shares weighted by unit numbers; maximum-adjusted rota test; persistent rosters; offender placed on the rota; idealised CUSUM benchmark; staff-weighted sensitivity |
 | 4 | Offender effect labelled as expected deaths, with an exact-count check; 10,000 detection runs per cell; full CUSUM excursion as the review window; threshold sweep |
 | 5 | CUSUM calibrated on crossings using fixed null paths; sweep extended to 1 in 10,000; background detection with no offender |
+| 6 | Base rates anchored to the record: national (0.1 per 10,000) and neonatal (1 per 10,000) references added, 3 to 30 kept as stress tests; each rate printed per nurse-year; risk in proportion to staff becomes the main case, equal risk per unit the sensitivity. Simulated alarm and detection rates unchanged |
 
 ## Try another interpretation
 
