@@ -78,9 +78,9 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 
 **Rota tests.** After an alarm, the deaths in the triggering window are matched to the rota and the most-present nurse is tested three ways:
 
-- **Average exposure** (the article's "careless test"; `careless` in the output): compare her attendance with the average nurse's assumed exposure.
-- **Own exposure, naive** (the article's "naive test"; `naive`): compare it with her own exposure as though she had been named before looking at the rota.
-- **Maximum adjusted** (the article's "correct test"; `exact-correct` or `correct`): under the model's independent-attendance assumption, calculate the probability that the most-present nurse on the whole roster would do at least this well: P(max X_j ≥ m) = 1 − ∏ P(X_j < m), with X_j ~ Binomial(k, f_j). Because attendance counts are whole numbers, this test is conservative at a nominal 5% level. A real rota, with fixed staffing, teams and night shifts, would need a test built on the rota itself.
+- **Average exposure** (`careless` in the output): compare her attendance with the average nurse's assumed exposure.
+- **Own exposure, naive** (`naive` in the output): compare it with her own exposure as though she had been named before looking at the rota.
+- **Maximum adjusted** (`exact-correct` or `correct` in the output): under the model's independent-attendance assumption, calculate the probability that the most-present nurse on the whole roster would do at least this well: P(max X_j ≥ m) = 1 − ∏ P(X_j < m), with X_j ~ Binomial(k, f_j). Because attendance counts are whole numbers, this test is conservative at a nominal 5% level. A real rota, with fixed staffing, teams and night shifts, would need a test built on the rota itself.
 
 The nurse-flagging episode and distinct-nurse estimates elsewhere in the output use the **naive own-exposure** test at p < 0.05. The maximum-adjusted test is exact only under the specified synthetic roster model.
 

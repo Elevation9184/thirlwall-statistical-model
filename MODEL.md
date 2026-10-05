@@ -39,7 +39,7 @@ An **alarm unit-year** is a monitoring year with at least one alarm. An **alarm 
 
 The synthetic roster persists throughout each unit's ten-year monitoring path. Nurses' attendance fractions are drawn from three values: 0.21 for 50% of nurses, 0.13 for 35%, and 0.27 for 15%. Given a review window with `k` deaths, each nurse's attendance count is drawn independently as `Binomial(k, f_j)`, where `f_j` is her assigned fraction. Episodes with fewer than two deaths do not enter the rota-significance review.
 
-The most-present nurse is then tested three ways. The article calls these the careless, naive and correct tests; the output labels them `careless`, `naive` and `exact-correct` (or `correct`).
+The most-present nurse is then tested three ways. The article uses the names below; the output uses the shorthand labels `careless`, `naive` and `exact-correct` (or `correct`).
 
 1. **Average exposure:** compare her count with `Binomial(k, mean(f))`.
 2. **Own exposure, naive:** compare it with `Binomial(k, f_j)` as though she had been named before looking at the rota.
