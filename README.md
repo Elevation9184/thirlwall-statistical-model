@@ -50,7 +50,7 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 | --- | --- | --- |
 | 1 | Chance alarms per year, nationally, under each monitoring rule; share of unit-years with an alarm by unit type | Step one: Table 1 and discussion; Figure 1 |
 | 2 | How often the most-present nurse looks significant under the average-exposure, naive own-exposure, and maximum-adjusted tests; median deaths reviewed and median top-nurse attendance by unit type | Step two: Table 2; Figure 1 |
-| 3 | How often a unit with an offender is flagged within a year; how often the rota review names her; background flagging with no offender | Step three: Table 3 and background result |
+| 3 | How often a unit with an offender is flagged within a year; how often the rota review identifies the offender; background flagging with no offender | Step three: Table 3 and background result |
 | 4 | Each base rate as a rate per nurse-year; falsely flagged unit-years per detected offender-year and national years per detection, at five base rates, with risk in proportion to staff (main case) and equal risk per unit (sensitivity) | Step three: Table 4; Figure 1 |
 | 5 | Scenario-based probability that a naively flagged nurse is the offender, under both allocations | Step three: closing paragraph |
 | 6 | Nurses put in the frame each year, by *q* | Step three: Table 5; The cost side; Figure 1 |
@@ -78,13 +78,13 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 
 **Rota tests.** After an alarm, the deaths in the triggering window are matched to the rota and the most-present nurse is tested three ways:
 
-- **Average exposure** (`careless` in the output): compare her attendance with the average nurse's assumed exposure.
-- **Own exposure, naive** (`naive` in the output): compare it with her own exposure as though she had been named before looking at the rota.
+- **Average exposure** (`careless` in the output): compare the nurse's attendance with the average nurse's assumed exposure.
+- **Own exposure, naive** (`naive` in the output): compare it with that nurse's own exposure, as though the nurse had been named before looking at the rota.
 - **Maximum adjusted** (`exact-correct` or `correct` in the output): under the model's independent-attendance assumption, calculate the probability that the most-present nurse on the whole roster would do at least this well: P(max X_j ≥ m) = 1 − ∏ P(X_j < m), with X_j ~ Binomial(k, f_j). Because attendance counts are whole numbers, this test is conservative at a nominal 5% level. A real rota, with fixed staffing, teams and night shifts, would need a test built on the rota itself.
 
 The nurse-flagging episode and distinct-nurse estimates elsewhere in the output use the **naive own-exposure** test at p < 0.05. The maximum-adjusted test is exact only under the specified synthetic roster model.
 
-**Offender.** In detection runs, one nurse on the roster has a 21% attendance fraction, causes an expected 4 (or 7) extra deaths over the first twelve monitoring months (Poisson), and is present at every death she causes. Detection means the **unit** alarms within that year, whether or not her deaths caused the alarm. Identifying the offender in the rota review is a separate outcome. Block 3 also reports how often a background unit alarms with no offender present. Detection checks stop after month 12, while retaining 48 history months; CUSUM calibration still uses full ten-year null paths.
+**Offender.** In detection runs, one nurse on the roster has a 21% attendance fraction, causes an expected 4 (or 7) extra deaths over the first twelve monitoring months (Poisson), and is present at every one of those deaths. Detection means the **unit** alarms within that year, whether or not the offender's deaths caused the alarm. Identifying the offender in the rota review is a separate outcome. Block 3 also reports how often a background unit alarms with no offender present. Detection checks stop after month 12, while retaining 48 history months; CUSUM calibration still uses full ten-year null paths.
 
 **Base rates.** Five scenarios: 0.1, 1, 3, 10 and 30 offender-years per 10,000 unit-years. The first two are reference points anchored to the record. The national reference, 0.1, is about one offender-year in 5 million nurse-years: five UK nurses convicted of murdering two or more patients since 1990, over some 25 million nurse-years of published register totals, consistent with the rough 1 in 2 million per nurse-year of Gill, Fenton and Lagnado (2022), after Forrest (1995). The neonatal reference, 1, takes the single (disputed) neonatal case at face value. Rates of 3 to 30 are stress tests. All five are scenarios, not estimates of actual prevalence; [`MODEL.md`](MODEL.md) gives the derivation. Because the references are rates per nurse, the main results spread risk in proportion to each unit's roster; equal risk per unit is reported as a sensitivity check.
 
@@ -98,7 +98,7 @@ The nurse-flagging episode and distinct-nurse estimates elsewhere in the output 
 - The base rate is a set of scenarios anchored to the conviction record, not an estimate. Undetected offenders would raise the true rate and wrongful convictions lower it; the national reference also rests on an approximate count of nurse-years, and the neonatal reference on a single disputed case.
 - The tables compare falsely flagged unit-years with detected offender-years; the threshold sweep counts chart crossings. These are distinct measures.
 - At the strictest settings of the threshold sweep, calibration rests on as few as 50 simulated crossings, so those points are approximate.
-- In output block 5, the offender side counts the first flagged alarm in her year, while the background side counts every flagged episode. A check during review, using matched event definitions, found its numerical effect negligible at these base rates (a few hundredths of a percentage point).
+- In output block 5, the offender side counts the first flagged alarm in the offender's year, while the background side counts every flagged episode. A check during review, using matched event definitions, found its numerical effect negligible at these base rates (a few hundredths of a percentage point).
 - Paediatric wards, which the report's monitoring also covers, are not modelled.
 
 ## Sources for the inputs

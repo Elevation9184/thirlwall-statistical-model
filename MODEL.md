@@ -37,19 +37,19 @@ An **alarm unit-year** is a monitoring year with at least one alarm. An **alarm 
 
 ## Rota review after an alarm
 
-The synthetic roster persists throughout each unit's ten-year monitoring path. Nurses' attendance fractions are drawn from three values: 0.21 for 50% of nurses, 0.13 for 35%, and 0.27 for 15%. Given a review window with `k` deaths, each nurse's attendance count is drawn independently as `Binomial(k, f_j)`, where `f_j` is her assigned fraction. Episodes with fewer than two deaths do not enter the rota-significance review.
+The synthetic roster persists throughout each unit's ten-year monitoring path. Nurses' attendance fractions are drawn from three values: 0.21 for 50% of nurses, 0.13 for 35%, and 0.27 for 15%. Given a review window with `k` deaths, each nurse's attendance count is drawn independently as `Binomial(k, f_j)`, where `f_j` is that nurse's assigned fraction. Episodes with fewer than two deaths do not enter the rota-significance review.
 
 The most-present nurse is then tested three ways. The article uses the names below; the output uses the shorthand labels `careless`, `naive` and `exact-correct` (or `correct`).
 
-1. **Average exposure:** compare her count with `Binomial(k, mean(f))`.
-2. **Own exposure, naive:** compare it with `Binomial(k, f_j)` as though she had been named before looking at the rota.
+1. **Average exposure:** compare the nurse's count with `Binomial(k, mean(f))`.
+2. **Own exposure, naive:** compare it with `Binomial(k, f_j)` as though the nurse had been named before looking at the rota.
 3. **Maximum adjusted:** under this synthetic independent-attendance model, calculate `1 - product_j P(Binomial(k, f_j) < m)`, where `m` is the observed maximum attendance count. This allows for having selected the highest count from the entire roster.
 
 Block 2 also prints, for each rule and unit type, the median number of deaths in a reviewed window and the median attendance of the most-present nurse. The printed nurse-flagging episode and distinct-nurse rates use the *naive own-exposure* test at `p < 0.05`. The maximum-adjusted test is exact **conditional on this model's independent roster probabilities**; it is not a test for an actual rota with fixed shifts, teams, and correlated attendance.
 
 ## Offender and detection scenarios
 
-In the detection runs, an offender is added as one nurse on the roster with attendance fraction 0.21. She is present at every death she causes and may also be present at background deaths. Her effect is an *expected* four or seven extra deaths during the first 12 monitoring months; the number and timing of those deaths are Poisson draws. A separate robustness run assigns exactly four extra deaths randomly across those months.
+In the detection runs, an offender is added as one nurse on the roster with attendance fraction 0.21. The offender is present at every extra death and may also be present at background deaths. The effect is an *expected* four or seven extra deaths during the first 12 monitoring months; the number and timing of those deaths are Poisson draws. A separate robustness run assigns exactly four extra deaths randomly across those months.
 
 **Detection means that the unit alarms during those first 12 months**, regardless of whether the offender's deaths caused the alarm. Identification of the offender by the rota review is a distinct result. Each detection cell also has a separate background run with no offender, showing how often the same rule would have alarmed anyway. The detection calculation keeps all 48 history months, and CUSUM calibration remains on 120-month paths. Only the detection *checks* stop after month 12. The current script still generates complete unit paths, preserving its random-number sequence.
 

@@ -366,7 +366,7 @@ for extra in (4, 7):
                 if k < 2:
                     continue
                 cnt = rng.binomial(kb, f) + rng.binomial(ko, f)
-                cnt[-1] = rng.binomial(kb, OFFENDER_F) + ko     # present at all her own
+                cnt[-1] = rng.binomial(kb, OFFENDER_F) + ko     # present at all own deaths
                 i, top, pa, po, pj = rota_review(f, cnt, k)
                 if po < .05:
                     flag_any += 1
