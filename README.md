@@ -53,7 +53,7 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 | 3 | How often a unit with an offender is flagged within a year; how often the rota review identifies the offender; background flagging with no offender | Step three: Table 3 and background result |
 | 4 | Each base rate as a rate per nurse-year; falsely flagged unit-years per detected offender-year and national years per detection, at five base rates, with risk in proportion to staff (main case) and equal risk per unit (sensitivity) | Step three: Table 4; Figure 1 |
 | 5 | Scenario-based probability that a naively flagged nurse is the offender, under both allocations | Step three: closing paragraph |
-| 6 | Nurses put in the frame each year, by *q* | Step three: Table 5; The cost side; Figure 1 |
+| 6 | Nurses put in the frame each year, by *q* | Step three: Table 5; Costs and consequences; Figure 1 |
 | 7 | Chance alarms with no case-mix variation and a known baseline | Step one: robustness check |
 | 8 | Exactly four offender deaths instead of an expected four, at the neonatal reference | Step three: exact-count result |
 | 9 | Threshold sweep for the idealised chart: false alarms against detection, at both reference rates | Step three: Figure 2 |
