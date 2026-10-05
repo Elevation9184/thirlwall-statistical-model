@@ -87,8 +87,9 @@ LABEL = {"A": "Annual check, 2-sigma", "B": "Annual check, 3-sigma",
 # Base rates, offender-years per 10,000 unit-years. Risk is spread across units in
 # proportion to their rosters, so each rate is also a rate per nurse-year (printed in
 # section 4); equal risk per unit is reported as a sensitivity check.
-#   0.1   national reference: about 1 in 5 million nurse-years, from UK convictions of
-#         nurses for serial patient murder since 1970 (Forrest 1995; Gill et al. 2022)
+#   0.1   national reference: about 1 in 5 million nurse-years, from five UK convictions
+#         of nurses for serial patient murder since 1990 over about 25 million nurse-years
+#         (consistent with Forrest 1995; Gill et al. 2022; derivation in MODEL.md)
 #   1     neonatal reference: the one (disputed) neonatal case, taken at face value
 #   3-30  stress tests, deliberately pessimistic
 BASE_RATES = (0.1, 1, 3, 10, 30)
