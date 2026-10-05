@@ -118,4 +118,4 @@ D: 16.4 alarm unit-years per year
   1 in   5000 |   0.04 | 0.002 0.003 0.027 | 0.000 |    4003:1   114385 |     400:1    11438
   1 in  10000 |   0.02 | 0.001 0.002 0.014 | 0.000 |    4014:1   229385 |     401:1    22938
 
-Total elapsed wall time: 288.17 s (Numba)
+Total elapsed wall time: 224.27 s (Numba)
