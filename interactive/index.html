@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101e31">
+  <title>Explore Figure 2 · The Arithmetic of Suspicion</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <a class="skip-link" href="#figure">Skip to the charts</a>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">A<span>·</span>S</span><span>The Arithmetic of Suspicion</span></div>
+      <a href="../The%20Arithmetic%20of%20Suspicion.pdf" class="paper-link">Read the paper <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow">Interactive model · Figure 2</div>
+      <h1 id="page-title">What does a stricter alarm buy?</h1>
+      <p class="lede">Move the threshold and watch false alarms fall alongside the chance of detecting a real offender. Change how rare offenders are and the detector stays the same—but the odds behind an alarm move sharply.</p>
+      <div class="scope-note"><span class="scope-icon" aria-hidden="true">i</span><p>This is the paper’s <strong>idealised CUSUM</strong> chart: it knows each month’s true expected deaths. An offender adds an expected <strong>four deaths in 12 months</strong>. Values at the 11 threshold settings come from the validated Python run.</p></div>
+    </section>
+
+    <div class="workspace">
+      <aside class="controls" aria-labelledby="controls-title">
+        <div class="panel-heading"><div><div class="eyebrow">Set the scene</div><h2 id="controls-title">Controls</h2></div><button class="text-button" id="reset-button" type="button">Reset to paper</button></div>
+
+        <div class="control-group">
+          <label for="threshold-slider"><span class="control-number">01</span><span>Alarm strictness</span></label>
+          <p class="control-help">The target number of false chart crossings per unit-year.</p>
+          <div class="control-value" id="threshold-value">1 in 10 unit-years</div>
+          <input id="threshold-slider" type="range" min="0" max="10" step="1" value="1" aria-describedby="threshold-help">
+          <div class="range-ends" id="threshold-help"><span>More sensitive</span><span>Stricter</span></div>
+          <div class="quick-presets"><button type="button" data-threshold="1">Paper E10</button><button type="button" data-threshold="3">Paper E50</button></div>
+        </div>
+
+        <div class="control-group">
+          <label for="prevalence-slider"><span class="control-number">02</span><span>Offender base rate</span></label>
+          <p class="control-help">Assumed offender-years per 10,000 unit-years. This is a scenario, not an estimate.</p>
+          <div class="control-value" id="prevalence-value">1 per 10,000 unit-years</div>
+          <input id="prevalence-slider" type="range" min="0" max="100" step="1" value="40" aria-describedby="prevalence-help">
+          <div class="range-ends" id="prevalence-help"><span>0.1 national reference</span><span>30 stress test</span></div>
+          <div class="quick-presets"><button type="button" data-prevalence="0.1">National 0.1</button><button type="button" data-prevalence="1">Neonatal 1</button></div>
+        </div>
+
+        <fieldset class="control-group unit-group">
+          <legend><span class="control-number">03</span><span>Detection shown for</span></legend>
+          <p class="control-help">The horizontal axis shows one unit type. The false-to-true ratio still covers all 175 modelled units.</p>
+          <div class="segmented" aria-label="Unit type">
+            <label><input type="radio" name="unit-type" value="NICU"><span>Intensive</span></label>
+            <label><input type="radio" name="unit-type" value="LNU" checked><span>Local</span></label>
+            <label><input type="radio" name="unit-type" value="SCU"><span>Special care</span></label>
+          </div>
+        </fieldset>
+        <p class="fixed-assumptions">Fixed here: staff-proportional offender risk · 45 intensive, 85 local, 45 special-care units · 25% year-to-year rate variation.</p>
+      </aside>
+
+      <section class="results" id="figure" aria-labelledby="figure-title">
+        <div class="figure-card">
+          <div class="figure-top"><div><div class="eyebrow">Threshold trade-off</div><h2 id="figure-title">False alarms per detection</h2></div><span class="live-badge"><span aria-hidden="true"></span>Linked to controls</span></div>
+          <p class="figure-subtitle">Each point is one calibrated CUSUM setting. Click a point or use the strictness slider to inspect it.</p>
+          <div class="chart-wrap"><svg id="tradeoff-chart" viewBox="0 0 760 440" role="img" aria-labelledby="tradeoff-title tradeoff-desc"><title id="tradeoff-title">Figure 2 threshold trade-off</title><desc id="tradeoff-desc">Detection probability on the horizontal axis and false chart crossings per detected offender-year on a logarithmic vertical axis.</desc></svg></div>
+          <div class="axis-note">Horizontal: chance the selected unit type alarms within 12 months with an offender. Vertical: false chart crossings across all 175 units per detected offender-year.</div>
+          <div class="figure-foot"><span class="legend-line" aria-hidden="true"></span><span>Current base-rate scenario</span><span class="reference-legend"><span class="legend-line reference" aria-hidden="true"></span><span>Neonatal reference (1 in 10,000)</span></span></div>
+        </div>
+
+        <div class="metric-grid" aria-live="polite">
+          <div class="metric-card primary"><span class="metric-label">False crossings : detected offender-years</span><strong id="ratio-value">—</strong><span class="metric-detail">Across all 175 units</span></div>
+          <div class="metric-card"><span class="metric-label">Chance of detecting an offender</span><strong id="detection-value">—</strong><span class="metric-detail" id="selected-unit-label">In a local unit, within 12 months</span></div>
+          <div class="metric-card"><span class="metric-label">National wait for one detection</span><strong id="wait-value">—</strong><span class="metric-detail">Expected years at this base rate</span></div>
+        </div>
+
+        <div class="companion-card">
+          <div><div class="eyebrow">Same threshold, different units</div><h2>Detection chance by unit type</h2><p>The base-rate slider leaves these probabilities unchanged. It changes how often an offender is present, not how the chart behaves when one is present.</p></div>
+          <svg id="unit-chart" viewBox="0 0 500 240" role="img" aria-labelledby="unit-title unit-desc"><title id="unit-title">Detection chance by unit type</title><desc id="unit-desc">Bars for intensive, local, and special care units at the selected threshold.</desc></svg>
+        </div>
+
+        <div class="method-note"><strong>Read this as a scenario, not a case probability.</strong> “Detection” means the unit alarms in an offender-year, even if background deaths would have caused that alarm. It does not mean the offender is identified. The strictest points are noisier Monte Carlo estimates; the rarest target rests on roughly 50 calibrated crossings.</div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="shell">Source: <a href="../thirlwall_statistical_model.py">Python reference model</a> · <a href="../example_output.txt">validated output, block 9</a> · <a href="../MODEL.md">model definitions</a></div></footer>
+  <script defer src="./app.js"></script>
+</body>
+</html>
