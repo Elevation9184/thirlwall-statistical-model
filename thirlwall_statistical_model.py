@@ -61,6 +61,9 @@ parser.add_argument("--quick", action="store_true",
                     help="reduced run (about a tenth of the simulations): fast but noisier")
 parser.add_argument("--seed", type=int, default=20261002,
                     help="random seed (default reproduces the article's figures)")
+parser.add_argument("--export", metavar="PATH",
+                    help="also write full-precision results as JSON (for the interactive "
+                         "explorer); printed output is unchanged")
 ARGS = parser.parse_args()
 
 rng = np.random.default_rng(ARGS.seed)
@@ -473,9 +476,10 @@ print("  false alarms per unit-year | national false alarms/yr | caught within 1
       + "".join(f" | p={p}: false:true, years per detection" for p in REFERENCE_RATES))
 SWEEP = []
 for target in (0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001):
-    alarms, dets, bgs = 0.0, {}, {}
+    alarms, dets, bgs, hs = 0.0, {}, {}, {}
     for t, T in TYPES.items():
         h = calibrate(t, target)
+        hs[t] = h
         alarms += T["n"] * crossing_rate(t, h)
         dets[t] = np.mean(cusum_run(*OFF[t], h)[1] < 12)
         bgs[t] = np.mean(cusum_run(*BG[t], h)[1] < 12)
@@ -483,9 +487,37 @@ for target in (0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 
     for p_10k in REFERENCE_RATES:
         true_ = sum(TYPES[t]["n"] * p_10k / 1e4 * W_STAFF[t] * dets[t] for t in TYPES)
         cols.append(f" | {alarms/true_:7.0f}:1 {1/true_:8.0f}")
-    SWEEP.append((target, alarms, dets, bgs))
+    SWEEP.append((target, alarms, dets, bgs, hs))
     print(f"  1 in {1/target:6.0f} | {alarms:6.2f} | {dets['NICU']:.3f} {dets['LNU']:.3f} {dets['SCU']:.3f} | "
           f"{bgs['LNU']:.3f}" + "".join(cols))
+
+# ---------------- optional export for the interactive explorer ----------------
+# Writes values already computed above; uses no random numbers and changes no output.
+if ARGS.export:
+    import json
+    def _num(v):
+        v = float(v)
+        return None if v != v else v                     # NaN -> null
+    export = {
+        "model_version": 7, "seed": ARGS.seed, "quick": ARGS.quick,
+        "inputs": {"types": TYPES, "cv": CV, "pre_months": PRE, "monitor_months": MON,
+                   "exposure": EXPOSURE.tolist(), "exposure_mix": EXP_P, "offender_f": OFFENDER_F,
+                   "rules": RULES, "labels": LABEL, "base_rates": list(BASE_RATES),
+                   "reference_rates": list(REFERENCE_RATES), "q": list(Q),
+                   "reps": REPS, "det_reps": DET_REPS, "n_cal": N_CAL, "n_det": N_DET},
+        "weights": {"staff": W_STAFF, "equal": W_EQUAL},
+        "cusum_h": {f"{tag}|{t}": h for (tag, t), h in H.items()},
+        "chance": {r: {t: {k: _num(v) for k, v in per[(r, t)].items()} for t in TYPES} for r in RULES},
+        "detection": {str(e): {r: {t: {k: _num(v) for k, v in det[(e, r, t)].items()} for t in TYPES}
+                               for r in RULES} for e in (4, 7)},
+        "exact_count_ratio_p1": {r: _num(v) for r, v in ex.items()},
+        "sweep": [{"target": tg, "alarms_per_year": _num(al),
+                   "detection": {t: _num(v) for t, v in d.items()},
+                   "background": {t: _num(v) for t, v in b.items()},
+                   "h": {t: _num(v) for t, v in hh.items()}} for tg, al, d, b, hh in SWEEP],
+    }
+    with open(ARGS.export, "w", encoding="utf-8") as fh:
+        json.dump(export, fh, indent=1)
 
 print(f"\nTotal elapsed wall time: {perf_counter() - _run_start:.2f} s "
       f"({'Numba' if njit is not None else 'NumPy fallback, Numba not installed'})")

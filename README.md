@@ -34,6 +34,8 @@ python -m pip install -r requirements.txt
 python thirlwall_statistical_model.py            # full run
 python thirlwall_statistical_model.py --quick    # reduced run, noisier
 python thirlwall_statistical_model.py --seed 1   # different random seed
+python thirlwall_statistical_model.py --export interactive/reference/reference.json
+                                                 # full run, also saving full-precision results
 ```
 
 If `python` selects a different interpreter, use the path or launcher for Python 3.14 instead. The default seed is `20261002`. The full run prints nine numbered sections and its elapsed wall time; [`example_output.txt`](example_output.txt) records the rounded results from the reference environment. The script produces the model outputs used for the article's tables and discussion. The article's staffing and camera discussion also draws on external sources and explicit extrapolations; those claims are not outputs of this simulation. The script does not produce the article's prose or presentation graphics.
@@ -125,7 +127,7 @@ The model was revised seven times during review of the code and article draft. W
 | 4 | Offender effect labelled as expected deaths, with an exact-count check; 10,000 detection runs per cell; full CUSUM excursion as the review window; threshold sweep |
 | 5 | CUSUM calibrated on crossings using fixed null paths; sweep extended to 1 in 10,000; background detection with no offender |
 | 6 | Base rates anchored to the record: national (0.1 per 10,000) and neonatal (1 per 10,000) references added, 3 to 30 kept as stress tests; each rate printed per nurse-year; risk in proportion to staff becomes the main case, equal risk per unit the sensitivity. Simulated alarm and detection rates unchanged |
-| 7 | Fair tie-break in the offender rota review (ties for top attendance shared equally); output labels use the article's test names; unused code removed. Alarm and detection rates unchanged |
+| 7 | Fair tie-break in the offender rota review (ties for top attendance shared equally); output labels use the article's test names; unused code removed. Alarm and detection rates unchanged. A later addition, `--export`, saves the full-precision results behind every printed table as JSON for the [interactive explorer](interactive/); it uses no random numbers, and the printed output is byte-for-byte unchanged |
 
 ## Try another interpretation
 

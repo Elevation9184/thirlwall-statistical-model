@@ -9,9 +9,9 @@ The paper ("The Arithmetic of Suspicion") and the Python model (`../thirlwall_st
 | Stage | Scope | Owner | Status |
 |---|---|---|---|
 | 1 | Figure 2 explorer: threshold, base rate, unit type | Codex, reviewed by Claude | **Done** (commits df26da2, 84ce638, 404c6d5) |
-| 2a | Python reference export: full-precision JSON of every per-unit-type result | Claude | Not started; awaiting decision D1 |
+| 2a | Python reference export: full-precision JSON of every per-unit-type result | Claude | **Done**: `reference/reference.json`, printed output verified identical |
 | 2b | Five tabs following Tables 1–5, shared state, live tables, all "Ready" controls | Codex, reviewed by Claude | Not started |
-| 3 | In-browser simulation: "Sim" controls on Tabs 1–3 and the shared world | To be decided | Not started; scope is decision D2 |
+| 3 | In-browser simulation: shortlisted "Sim" controls (D2) | To be decided | Not started |
 | 4 | Optional extensions (see section 8) | — | Not planned |
 
 ## 1. Purpose and principles
@@ -29,7 +29,7 @@ The paper's tables are snapshots. Each rests on assumptions. The explorer turns 
 ## 2. Architecture
 
 - **State.** One object holding every control value, plus the active tab. It is serialised to the URL hash, so a scenario can be shared as a link. "Reset to paper" restores the paper's main case.
-- **Reference data.** Stage 2b reads `reference/reference.json` (produced by Stage 2a) through a small loader. Every value is regression-tested against `example_output.txt` at the printed precision.
+- **Reference data.** Stage 2b reads `reference/reference.json` (produced by Stage 2a). For `file://` use, `build.mjs` should inline it into the bundle as a constant rather than fetch it. Every value is regression-tested against `example_output.txt` at the printed precision.
 - **Derivation.** `derive.js` holds pure functions that turn state plus reference data into every displayed number (section 5). There is no DOM access, and everything is unit-tested.
 - **Views.** One module per tab. Each renders the controls, graph, live table and working panel from `derive.js` output only.
 - **Simulation (Stage 3).** `sim/` holds a JavaScript port of the model, run in a Web Worker. It feeds the same `derive.js` functions, so the views do not change.
@@ -147,15 +147,24 @@ Mechanism check values (independent attendance, the model's shift mix, 5%, every
 
 ## 4. Reference data
 
-Stage 2a adds an export to the Python script. At the end of a run, it writes `interactive/reference/reference.json`, containing at full precision:
+Stage 2a added an optional `--export PATH` to the Python script. `reference/reference.json` was produced by the full default run (`python thirlwall_statistical_model.py --export interactive/reference/reference.json`). It contains, at full precision:
 
 - For each rule and unit type, from the chance-alarm runs: alarm share, episodes, reviewed alarms, the three test shares, flag episodes, distinct nurses, median deaths reviewed, and median top attendance.
 - For each effect (+4, +7), rule and unit type, from the detection runs: detection, background, offender identification (`flag_off`), and any-nurse flag rate (`flag_any`).
 - The CUSUM thresholds, the block 9 sweep, and the model inputs (unit types, shift mix, CV, base rates, q values).
 
-Constraints for 2a: it adds a file only. The printed output and the random-number sequence must be unchanged, verified by a byte-for-byte diff of `example_output.txt` apart from the timing line. Stage 2b tests every JSON value against `example_output.txt` at the printed precision.
+The export uses no random numbers and writes values already computed. A full run with `--export` produced output identical to `example_output.txt` apart from the timing line.
 
-Without the export (if D1 is declined), Stage 2b must transcribe from the printed output. That has two costs. Unit-count sliders cannot recompute Tab 2's weighted row or flagged-nurse totals, because reviewed alarms per type are not printed. The posterior would also have to be interpolated between the five printed base rates.
+JSON keys:
+- `inputs`: model inputs (unit types with `n`, `mean` and `staff`; `cv`; exposure shares and mix; `offender_f`; rules; base rates; q).
+- `weights`: `staff` and `equal` risk weights by unit type.
+- `cusum_h`: thresholds keyed `"E10|NICU"` and so on.
+- `chance[rule][type]`: `alpha` (share of unit-years alarmed), `ep` (episodes per unit-year), `rev` (reviewed alarms per unit-year), `s_avg`, `s_own` and `s_adj` (test shares among reviewed alarms), `flag_ep` and `flag_distinct` (own-exposure flags per unit-year), `med_k`, `med_top`.
+- `detection["4"|"7"][rule][type]`: `d` (detection), `bg` (background), `flag_off` (offender identified, per detection), `flag_any` (any nurse flagged, per detection).
+- `exact_count_ratio_p1`: block 8.
+- `sweep`: block 9, with per-type thresholds.
+
+Verification already done: the section 5 formulas applied to this file reproduce every line of blocks 4, 5 and 6 of `example_output.txt` character for character (30 of 30 lines).
 
 ## 5. Derived arithmetic (`derive.js`)
 
@@ -203,12 +212,13 @@ Use the paper's terms:
 
 | # | Question | Options | Recommendation | Decided |
 |---|---|---|---|---|
-| D1 | Add the reference export to the Python script? | Yes (export only, output unchanged) / No (transcribe printed output) | **Yes.** Makes the unit-count sliders and the posterior exact at no cost to the frozen results. | — |
-| D2 | Stage 3 scope | All 12 Sim controls / a shortlist | **Shortlist first:** deaths a year, roster size, alarm line, significance level, offender's extra deaths. | — |
-| D3 | Rule E when the world changes | Recalibrate in the browser (a few seconds) / grey out | **Recalibrate**, with a progress indicator; grey out only the 1-in-5,000 and 1-in-10,000 settings, which need too many paths. | — |
-| D4 | Show paper values beside live values | Yes / No | **Yes**, small and muted, only where they differ. | — |
+| D1 | Add the reference export to the Python script? | Yes / No | Yes | **Yes**, 2026-10-06; done |
+| D2 | Stage 3 scope | All 12 Sim controls / a shortlist | Shortlist first | **Shortlist**, 2026-10-06: deaths a year, roster size, alarm line, significance level, offender's extra deaths |
+| D3 | Rule E when the world changes | Recalibrate in the browser (a few seconds) / grey out | Recalibrate | **Recalibrate**, 2026-10-06, with a progress indicator; grey out the 1-in-5,000 and 1-in-10,000 settings |
+| D4 | Show paper values beside live values | Yes / No | Yes | **Yes**, 2026-10-06: small and muted, only where they differ |
 | D5 | Where the explorer is hosted, and the paper link | Repo only / a public page | Decide before the repo goes public. | — |
 
 ## 9. Change log
 
+- 2026-10-06: Decisions D1–D4 agreed. Stage 2a done: `--export` added to the Python script; `reference/reference.json` generated; output verified identical; Tables 4, 5 and posteriors recreated exactly from the export.
 - 2026-10-06: Stage 1 complete and reviewed (log detection axis, paper terminology, follow-ups). Plan drafted for Stages 2–3: five tabs, live tables, assumption inventory, reference export proposal.
