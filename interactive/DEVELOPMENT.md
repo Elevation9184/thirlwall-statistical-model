@@ -11,8 +11,10 @@ The paper ("The Arithmetic of Suspicion") and the Python model (`../thirlwall_st
 | 1 | Figure 2 explorer: threshold, base rate, unit type | Codex, reviewed by Claude | **Done** (commits df26da2, 84ce638, 404c6d5) |
 | 2a | Python reference export: full-precision JSON of every per-unit-type result | Claude | **Done**: `reference/reference.json`, printed output verified identical |
 | 2b | Five tabs following Tables 1–5, shared state, live tables, all "Ready" controls | Codex, reviewed | **Done**: reference arithmetic, five linked views, file-open bundle, 1400/390 px review screenshots and regression checks |
-| 3 | In-browser simulation: shortlisted "Sim" controls (D2) | To be decided | Not started |
-| 4 | Optional extensions (see section 8) | — | Not planned |
+| 3a | Simulation layer: JavaScript port of the model, validated against the Python baseline; no new reader controls | Codex, reviewed by Claude | Not started (section 8) |
+| 3b | Simulation mode in the page: the five shortlisted controls | Codex, reviewed by Claude | Not started; after 3a |
+| 3c | Rule E recalibration when the world changes | Codex, reviewed by Claude | Not started; after 3b |
+| 4 | Optional extensions (see section 9) | — | Not planned |
 
 ## 1. Purpose and principles
 
@@ -208,7 +210,62 @@ Use the paper's terms:
 
 "Detection" always means the unit alarms in an offender-year. It never means the offender is identified.
 
-## 8. Open decisions
+## 8. Stage 3: the simulation layer
+
+### 8.1 Two modes
+
+- **Paper mode** (default, and after "Reset to paper"). Every number comes from `reference/reference.json` and the section 5 arithmetic. It is exact and test-guaranteed to match the paper. All "Ready" controls stay in paper mode.
+- **Simulation mode** begins when the reader changes a "Sim" control. Affected numbers come from the in-browser simulation. They are shown with a 95% interval and labelled "simulated"; the paper's value stays beside each one. A banner states the mode, the number of simulated units and the seed, with a "Return to paper baseline" button.
+- The two modes never mix silently. Each displayed number knows its source (`paper`, `derived`, `simulated`), and the "How this number is made" panel names it.
+
+### 8.2 The port must be faithful
+
+`sim/` reimplements `thirlwall_statistical_model.py` sections 1–3 exactly as written, not approximately. The behaviour to reproduce (Python names in brackets):
+
+- **Unit path** (`sim_unit`): one gamma draw per year, mean `mean`, shape K = 1/CV², scale 1/K; monthly mean = annual rate ÷ 12 for all 12 months of that year; deaths ~ Poisson(monthly mean); 48 months of history plus 120 monitored. With an offender, months 48–59 add Poisson(extra ÷ 12) offender deaths.
+- **Rules A and B**: one check per monitored year. The count is the year's deaths; the baseline is max(total deaths in the previous 36 months ÷ 3, 0.5). The rule alarms when count > Poisson quantile(q, baseline) with q = 0.977 (A) or 0.9987 (B). "Quantile" means scipy's `ppf`: the smallest k with CDF(k) ≥ q. The review window is that year.
+- **Rules C and D**: one check per monitored month, on the rolling 12-month count, with the same baseline (the three years before the window). C alarms when count > Poisson quantile(0.977, baseline); D when count ≥ 2 × baseline and count ≥ 4. The review window is those 12 months.
+- **Rule E** (`checks`, CUSUM branch): S = max(0, S + deaths × ln 2 − true monthly mean); the window starts the month after S was last 0; alarm when S ≥ h; then S = 0. In 3a and 3b, h comes from `cusum_h` in the reference file.
+- **Episodes and unit-years**: consecutive alarmed checks form one episode, reviewed over the first alarmed check's window. A unit-year counts once if any check in that year alarms.
+- **Rota review, chance runs**: one persistent roster per unit (shift shares drawn from 0.21 / 0.13 / 0.27 with probabilities 0.5 / 0.35 / 0.15). Per episode with k ≥ 2 deaths: each nurse's attendance ~ Binomial(k, own share); the top nurse is the first maximum (as numpy `argmax`); the three tests as in MODEL.md at 5%; a nurse is flagged by the own-exposure test.
+- **Detection runs**: checks for the first 12 monitored months only (rules A and B: the first annual check). Hit if the first alarm falls in those months. The roster has staff − 1 drawn nurses plus the offender (share 0.21) last. The offender's attendance is Binomial(background deaths, 0.21) plus all offender deaths; the others' is Binomial(background, share) + Binomial(offender deaths, share). Ties for the top count use the fair rule (MODEL.md). The background rate comes from separate no-offender units.
+- **Counts per cell**: 2,000 units per rule and type (chance), 10,000 (detection), as in Python.
+
+### 8.3 Validation against the Python baseline (the gate for 3b)
+
+With the paper's inputs, the JavaScript simulation must agree with `reference.json`:
+- For every proportion or rate cell in `chance` and `detection` (alpha, ep, rev, test shares, flag_ep, flag_distinct, d, bg, flag_off, flag_any): z = (JS − Python) ÷ √(SE_JS² + SE_Python²), using binomial or Poisson standard errors from each run's own counts.
+- Pass: no |z| > 4, and no more than 1% of cells with |z| > 3.
+- Medians (`med_k`, `med_top`) within 1.
+- Recalculated Tables 4 and 5 from the simulated values fall inside their simulated 95% intervals of the paper's values.
+- The validation runs as `npm run validate-sim` (slow; not part of the quick test suite) and writes a report, `sim/validation-report.md`, listing every cell with JS value, Python value and z. The report is committed.
+
+Exact equality with Python is impossible (different random generators) and is not a goal. The Python baseline is the guarantee; the simulation shows direction and size.
+
+### 8.4 Engineering
+
+- **Random numbers**: a seeded, fast generator (for example sfc32 or xoshiro128**). The same seed and inputs give the same results in the browser. Show the seed in the banner.
+- **Samplers**: gamma (Marsaglia–Tsang), Poisson (inversion for means below 30; a standard method above), binomial (inversion for small k; a standard method above). Each sampler gets its own distribution test.
+- **Poisson quantile and binomial tails**: exact, by summing probabilities, as scipy defines them.
+- **Worker**: the simulation runs in a Web Worker. Under `file://`, create it from a Blob URL of inlined source, because a worker file cannot be loaded from `file://`.
+- **Output shape**: the worker returns objects shaped like `reference.json`'s `chance` and `detection`, plus the counts behind each value. `derive.js` then works unchanged.
+- **Speed**: compute what the visible tab needs first (the selected rule and effect), then fill the rest in the background. Report progress. A full Tables 1–3 run should take seconds, not minutes, on a laptop. Measure it and record it in the change log.
+
+### 8.5 Stage 3b controls (from D2) and what they change
+
+| Control | Range | Simulation inputs changed | Tables affected |
+|---|---|---|---|
+| Expected deaths a year, by unit type | 0.5–60 | `mean` per type | 1–5 |
+| Nurses on each roster, by type | 10–200 | `staff` per type; risk weights | 2–5 |
+| Alarm line, rules A–C | 1.5–3.5 SD, converted to the quantile q = Φ(SD), except that 2 SD and 3 SD use the paper's exact 0.977 and 0.9987 (Φ gives 0.97725 and 0.99865) | the quantile q | 1–5 for A–C |
+| Significance level | 1–10% | the rota tests' threshold | 2, 3 (identification), 5 |
+| Offender's extra deaths | 1–15 expected | `extra` | 3–5 |
+
+Changing deaths a year changes rule E's thresholds. Until 3c, rule E is greyed out in simulation mode when deaths a year differ from the paper, with the note "rule E needs recalibration (coming)".
+
+Simulation mode can also compute what paper mode cannot: the chance that a flagged nurse is the offender under the maximum-adjusted test. Show it there, labelled simulated.
+
+## 9. Open decisions
 
 | # | Question | Options | Recommendation | Decided |
 |---|---|---|---|---|
@@ -218,8 +275,9 @@ Use the paper's terms:
 | D4 | Show paper values beside live values | Yes / No | Yes | **Yes**, 2026-10-06: small and muted, only where they differ |
 | D5 | Where the explorer is hosted, and the paper link | Repo only / a public page | Decide before the repo goes public. | — |
 
-## 9. Change log
+## 10. Change log
 
+- 2026-10-07: Stage 2 complete after review. Stage 3 planned (section 8): paper and simulation modes, a faithful JavaScript port validated against the Python baseline before any simulation control goes live (3a), the five shortlisted controls (3b), rule E recalibration (3c).
 - 2026-10-06: Stage 2b review follow-ups. Posterior displays now lead with reciprocal odds and retain the three-decimal percentage beneath. All numeric display rounding follows Python's fixed-point formatting of the binary value, checked against rendered Tables 1–5 at paper defaults. The Figure 2 target slider lives only in Tab 4, takeaway panels lead with the paper's finding, and Tab 3/5 chart labels were improved. Screenshots remain a review artifact in a Git-ignored directory.
 - 2026-10-06: Stage 2b implemented. Added one URL-backed model state, the five Table 1–5 tabs, scenario bar, paper comparisons, fixed assumptions and calculation panels. The exact roster mechanism, maximum-adjusted flag count, posterior and all Table 4–5 arithmetic use the Stage 2a export. The original Figure 2 explorer sits in a collapsed Tab 4 section. All Ready controls are active; simulation-dependent assumptions remain fixed. The full regression suite, bundle check, file-open browser interaction check and ten desktop/phone screenshots passed.
 - 2026-10-06: Decisions D1–D4 agreed. Stage 2a done: `--export` added to the Python script; `reference/reference.json` generated; output verified identical; Tables 4, 5 and posteriors recreated exactly from the export.
