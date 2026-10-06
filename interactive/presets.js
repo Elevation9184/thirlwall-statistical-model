@@ -9,4 +9,4 @@ export const PAPER_DEFAULT = Object.freeze({
   caseMixCV: .25
 });
 
-export const UNIT_NAMES = Object.freeze({ NICU: 'intensive unit', LNU: 'local unit', SCU: 'special care unit' });
+export const UNIT_NAMES = Object.freeze({ NICU: 'intensive care unit', LNU: 'local unit', SCU: 'special care unit' });

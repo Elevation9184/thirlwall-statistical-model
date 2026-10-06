@@ -21,7 +21,7 @@ function render() {
   $('#prevalence-value').textContent = `${formatPrevalence(state.prevalencePer10k)} per 10,000 unit-years`;
   $('#ratio-value').textContent = `${number.format(Math.round(selected.falsePerTrue))} : 1`;
   $('#detection-value').textContent = `${(selected.detectionProbability * 100).toFixed(1)}%`;
-  $('#selected-unit-label').textContent = `In a ${UNIT_NAMES[state.unitType]}, within 12 months`;
+  $('#selected-unit-label').textContent = `In a ${UNIT_NAMES[state.unitType]} with an offender`;
   $('#wait-value').textContent = `${number.format(Math.round(selected.yearsPerDetection))} years`;
 
   document.querySelectorAll('[data-threshold]').forEach(button => {
@@ -30,7 +30,8 @@ function render() {
   document.querySelectorAll('[data-prevalence]').forEach(button => {
     button.setAttribute('aria-pressed', String(Number(button.dataset.prevalence) === state.prevalencePer10k));
   });
-  $('.reference-legend').hidden = state.prevalencePer10k === 1;
+  $('.neonatal-legend').hidden = state.prevalencePer10k === 1;
+  $('.national-legend').hidden = state.prevalencePer10k === .1;
   drawTradeoff($('#tradeoff-chart'), result, state, thresholdIndex => setState({ thresholdIndex }));
   drawUnitChart($('#unit-chart'), selected, state.unitType);
 }

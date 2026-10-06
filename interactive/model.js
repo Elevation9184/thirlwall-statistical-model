@@ -38,5 +38,10 @@ export function calculate(state) {
     throw new RangeError('Invalid threshold index');
   }
   const curve = SWEEP.map(row => calculatePoint(row, state.prevalencePer10k, state.unitType));
-  return { curve, selected: curve[state.thresholdIndex], referenceCurve: SWEEP.map(row => calculatePoint(row, 1, state.unitType)) };
+  return {
+    curve,
+    selected: curve[state.thresholdIndex],
+    neonatalCurve: SWEEP.map(row => calculatePoint(row, 1, state.unitType)),
+    nationalCurve: SWEEP.map(row => calculatePoint(row, .1, state.unitType))
+  };
 }

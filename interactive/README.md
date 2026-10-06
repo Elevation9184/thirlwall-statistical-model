@@ -11,12 +11,15 @@ For regression checks, run `node --test interactive/tests/figure2.test.js` from 
 ## What this version models
 
 - The 11 calibrated CUSUM thresholds in Python output block 9.
-- Figure 2’s horizontal coordinate: probability of an alarm within 12 months in a selected unit with an offender. The article displays local neonatal units by default.
-- Figure 2’s vertical coordinate: false CUSUM crossings across 175 units per detected offender-year, on a logarithmic axis.
+- Figure 2’s horizontal coordinate: probability of an alarm within 12 months in a selected unit with an offender, on a logarithmic axis from 0.1% to 100%. The article displays local neonatal units by default.
+- Figure 2’s vertical coordinate: false CUSUM crossings across 175 units per detected offender-year. This interactive version uses a logarithmic vertical axis to accommodate the 0.1–30 base-rate slider; the paper uses a linear vertical axis. The curve’s shape therefore differs from the printed figure.
+- Dashed reference curves for the national and neonatal base-rate scenarios, except where the selected scenario overlaps one of them.
 - A scenario prevalence from 0.1 to 30 offender-years per 10,000 unit-years. The false:true ratio and years per detection scale inversely with prevalence; sensitivity does not change.
 - A companion chart showing detection chances for intensive, local, and special-care units at the chosen threshold.
 
 The paper defaults shown on opening are E10, the neonatal reference base rate of 1 per 10,000 unit-years, and local-unit detection. E50 and the national reference rate of 0.1 are one-click presets. The underlying sweep fixes offender effect at an expected four excess deaths in 12 months and allocates offender risk in proportion to staffing.
+
+The “Read paper PDF” link points to the PDF in the parent folder. That relative path works locally and when the same folder layout is hosted. The local PDF is newer than the PDF currently in the GitHub repository; synchronize the article before publishing the site. The interactive project does not change either PDF.
 
 The Python output prints rounded results. The browser uses the more precise printed 0.1-reference false:true column as its arithmetic anchor; intermediate prevalence values use the same inverse-rate relationship as the Python model. The strictest estimates have higher Monte Carlo uncertainty and should not be read as exact.
 

@@ -17,7 +17,8 @@ export function drawTradeoff(svg, result, state, onPointSelected) {
   const compact = window.matchMedia('(max-width:760px)').matches;
   svg.setAttribute('viewBox', compact ? '0 0 420 350' : '0 0 760 440');
   const plot = compact ? { left: 49, right: 405, top: 21, bottom: 286 } : { left: 82, right: 730, top: 25, bottom: 358 };
-  const x = probability => plot.left + probability * (plot.right - plot.left);
+  // The paper uses a log sensitivity axis so the low-detection tail remains legible.
+  const x = probability => plot.left + (Math.log10(probability) + 3) / 3 * (plot.right - plot.left);
   const y = ratio => plot.bottom - (Math.log10(ratio) - 1) / 4 * (plot.bottom - plot.top);
   const contents = [title, desc];
   const grid = node('g', { class: 'chart-grid' });
@@ -27,19 +28,18 @@ export function drawTradeoff(svg, result, state, onPointSelected) {
     grid.append(node('line', { x1: plot.left, x2: plot.right, y1: yy, y2: yy }));
     grid.append(node('text', { x: plot.left - 13, y: yy + 4, 'text-anchor': 'end' }, label(tick)));
   }
-  for (const tick of compact ? [0, .25, .5, .75, 1] : [0, .2, .4, .6, .8, 1]) {
+  for (const [tick, tickLabel] of [[.001, '0.1%'], [.01, '1%'], [.1, '10%'], [1, '100%']]) {
     const xx = x(tick);
     grid.append(node('line', { x1: xx, x2: xx, y1: plot.top, y2: plot.bottom, class: 'vertical' }));
-    grid.append(node('text', { x: xx, y: plot.bottom + 26, 'text-anchor': 'middle' }, `${Math.round(tick * 100)}%`));
+    grid.append(node('text', { x: xx, y: plot.bottom + 26, 'text-anchor': 'middle' }, tickLabel));
   }
   contents.push(grid);
 
   const pathFor = curve => curve.map((point, index) =>
     `${index ? 'L' : 'M'} ${x(point.detectionProbability).toFixed(2)} ${y(point.falsePerTrue).toFixed(2)}`).join(' ');
 
-  if (state.prevalencePer10k !== 1) {
-    contents.push(node('path', { d: pathFor(result.referenceCurve), class: 'reference-curve' }));
-  }
+  if (state.prevalencePer10k !== .1) contents.push(node('path', { d: pathFor(result.nationalCurve), class: 'reference-curve national' }));
+  if (state.prevalencePer10k !== 1) contents.push(node('path', { d: pathFor(result.neonatalCurve), class: 'reference-curve neonatal' }));
   contents.push(node('path', { d: pathFor(result.curve), class: 'active-curve' }));
 
   const dots = node('g', { class: 'chart-dots' });
@@ -67,7 +67,7 @@ export function drawTradeoff(svg, result, state, onPointSelected) {
   contents.push(annotation);
 
   svg.replaceChildren(...contents);
-  desc.textContent = `Selected target: one false crossing in ${selected.interval} unit-years. The selected unit type has a ${(selected.detectionProbability * 100).toFixed(1)} percent chance of an alarm. The model gives ${Math.round(selected.falsePerTrue)} false crossings per detected offender-year across 175 units.`;
+  desc.textContent = `Both axes are logarithmic. Selected target: one false crossing in ${selected.interval} unit-years. The selected unit type has a ${(selected.detectionProbability * 100).toFixed(1)} percent chance of an alarm during an offender-year. The model gives ${Math.round(selected.falsePerTrue)} false-alarm crossings per detected offender-year across 175 units.`;
 }
 
 export function drawUnitChart(svg, point, selectedType) {
@@ -82,7 +82,7 @@ export function drawUnitChart(svg, point, selectedType) {
     chart.append(node('line', { x1: xx, x2: xx, y1: 25, y2: 197, class: 'bar-grid' }));
     chart.append(node('text', { x: xx, y: 220, 'text-anchor': 'middle', class: 'bar-axis-label' }, `${tick * 100}%`));
   }
-  const rows = [['NICU', 'Intensive'], ['LNU', 'Local'], ['SCU', 'Special care']];
+  const rows = [['NICU', 'Intensive care'], ['LNU', 'Local'], ['SCU', 'Special care']];
   rows.forEach(([key, name], index) => {
     const yy = 44 + index * 62;
     const value = point.byUnit[key];
