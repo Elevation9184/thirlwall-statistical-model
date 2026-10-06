@@ -21,7 +21,7 @@ function render() {
   $('#prevalence-value').textContent = `${formatPrevalence(state.prevalencePer10k)} per 10,000 unit-years`;
   $('#ratio-value').textContent = `${number.format(Math.round(selected.falsePerTrue))} : 1`;
   $('#detection-value').textContent = `${(selected.detectionProbability * 100).toFixed(1)}%`;
-  $('#selected-unit-label').textContent = `In a ${UNIT_NAMES[state.unitType]} with an offender`;
+  $('#selected-unit-label').textContent = `${UNIT_NAMES[state.unitType]} with an offender present`;
   $('#wait-value').textContent = `${number.format(Math.round(selected.yearsPerDetection))} years`;
 
   document.querySelectorAll('[data-threshold]').forEach(button => {

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { SWEEP } from '../reference/figure2-data.js';
 import { PAPER_DEFAULT } from '../presets.js';
 import { calculate, calculatePoint, prevalenceToSlider, sliderToPrevalence } from '../model.js';
+import { scales } from '../charts.js';
 import { makeBundle } from '../build.mjs';
 
 const outputPath = fileURLToPath(new URL('../../example_output.txt', import.meta.url));
@@ -64,7 +65,29 @@ test('log slider round trips the two paper base-rate presets', () => {
   }
 });
 
+test('the log sensitivity scale spaces each tenfold step evenly', () => {
+  for (const plot of [{ left: 82, right: 730, top: 25, bottom: 358 }, { left: 49, right: 405, top: 21, bottom: 286 }]) {
+    const { x } = scales(plot);
+    assert.ok(Math.abs(x(.01) - (x(.001) + x(.1)) / 2) < .5);
+  }
+});
+
+test('all sweep sensitivities sit strictly inside both plot widths', () => {
+  for (const plot of [{ left: 82, right: 730, top: 25, bottom: 358 }, { left: 49, right: 405, top: 21, bottom: 286 }]) {
+    const { x } = scales(plot);
+    for (const row of SWEEP) {
+      for (const [unit, probability] of Object.entries(row.detection)) {
+        const position = x(probability);
+        assert.ok(position > plot.left && position < plot.right, `${unit} at 1 in ${row.interval} is outside the plot`);
+      }
+    }
+  }
+});
+
 test('the delivered file-open browser script matches the tested source modules', async () => {
   const delivered = readFileSync(fileURLToPath(new URL('../app.js', import.meta.url)), 'utf8');
   assert.equal(delivered, await makeBundle());
+  for (const phrase of ['Chance of detecting', 'National wait', 'intensive unit', 'In a intensive']) {
+    assert.ok(!delivered.includes(phrase), `Stale wording in app.js: ${phrase}`);
+  }
 });

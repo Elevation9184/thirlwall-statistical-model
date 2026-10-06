@@ -66,8 +66,8 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border:3px soli
 .chart-grid line.vertical { stroke:#edf0f1; }
 .chart-grid text { fill:#6f7c89; font-size:12px; }
 .active-curve { fill:none; stroke:#007f83; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; }
-.reference-curve { fill:none; stroke:#aebcc5; stroke-width:2.5; stroke-dasharray:6 7; stroke-linecap:round; stroke-linejoin:round; }
-.reference-curve.national { stroke:#c29573; }
+.reference-curve { fill:none; stroke:#aebcc5; stroke-width:2.5; stroke-dasharray:8 6; stroke-linecap:round; stroke-linejoin:round; }
+.reference-curve.national { stroke-dasharray:2 6; }
 .chart-dot { cursor:pointer; }
 .chart-dot circle:first-child { fill:#007f83; stroke:#fff; stroke-width:2; }
 .chart-dot.selected circle:first-child { fill:#e49448; stroke:#fff; stroke-width:3; }
@@ -82,7 +82,7 @@ input[type="range"]::-moz-range-thumb { width:15px; height:15px; border:3px soli
 .legend-line { width:22px; height:0; border-top:3px solid #007f83; margin-left:9px; }
 .legend-line:first-child { margin-left:0; }
 .legend-line.reference { border-color:#aebcc5; border-top-style:dashed; }
-.legend-line.reference.national { border-color:#c29573; }
+.legend-line.reference.national { border-top-style:dotted; }
 .metric-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; margin:16px 0; }
 .metric-card { min-height:136px; padding:20px 19px; display:flex; flex-direction:column; }
 .metric-card.primary { background:#112c3c; border-color:#112c3c; color:#fff; }

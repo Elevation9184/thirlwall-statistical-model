@@ -30,7 +30,7 @@ const PAPER_DEFAULT = Object.freeze({
   caseMixCV: .25
 });
 
-const UNIT_NAMES = Object.freeze({ NICU: 'intensive care unit', LNU: 'local unit', SCU: 'special care unit' });
+const UNIT_NAMES = Object.freeze({ NICU: 'Intensive care unit', LNU: 'Local unit', SCU: 'Special care unit' });
 
 // ---- model.js ----
 const PREVALENCE_MIN = .1;
@@ -81,6 +81,7 @@ function calculate(state) {
 
 // ---- charts.js ----
 const NS = 'http://www.w3.org/2000/svg';
+const LOG_X_SPAN = Math.log10(2000); // 0.05% to 100%
 
 function node(name, attrs = {}, text = '') {
   const element = document.createElementNS(NS, name);
@@ -93,6 +94,13 @@ function label(value) {
   return value >= 1000 ? `${value / 1000}k` : String(value);
 }
 
+function scales(plot) {
+  return {
+    x: probability => plot.left + (Math.log10(probability) + LOG_X_SPAN) / LOG_X_SPAN * (plot.right - plot.left),
+    y: ratio => plot.bottom - (Math.log10(ratio) - 1) / 4 * (plot.bottom - plot.top)
+  };
+}
+
 function drawTradeoff(svg, result, state, onPointSelected) {
   const title = svg.querySelector('title');
   const desc = svg.querySelector('desc');
@@ -100,8 +108,7 @@ function drawTradeoff(svg, result, state, onPointSelected) {
   svg.setAttribute('viewBox', compact ? '0 0 420 350' : '0 0 760 440');
   const plot = compact ? { left: 49, right: 405, top: 21, bottom: 286 } : { left: 82, right: 730, top: 25, bottom: 358 };
   // The paper uses a log sensitivity axis so the low-detection tail remains legible.
-  const x = probability => plot.left + (Math.log10(probability) + 3) / 3 * (plot.right - plot.left);
-  const y = ratio => plot.bottom - (Math.log10(ratio) - 1) / 4 * (plot.bottom - plot.top);
+  const { x, y } = scales(plot);
   const contents = [title, desc];
   const grid = node('g', { class: 'chart-grid' });
 
@@ -198,7 +205,7 @@ function render() {
   $('#prevalence-value').textContent = `${formatPrevalence(state.prevalencePer10k)} per 10,000 unit-years`;
   $('#ratio-value').textContent = `${number.format(Math.round(selected.falsePerTrue))} : 1`;
   $('#detection-value').textContent = `${(selected.detectionProbability * 100).toFixed(1)}%`;
-  $('#selected-unit-label').textContent = `In a ${UNIT_NAMES[state.unitType]} with an offender`;
+  $('#selected-unit-label').textContent = `${UNIT_NAMES[state.unitType]} with an offender present`;
   $('#wait-value').textContent = `${number.format(Math.round(selected.yearsPerDetection))} years`;
 
   document.querySelectorAll('[data-threshold]').forEach(button => {
