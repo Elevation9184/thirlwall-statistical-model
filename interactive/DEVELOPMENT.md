@@ -11,8 +11,8 @@ The paper ("The Arithmetic of Suspicion") and the Python model (`../thirlwall_st
 | 1 | Figure 2 explorer: threshold, base rate, unit type | Codex, reviewed by Claude | **Done** (commits df26da2, 84ce638, 404c6d5) |
 | 2a | Python reference export: full-precision JSON of every per-unit-type result | Claude | **Done**: `reference/reference.json`, printed output verified identical |
 | 2b | Five tabs following Tables 1–5, shared state, live tables, all "Ready" controls | Codex, reviewed | **Done**: reference arithmetic, five linked views, file-open bundle, 1400/390 px review screenshots and regression checks |
-| 3a | Simulation layer: JavaScript port of the model, validated against the Python baseline; no new reader controls | Codex, awaiting review | **Done**: 288/288 cells within gate, all medians and Tables 4–5 pass; file-open worker smoke passed |
-| 3b | Simulation mode in the page: the five shortlisted controls | Codex, reviewed by Claude | Not started; after 3a |
+| 3a | Simulation layer: JavaScript port of the model, validated against the Python baseline; no new reader controls | Codex, reviewed | **Done**: 288/288 cells within gate, all medians and Tables 4–5 pass; file-open worker smoke passed |
+| 3b | Simulation mode in the page: the five shortlisted controls | Codex, awaiting review | **Done**: selective worker results, source labels, intervals, paper round trips, file-open browser checks and six review screenshots |
 | 3c | Rule E recalibration when the world changes | Codex, reviewed by Claude | Not started; after 3b |
 | 4 | Optional extensions (see section 9) | — | Not planned |
 
@@ -276,6 +276,18 @@ Simulation mode can also compute what paper mode cannot: the chance that a flagg
 | D5 | Where the explorer is hosted, and the paper link | Repo only / a public page | Decide before the repo goes public. | — |
 
 ## 10. Change log
+
+- 2026-10-07: Stage 3b enabled mortality, roster size, alarm line, significance and offender effect in one URL-backed state. Selective worker jobs update the visible scenario first, with progress, stale-value dimming, 95% intervals and paper comparisons. At exact +4 or +7 with the other simulation controls at their defaults, the page uses the Python paper values. Rule E is unavailable only where mortality changes, pending Stage 3c recalibration. Simulation mode computes the maximum-adjusted posterior from deterministic additional rota counts. The 288 Stage 3a validation cell values remain byte-identical to the committed report; all Stage 3b direction, source, interval and paper round-trip checks passed. Six desktop/phone review screenshots are Git-ignored under `screenshots/stage3b/`.
+
+  Browser timings from the project’s `file://` page in Chrome at paper defaults, excluding screenshot time (milliseconds, input to first updated cell / full completion):
+
+  | Control change | First update | Complete |
+  |---|---:|---:|
+  | Local-unit expected deaths, 4 → 8/year | 449 | 1,968 |
+  | Local-unit roster, 40 → 80 nurses | 454 | 2,677 |
+  | Alarm line, 2 → 2.5 SD | 413 | 3,264 |
+  | Significance, 5% → 1% | 429 | 6,927 |
+  | Offender effect, +4 → +5 | 776 | 6,004 |
 
 - 2026-10-07: Stage 3a engine added under `sim/`, leaving paper mode and reader controls unchanged. Seeded gamma, Poisson and binomial samplers have distribution checks; chance, rota and detection paths cover all six rules and return raw counts. A Blob worker runs from `file://`, prioritises the selected cell and reports progress. Full validation (2,000/10,000 units per cell) passed: 288 cells, largest |z| 2.917, none over 3 or 4, all 36 medians within 1, and all 168 recalculated Table 4/5 values within combined simulation 95% intervals. Actual project run: 8.04 s in Node and 11.17 s in Chrome worker. See `sim/validation-report.md`.
 - 2026-10-07: Stage 2 complete after review. Stage 3 planned (section 8): paper and simulation modes, a faithful JavaScript port validated against the Python baseline before any simulation control goes live (3a), the five shortlisted controls (3b), rule E recalibration (3c).

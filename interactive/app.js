@@ -5,7 +5,7 @@
 const REFERENCE = {"model_version":7,"seed":20261002,"quick":false,"inputs":{"types":{"NICU":{"n":45,"mean":20,"staff":100},"LNU":{"n":85,"mean":4,"staff":40},"SCU":{"n":45,"mean":1,"staff":20}},"cv":0.25,"pre_months":48,"monitor_months":120,"exposure":[0.21,0.13,0.27],"exposure_mix":[0.5,0.35,0.15],"offender_f":0.21,"rules":["A","B","C","D","E10","E50"],"labels":{"A":"Annual check, 2-sigma","B":"Annual check, 3-sigma","C":"Rolling 12m, monthly, 2-sigma","D":"Rolling 12m, monthly, doubling heuristic","E10":"Risk-adjusted CUSUM, 1 false alarm per 10 unit-years","E50":"Risk-adjusted CUSUM, 1 false alarm per 50 unit-years"},"base_rates":[0.1,1,3,10,30],"reference_rates":[0.1,1],"q":[1,0.5,0.25,0.1],"reps":2000,"det_reps":10000,"n_cal":50000,"n_det":50000},"weights":{"staff":{"NICU":1.9886363636363635,"LNU":0.7954545454545454,"SCU":0.3977272727272727},"equal":{"NICU":1,"LNU":1,"SCU":1}},"cusum_h":{"E10|NICU":2.9242587720511253,"E10|LNU":2.1924405430066893,"E10|SCU":1.3929940386217818,"E50|NICU":4.447890175181743,"E50|LNU":3.566532116683498,"E50|SCU":2.51373475684529},"chance":{"A":{"NICU":{"alpha":0.1138,"ep":0.10605,"rev":0.10605,"s_avg":0.9966996699669967,"s_own":0.6836397925506836,"s_adj":0.03536067892503536,"flag_ep":0.0725,"flag_distinct":0.07205,"med_k":30,"med_top":13},"LNU":{"alpha":0.05795,"ep":0.0567,"rev":0.0567,"s_avg":0.7116402116402116,"s_own":0.5343915343915344,"s_adj":0.013227513227513227,"flag_ep":0.0303,"flag_distinct":0.0303,"med_k":8,"med_top":4},"SCU":{"alpha":0.02755,"ep":0.0274,"rev":0.0274,"s_avg":0.31386861313868614,"s_own":0.3175182481751825,"s_adj":0.01824817518248175,"flag_ep":0.0087,"flag_distinct":0.0087,"med_k":3.5,"med_top":2}},"B":{"NICU":{"alpha":0.04275,"ep":0.04165,"rev":0.04165,"s_avg":0.9987995198079231,"s_own":0.687875150060024,"s_adj":0.027611044417767107,"flag_ep":0.02865,"flag_distinct":0.02865,"med_k":34,"med_top":14},"LNU":{"alpha":0.0121,"ep":0.0121,"rev":0.0121,"s_avg":0.6859504132231405,"s_own":0.45867768595041325,"s_adj":0.0371900826446281,"flag_ep":0.00555,"flag_distinct":0.00555,"med_k":10,"med_top":5},"SCU":{"alpha":0.0025,"ep":0.0025,"rev":0.0025,"s_avg":0.4,"s_own":0.32,"s_adj":0.04,"flag_ep":0.0008,"flag_distinct":0.0008,"med_k":5,"med_top":3}},"C":{"NICU":{"alpha":0.2783,"ep":0.2632,"rev":0.2632,"s_avg":0.996580547112462,"s_own":0.6914893617021277,"s_adj":0.030585106382978722,"flag_ep":0.182,"flag_distinct":0.1789,"med_k":28,"med_top":12},"LNU":{"alpha":0.17675,"ep":0.17655,"rev":0.17655,"s_avg":0.6833758142169357,"s_own":0.5111866326819597,"s_adj":0.0184083828943642,"flag_ep":0.09025,"flag_distinct":0.0885,"med_k":8,"med_top":4},"SCU":{"alpha":0.0878,"ep":0.0747,"rev":0.0747,"s_avg":0.2643908969210174,"s_own":0.2603748326639893,"s_adj":0.014056224899598393,"flag_ep":0.01945,"flag_distinct":0.01935,"med_k":3,"med_top":2}},"D":{"NICU":{"alpha":0.07065,"ep":0.0672,"rev":0.0672,"s_avg":0.9985119047619048,"s_own":0.6875,"s_adj":0.029017857142857144,"flag_ep":0.0462,"flag_distinct":0.046,"med_k":31,"med_top":13},"LNU":{"alpha":0.3275,"ep":0.32755,"rev":0.32755,"s_avg":0.6391390627385132,"s_own":0.48969622958326975,"s_adj":0.011448633796366967,"flag_ep":0.1604,"flag_distinct":0.1559,"med_k":6,"med_top":4},"SCU":{"alpha":0.067,"ep":0.0595,"rev":0.0595,"s_avg":0.4588235294117647,"s_own":0.3235294117647059,"s_adj":0.041176470588235294,"flag_ep":0.01925,"flag_distinct":0.019,"med_k":4,"med_top":2}},"E10":{"NICU":{"alpha":0.09455,"ep":0.09755,"rev":0.09755,"s_avg":0.9548949256791389,"s_own":0.7298821117375704,"s_adj":0.025627883136852898,"flag_ep":0.0712,"flag_distinct":0.0707,"med_k":12,"med_top":7},"LNU":{"alpha":0.09975,"ep":0.10195,"rev":0.10195,"s_avg":0.6414909269249632,"s_own":0.48749386954389407,"s_adj":0.014713094654242276,"flag_ep":0.0497,"flag_distinct":0.0494,"med_k":7,"med_top":4},"SCU":{"alpha":0.0968,"ep":0.0983,"rev":0.0983,"s_avg":0.2736520854526958,"s_own":0.2807731434384537,"s_adj":0.015259409969481181,"flag_ep":0.0276,"flag_distinct":0.0275,"med_k":3,"med_top":2}},"E50":{"NICU":{"alpha":0.0185,"ep":0.01855,"rev":0.01855,"s_avg":0.9811320754716981,"s_own":0.7008086253369272,"s_adj":0.02425876010781671,"flag_ep":0.013,"flag_distinct":0.013,"med_k":20,"med_top":9},"LNU":{"alpha":0.02065,"ep":0.0207,"rev":0.0207,"s_avg":0.7898550724637681,"s_own":0.5265700483091788,"s_adj":0.014492753623188406,"flag_ep":0.0109,"flag_distinct":0.0109,"med_k":12,"med_top":6},"SCU":{"alpha":0.02,"ep":0.02,"rev":0.02,"s_avg":0.46,"s_own":0.3275,"s_adj":0.03,"flag_ep":0.00655,"flag_distinct":0.00655,"med_k":7,"med_top":3}}},"detection":{"4":{"A":{"NICU":{"d":0.2375,"bg":0.1188,"flag_off":0.1435478696741854,"flag_any":0.7475388471177944},"LNU":{"d":0.4036,"bg":0.0578,"flag_off":0.6456557647836143,"flag_any":0.8624017768653548},"SCU":{"d":0.6572,"bg":0.0286,"flag_off":0.8628068573747207,"flag_any":0.9231287859026753}},"B":{"NICU":{"d":0.1005,"bg":0.0397,"flag_off":0.1426723525230988,"flag_any":0.7163657900971334},"LNU":{"d":0.1686,"bg":0.0128,"flag_off":0.6663898774219057,"flag_any":0.8777175243367414},"SCU":{"d":0.3789,"bg":0.0034,"flag_off":0.9067915896894521,"flag_any":0.9443212809008532}},"C":{"NICU":{"d":0.4041,"bg":0.2727,"flag_off":0.05947372762517529,"flag_any":0.7057932972743666},"LNU":{"d":0.5482,"bg":0.1756,"flag_off":0.34453232223206615,"flag_any":0.6957374929784629},"SCU":{"d":0.7317,"bg":0.0847,"flag_off":0.5768826021593558,"flag_any":0.7121465341637542}},"D":{"NICU":{"d":0.1126,"bg":0.0699,"flag_off":0.08926879810538779,"flag_any":0.6985938425103613},"LNU":{"d":0.6687,"bg":0.3276,"flag_off":0.27275701966146065,"flag_any":0.6552304756207846},"SCU":{"d":0.7694,"bg":0.0658,"flag_off":0.6068863183432979,"flag_any":0.7539944545533319}},"E10":{"NICU":{"d":0.2537,"bg":0.0841,"flag_off":0.10457936820766935,"flag_any":0.7998836555202339},"LNU":{"d":0.5457,"bg":0.0668,"flag_off":0.4623694337548107,"flag_any":0.7627728038255795},"SCU":{"d":0.8323,"bg":0.061,"flag_off":0.6112579598702392,"flag_any":0.744186362518093}},"E50":{"NICU":{"d":0.0792,"bg":0.0136,"flag_off":0.15808080808080807,"flag_any":0.8011198292448294},"LNU":{"d":0.2295,"bg":0.0074,"flag_off":0.627182280319535,"flag_any":0.8476372030293601},"SCU":{"d":0.5305,"bg":0.0037,"flag_off":0.817876217404964,"flag_any":0.8868111844172164}}},"7":{"A":{"NICU":{"d":0.3593,"bg":0.1189,"flag_off":0.4160987634686491,"flag_any":0.8418846831802582},"LNU":{"d":0.7064,"bg":0.0579,"flag_off":0.8901425066062657,"flag_any":0.9666338038612955},"SCU":{"d":0.921,"bg":0.0288,"flag_off":0.9768729641693813,"flag_any":0.9907347086500182}},"B":{"NICU":{"d":0.173,"bg":0.0407,"flag_off":0.38650289017341044,"flag_any":0.8294315992292876},"LNU":{"d":0.4409,"bg":0.0139,"flag_off":0.9165419218265675,"flag_any":0.9787107539772543},"SCU":{"d":0.7674,"bg":0.0031,"flag_off":0.9840152897228738,"flag_any":0.9934410563808531}},"C":{"NICU":{"d":0.5213,"bg":0.2735,"flag_off":0.17048747179669885,"flag_any":0.7521427657961323},"LNU":{"d":0.7901,"bg":0.1802,"flag_off":0.5349398207580729,"flag_any":0.8020481132587186},"SCU":{"d":0.9394,"bg":0.0926,"flag_off":0.6840607479951735,"flag_any":0.7979234465768417}},"D":{"NICU":{"d":0.1738,"bg":0.0679,"flag_off":0.21182941531042787,"flag_any":0.7699038303468679},"LNU":{"d":0.8567,"bg":0.3275,"flag_off":0.4434311894478827,"flag_any":0.7482752662949927},"SCU":{"d":0.9615,"bg":0.0674,"flag_off":0.7081660599757309,"flag_any":0.8236730802565442}},"E10":{"NICU":{"d":0.4274,"bg":0.082,"flag_off":0.26224151569846527,"flag_any":0.8385615632223019},"LNU":{"d":0.8382,"bg":0.0707,"flag_off":0.6484800195430099,"flag_any":0.8528966076210164},"SCU":{"d":0.9775,"bg":0.0609,"flag_off":0.7403529411764693,"flag_any":0.8414977469248556}},"E50":{"NICU":{"d":0.1879,"bg":0.0163,"flag_off":0.35335348082820167,"flag_any":0.8523573183365628},"LNU":{"d":0.5951,"bg":0.0068,"flag_off":0.828423794320282,"flag_any":0.9429345608181098},"SCU":{"d":0.8826,"bg":0.0039,"flag_off":0.9013048568623001,"flag_any":0.9459740161643628}}}},"exact_count_ratio_p1":{"A":1845.0434433546864,"B":1318.469807111687,"C":3579.5108218063465,"D":4559.474563261347,"E10":2228.0803093578584,"E50":1293.2277366449368},"sweep":[{"target":0.2,"alarms_per_year":35,"detection":{"NICU":0.38846,"LNU":0.6965,"SCU":0.90982},"background":{"NICU":0.17248,"LNU":0.15458,"SCU":0.1561},"h":{"NICU":2.295879484508446,"LNU":1.673638911969117,"SCU":1.0574610954307435}},{"target":0.1,"alarms_per_year":17.5,"detection":{"NICU":0.24746,"LNU":0.54458,"SCU":0.8319},"background":{"NICU":0.08766,"LNU":0.0683,"SCU":0.0587},"h":{"NICU":2.9242587720511253,"LNU":2.1924405430066893,"SCU":1.3929940386217818}},{"target":0.05,"alarms_per_year":8.75,"detection":{"NICU":0.15248,"LNU":0.39906,"SCU":0.71564},"background":{"NICU":0.0413,"LNU":0.02658,"SCU":0.02038},"h":{"NICU":3.569212846363369,"LNU":2.7598000353663172,"SCU":1.8556402960166414}},{"target":0.02,"alarms_per_year":3.5,"detection":{"NICU":0.07654,"LNU":0.23536,"SCU":0.52938},"background":{"NICU":0.0145,"LNU":0.00666,"SCU":0.00372},"h":{"NICU":4.447890175181743,"LNU":3.566532116683498,"SCU":2.51373475684529}},{"target":0.01,"alarms_per_year":1.75,"detection":{"NICU":0.04476,"LNU":0.14706,"SCU":0.38996},"background":{"NICU":0.00678,"LNU":0.00198,"SCU":0.00104},"h":{"NICU":5.113850786522865,"LNU":4.196445159831103,"SCU":3.022980503815591}},{"target":0.005,"alarms_per_year":0.875,"detection":{"NICU":0.02502,"LNU":0.08444,"SCU":0.2697},"background":{"NICU":0.00304,"LNU":0.00046,"SCU":0.00024},"h":{"NICU":5.809801946994689,"LNU":4.83359498401514,"SCU":3.5475560102082233}},{"target":0.002,"alarms_per_year":0.35,"detection":{"NICU":0.01162,"LNU":0.03632,"SCU":0.15314},"background":{"NICU":0.001,"LNU":0.00008,"SCU":0.00002},"h":{"NICU":6.707173304562751,"LNU":5.692274372798084,"SCU":4.222016139585123}},{"target":0.001,"alarms_per_year":0.175,"detection":{"NICU":0.00608,"LNU":0.0193,"SCU":0.09798},"background":{"NICU":0.00036,"LNU":0,"SCU":0},"h":{"NICU":7.389619706112353,"LNU":6.304249005765782,"SCU":4.722914029685687}},{"target":0.0005,"alarms_per_year":0.0875,"detection":{"NICU":0.0034,"LNU":0.0088,"SCU":0.05848},"background":{"NICU":0.00028,"LNU":0,"SCU":0},"h":{"NICU":8.042018097792424,"LNU":6.99923973960613,"SCU":5.1952510104769}},{"target":0.0002,"alarms_per_year":0.035,"detection":{"NICU":0.00182,"LNU":0.00348,"SCU":0.0266},"background":{"NICU":0.00008,"LNU":0,"SCU":0},"h":{"NICU":8.851330795877203,"LNU":7.75847488025635,"SCU":5.877891412515856}},{"target":0.0001,"alarms_per_year":0.0175,"detection":{"NICU":0.00082,"LNU":0.00172,"SCU":0.01376},"background":{"NICU":0.00002,"LNU":0,"SCU":0},"h":{"NICU":9.527512158673948,"LNU":8.285211274488185,"SCU":6.387791655515725}}]};
 
 // ---- Blob worker source ----
-const SIM_WORKER_SOURCE = "'use strict';\nconst REFERENCE = {\"model_version\":7,\"seed\":20261002,\"quick\":false,\"inputs\":{\"types\":{\"NICU\":{\"n\":45,\"mean\":20,\"staff\":100},\"LNU\":{\"n\":85,\"mean\":4,\"staff\":40},\"SCU\":{\"n\":45,\"mean\":1,\"staff\":20}},\"cv\":0.25,\"pre_months\":48,\"monitor_months\":120,\"exposure\":[0.21,0.13,0.27],\"exposure_mix\":[0.5,0.35,0.15],\"offender_f\":0.21,\"rules\":[\"A\",\"B\",\"C\",\"D\",\"E10\",\"E50\"],\"labels\":{\"A\":\"Annual check, 2-sigma\",\"B\":\"Annual check, 3-sigma\",\"C\":\"Rolling 12m, monthly, 2-sigma\",\"D\":\"Rolling 12m, monthly, doubling heuristic\",\"E10\":\"Risk-adjusted CUSUM, 1 false alarm per 10 unit-years\",\"E50\":\"Risk-adjusted CUSUM, 1 false alarm per 50 unit-years\"},\"base_rates\":[0.1,1,3,10,30],\"reference_rates\":[0.1,1],\"q\":[1,0.5,0.25,0.1],\"reps\":2000,\"det_reps\":10000,\"n_cal\":50000,\"n_det\":50000},\"weights\":{\"staff\":{\"NICU\":1.9886363636363635,\"LNU\":0.7954545454545454,\"SCU\":0.3977272727272727},\"equal\":{\"NICU\":1,\"LNU\":1,\"SCU\":1}},\"cusum_h\":{\"E10|NICU\":2.9242587720511253,\"E10|LNU\":2.1924405430066893,\"E10|SCU\":1.3929940386217818,\"E50|NICU\":4.447890175181743,\"E50|LNU\":3.566532116683498,\"E50|SCU\":2.51373475684529},\"chance\":{\"A\":{\"NICU\":{\"alpha\":0.1138,\"ep\":0.10605,\"rev\":0.10605,\"s_avg\":0.9966996699669967,\"s_own\":0.6836397925506836,\"s_adj\":0.03536067892503536,\"flag_ep\":0.0725,\"flag_distinct\":0.07205,\"med_k\":30,\"med_top\":13},\"LNU\":{\"alpha\":0.05795,\"ep\":0.0567,\"rev\":0.0567,\"s_avg\":0.7116402116402116,\"s_own\":0.5343915343915344,\"s_adj\":0.013227513227513227,\"flag_ep\":0.0303,\"flag_distinct\":0.0303,\"med_k\":8,\"med_top\":4},\"SCU\":{\"alpha\":0.02755,\"ep\":0.0274,\"rev\":0.0274,\"s_avg\":0.31386861313868614,\"s_own\":0.3175182481751825,\"s_adj\":0.01824817518248175,\"flag_ep\":0.0087,\"flag_distinct\":0.0087,\"med_k\":3.5,\"med_top\":2}},\"B\":{\"NICU\":{\"alpha\":0.04275,\"ep\":0.04165,\"rev\":0.04165,\"s_avg\":0.9987995198079231,\"s_own\":0.687875150060024,\"s_adj\":0.027611044417767107,\"flag_ep\":0.02865,\"flag_distinct\":0.02865,\"med_k\":34,\"med_top\":14},\"LNU\":{\"alpha\":0.0121,\"ep\":0.0121,\"rev\":0.0121,\"s_avg\":0.6859504132231405,\"s_own\":0.45867768595041325,\"s_adj\":0.0371900826446281,\"flag_ep\":0.00555,\"flag_distinct\":0.00555,\"med_k\":10,\"med_top\":5},\"SCU\":{\"alpha\":0.0025,\"ep\":0.0025,\"rev\":0.0025,\"s_avg\":0.4,\"s_own\":0.32,\"s_adj\":0.04,\"flag_ep\":0.0008,\"flag_distinct\":0.0008,\"med_k\":5,\"med_top\":3}},\"C\":{\"NICU\":{\"alpha\":0.2783,\"ep\":0.2632,\"rev\":0.2632,\"s_avg\":0.996580547112462,\"s_own\":0.6914893617021277,\"s_adj\":0.030585106382978722,\"flag_ep\":0.182,\"flag_distinct\":0.1789,\"med_k\":28,\"med_top\":12},\"LNU\":{\"alpha\":0.17675,\"ep\":0.17655,\"rev\":0.17655,\"s_avg\":0.6833758142169357,\"s_own\":0.5111866326819597,\"s_adj\":0.0184083828943642,\"flag_ep\":0.09025,\"flag_distinct\":0.0885,\"med_k\":8,\"med_top\":4},\"SCU\":{\"alpha\":0.0878,\"ep\":0.0747,\"rev\":0.0747,\"s_avg\":0.2643908969210174,\"s_own\":0.2603748326639893,\"s_adj\":0.014056224899598393,\"flag_ep\":0.01945,\"flag_distinct\":0.01935,\"med_k\":3,\"med_top\":2}},\"D\":{\"NICU\":{\"alpha\":0.07065,\"ep\":0.0672,\"rev\":0.0672,\"s_avg\":0.9985119047619048,\"s_own\":0.6875,\"s_adj\":0.029017857142857144,\"flag_ep\":0.0462,\"flag_distinct\":0.046,\"med_k\":31,\"med_top\":13},\"LNU\":{\"alpha\":0.3275,\"ep\":0.32755,\"rev\":0.32755,\"s_avg\":0.6391390627385132,\"s_own\":0.48969622958326975,\"s_adj\":0.011448633796366967,\"flag_ep\":0.1604,\"flag_distinct\":0.1559,\"med_k\":6,\"med_top\":4},\"SCU\":{\"alpha\":0.067,\"ep\":0.0595,\"rev\":0.0595,\"s_avg\":0.4588235294117647,\"s_own\":0.3235294117647059,\"s_adj\":0.041176470588235294,\"flag_ep\":0.01925,\"flag_distinct\":0.019,\"med_k\":4,\"med_top\":2}},\"E10\":{\"NICU\":{\"alpha\":0.09455,\"ep\":0.09755,\"rev\":0.09755,\"s_avg\":0.9548949256791389,\"s_own\":0.7298821117375704,\"s_adj\":0.025627883136852898,\"flag_ep\":0.0712,\"flag_distinct\":0.0707,\"med_k\":12,\"med_top\":7},\"LNU\":{\"alpha\":0.09975,\"ep\":0.10195,\"rev\":0.10195,\"s_avg\":0.6414909269249632,\"s_own\":0.48749386954389407,\"s_adj\":0.014713094654242276,\"flag_ep\":0.0497,\"flag_distinct\":0.0494,\"med_k\":7,\"med_top\":4},\"SCU\":{\"alpha\":0.0968,\"ep\":0.0983,\"rev\":0.0983,\"s_avg\":0.2736520854526958,\"s_own\":0.2807731434384537,\"s_adj\":0.015259409969481181,\"flag_ep\":0.0276,\"flag_distinct\":0.0275,\"med_k\":3,\"med_top\":2}},\"E50\":{\"NICU\":{\"alpha\":0.0185,\"ep\":0.01855,\"rev\":0.01855,\"s_avg\":0.9811320754716981,\"s_own\":0.7008086253369272,\"s_adj\":0.02425876010781671,\"flag_ep\":0.013,\"flag_distinct\":0.013,\"med_k\":20,\"med_top\":9},\"LNU\":{\"alpha\":0.02065,\"ep\":0.0207,\"rev\":0.0207,\"s_avg\":0.7898550724637681,\"s_own\":0.5265700483091788,\"s_adj\":0.014492753623188406,\"flag_ep\":0.0109,\"flag_distinct\":0.0109,\"med_k\":12,\"med_top\":6},\"SCU\":{\"alpha\":0.02,\"ep\":0.02,\"rev\":0.02,\"s_avg\":0.46,\"s_own\":0.3275,\"s_adj\":0.03,\"flag_ep\":0.00655,\"flag_distinct\":0.00655,\"med_k\":7,\"med_top\":3}}},\"detection\":{\"4\":{\"A\":{\"NICU\":{\"d\":0.2375,\"bg\":0.1188,\"flag_off\":0.1435478696741854,\"flag_any\":0.7475388471177944},\"LNU\":{\"d\":0.4036,\"bg\":0.0578,\"flag_off\":0.6456557647836143,\"flag_any\":0.8624017768653548},\"SCU\":{\"d\":0.6572,\"bg\":0.0286,\"flag_off\":0.8628068573747207,\"flag_any\":0.9231287859026753}},\"B\":{\"NICU\":{\"d\":0.1005,\"bg\":0.0397,\"flag_off\":0.1426723525230988,\"flag_any\":0.7163657900971334},\"LNU\":{\"d\":0.1686,\"bg\":0.0128,\"flag_off\":0.6663898774219057,\"flag_any\":0.8777175243367414},\"SCU\":{\"d\":0.3789,\"bg\":0.0034,\"flag_off\":0.9067915896894521,\"flag_any\":0.9443212809008532}},\"C\":{\"NICU\":{\"d\":0.4041,\"bg\":0.2727,\"flag_off\":0.05947372762517529,\"flag_any\":0.7057932972743666},\"LNU\":{\"d\":0.5482,\"bg\":0.1756,\"flag_off\":0.34453232223206615,\"flag_any\":0.6957374929784629},\"SCU\":{\"d\":0.7317,\"bg\":0.0847,\"flag_off\":0.5768826021593558,\"flag_any\":0.7121465341637542}},\"D\":{\"NICU\":{\"d\":0.1126,\"bg\":0.0699,\"flag_off\":0.08926879810538779,\"flag_any\":0.6985938425103613},\"LNU\":{\"d\":0.6687,\"bg\":0.3276,\"flag_off\":0.27275701966146065,\"flag_any\":0.6552304756207846},\"SCU\":{\"d\":0.7694,\"bg\":0.0658,\"flag_off\":0.6068863183432979,\"flag_any\":0.7539944545533319}},\"E10\":{\"NICU\":{\"d\":0.2537,\"bg\":0.0841,\"flag_off\":0.10457936820766935,\"flag_any\":0.7998836555202339},\"LNU\":{\"d\":0.5457,\"bg\":0.0668,\"flag_off\":0.4623694337548107,\"flag_any\":0.7627728038255795},\"SCU\":{\"d\":0.8323,\"bg\":0.061,\"flag_off\":0.6112579598702392,\"flag_any\":0.744186362518093}},\"E50\":{\"NICU\":{\"d\":0.0792,\"bg\":0.0136,\"flag_off\":0.15808080808080807,\"flag_any\":0.8011198292448294},\"LNU\":{\"d\":0.2295,\"bg\":0.0074,\"flag_off\":0.627182280319535,\"flag_any\":0.8476372030293601},\"SCU\":{\"d\":0.5305,\"bg\":0.0037,\"flag_off\":0.817876217404964,\"flag_any\":0.8868111844172164}}},\"7\":{\"A\":{\"NICU\":{\"d\":0.3593,\"bg\":0.1189,\"flag_off\":0.4160987634686491,\"flag_any\":0.8418846831802582},\"LNU\":{\"d\":0.7064,\"bg\":0.0579,\"flag_off\":0.8901425066062657,\"flag_any\":0.9666338038612955},\"SCU\":{\"d\":0.921,\"bg\":0.0288,\"flag_off\":0.9768729641693813,\"flag_any\":0.9907347086500182}},\"B\":{\"NICU\":{\"d\":0.173,\"bg\":0.0407,\"flag_off\":0.38650289017341044,\"flag_any\":0.8294315992292876},\"LNU\":{\"d\":0.4409,\"bg\":0.0139,\"flag_off\":0.9165419218265675,\"flag_any\":0.9787107539772543},\"SCU\":{\"d\":0.7674,\"bg\":0.0031,\"flag_off\":0.9840152897228738,\"flag_any\":0.9934410563808531}},\"C\":{\"NICU\":{\"d\":0.5213,\"bg\":0.2735,\"flag_off\":0.17048747179669885,\"flag_any\":0.7521427657961323},\"LNU\":{\"d\":0.7901,\"bg\":0.1802,\"flag_off\":0.5349398207580729,\"flag_any\":0.8020481132587186},\"SCU\":{\"d\":0.9394,\"bg\":0.0926,\"flag_off\":0.6840607479951735,\"flag_any\":0.7979234465768417}},\"D\":{\"NICU\":{\"d\":0.1738,\"bg\":0.0679,\"flag_off\":0.21182941531042787,\"flag_any\":0.7699038303468679},\"LNU\":{\"d\":0.8567,\"bg\":0.3275,\"flag_off\":0.4434311894478827,\"flag_any\":0.7482752662949927},\"SCU\":{\"d\":0.9615,\"bg\":0.0674,\"flag_off\":0.7081660599757309,\"flag_any\":0.8236730802565442}},\"E10\":{\"NICU\":{\"d\":0.4274,\"bg\":0.082,\"flag_off\":0.26224151569846527,\"flag_any\":0.8385615632223019},\"LNU\":{\"d\":0.8382,\"bg\":0.0707,\"flag_off\":0.6484800195430099,\"flag_any\":0.8528966076210164},\"SCU\":{\"d\":0.9775,\"bg\":0.0609,\"flag_off\":0.7403529411764693,\"flag_any\":0.8414977469248556}},\"E50\":{\"NICU\":{\"d\":0.1879,\"bg\":0.0163,\"flag_off\":0.35335348082820167,\"flag_any\":0.8523573183365628},\"LNU\":{\"d\":0.5951,\"bg\":0.0068,\"flag_off\":0.828423794320282,\"flag_any\":0.9429345608181098},\"SCU\":{\"d\":0.8826,\"bg\":0.0039,\"flag_off\":0.9013048568623001,\"flag_any\":0.9459740161643628}}}},\"exact_count_ratio_p1\":{\"A\":1845.0434433546864,\"B\":1318.469807111687,\"C\":3579.5108218063465,\"D\":4559.474563261347,\"E10\":2228.0803093578584,\"E50\":1293.2277366449368},\"sweep\":[{\"target\":0.2,\"alarms_per_year\":35,\"detection\":{\"NICU\":0.38846,\"LNU\":0.6965,\"SCU\":0.90982},\"background\":{\"NICU\":0.17248,\"LNU\":0.15458,\"SCU\":0.1561},\"h\":{\"NICU\":2.295879484508446,\"LNU\":1.673638911969117,\"SCU\":1.0574610954307435}},{\"target\":0.1,\"alarms_per_year\":17.5,\"detection\":{\"NICU\":0.24746,\"LNU\":0.54458,\"SCU\":0.8319},\"background\":{\"NICU\":0.08766,\"LNU\":0.0683,\"SCU\":0.0587},\"h\":{\"NICU\":2.9242587720511253,\"LNU\":2.1924405430066893,\"SCU\":1.3929940386217818}},{\"target\":0.05,\"alarms_per_year\":8.75,\"detection\":{\"NICU\":0.15248,\"LNU\":0.39906,\"SCU\":0.71564},\"background\":{\"NICU\":0.0413,\"LNU\":0.02658,\"SCU\":0.02038},\"h\":{\"NICU\":3.569212846363369,\"LNU\":2.7598000353663172,\"SCU\":1.8556402960166414}},{\"target\":0.02,\"alarms_per_year\":3.5,\"detection\":{\"NICU\":0.07654,\"LNU\":0.23536,\"SCU\":0.52938},\"background\":{\"NICU\":0.0145,\"LNU\":0.00666,\"SCU\":0.00372},\"h\":{\"NICU\":4.447890175181743,\"LNU\":3.566532116683498,\"SCU\":2.51373475684529}},{\"target\":0.01,\"alarms_per_year\":1.75,\"detection\":{\"NICU\":0.04476,\"LNU\":0.14706,\"SCU\":0.38996},\"background\":{\"NICU\":0.00678,\"LNU\":0.00198,\"SCU\":0.00104},\"h\":{\"NICU\":5.113850786522865,\"LNU\":4.196445159831103,\"SCU\":3.022980503815591}},{\"target\":0.005,\"alarms_per_year\":0.875,\"detection\":{\"NICU\":0.02502,\"LNU\":0.08444,\"SCU\":0.2697},\"background\":{\"NICU\":0.00304,\"LNU\":0.00046,\"SCU\":0.00024},\"h\":{\"NICU\":5.809801946994689,\"LNU\":4.83359498401514,\"SCU\":3.5475560102082233}},{\"target\":0.002,\"alarms_per_year\":0.35,\"detection\":{\"NICU\":0.01162,\"LNU\":0.03632,\"SCU\":0.15314},\"background\":{\"NICU\":0.001,\"LNU\":0.00008,\"SCU\":0.00002},\"h\":{\"NICU\":6.707173304562751,\"LNU\":5.692274372798084,\"SCU\":4.222016139585123}},{\"target\":0.001,\"alarms_per_year\":0.175,\"detection\":{\"NICU\":0.00608,\"LNU\":0.0193,\"SCU\":0.09798},\"background\":{\"NICU\":0.00036,\"LNU\":0,\"SCU\":0},\"h\":{\"NICU\":7.389619706112353,\"LNU\":6.304249005765782,\"SCU\":4.722914029685687}},{\"target\":0.0005,\"alarms_per_year\":0.0875,\"detection\":{\"NICU\":0.0034,\"LNU\":0.0088,\"SCU\":0.05848},\"background\":{\"NICU\":0.00028,\"LNU\":0,\"SCU\":0},\"h\":{\"NICU\":8.042018097792424,\"LNU\":6.99923973960613,\"SCU\":5.1952510104769}},{\"target\":0.0002,\"alarms_per_year\":0.035,\"detection\":{\"NICU\":0.00182,\"LNU\":0.00348,\"SCU\":0.0266},\"background\":{\"NICU\":0.00008,\"LNU\":0,\"SCU\":0},\"h\":{\"NICU\":8.851330795877203,\"LNU\":7.75847488025635,\"SCU\":5.877891412515856}},{\"target\":0.0001,\"alarms_per_year\":0.0175,\"detection\":{\"NICU\":0.00082,\"LNU\":0.00172,\"SCU\":0.01376},\"background\":{\"NICU\":0.00002,\"LNU\":0,\"SCU\":0},\"h\":{\"NICU\":9.527512158673948,\"LNU\":8.285211274488185,\"SCU\":6.387791655515725}}]};\n\n// ---- sim/random.js ----\n// Xoshiro128** with SplitMix32 seeding. One stream belongs to one simulation run.\nconst UINT32_SCALE = 1 / 0x100000000;\nconst rotl = (value, bits) => (value << bits) | (value >>> (32 - bits));\n\nfunction createRng(seed) {\n  if (!Number.isInteger(seed)) throw new RangeError('The simulation seed must be an integer');\n  let seedState = seed >>> 0;\n  const splitmix32 = () => {\n    seedState = (seedState + 0x9e3779b9) >>> 0;\n    let value = seedState;\n    value = Math.imul(value ^ (value >>> 16), 0x85ebca6b);\n    value = Math.imul(value ^ (value >>> 13), 0xc2b2ae35);\n    return (value ^ (value >>> 16)) >>> 0;\n  };\n  let a = splitmix32(), b = splitmix32(), c = splitmix32(), d = splitmix32();\n  let spareNormal = null;\n  const nextUint = () => {\n    const result = Math.imul(rotl(Math.imul(b, 5), 7), 9) >>> 0;\n    const temp = b << 9;\n    c ^= a; d ^= b; b ^= c; a ^= d; c ^= temp; d = rotl(d, 11);\n    return result;\n  };\n  const uniform = () => (nextUint() + 0.5) * UINT32_SCALE;\n  const normal = () => {\n    if (spareNormal !== null) {\n      const value = spareNormal;\n      spareNormal = null;\n      return value;\n    }\n    const radius = Math.sqrt(-2 * Math.log(uniform()));\n    const angle = 2 * Math.PI * uniform();\n    spareNormal = radius * Math.sin(angle);\n    return radius * Math.cos(angle);\n  };\n  return { nextUint, uniform, normal };\n}\n\n// ---- sim/distributions.js ----\nconst LOG_FACTORIAL = [0];\n\nfunction logFactorial(n) {\n  for (let i = LOG_FACTORIAL.length; i <= n; i++) LOG_FACTORIAL[i] = LOG_FACTORIAL[i - 1] + Math.log(i);\n  return LOG_FACTORIAL[n];\n}\n\nfunction gamma(rng, shape, scale = 1) {\n  if (!(shape > 0) || !(scale > 0)) throw new RangeError('Gamma shape and scale must be positive');\n  if (shape < 1) return gamma(rng, shape + 1, scale) * rng.uniform() ** (1 / shape);\n  const d = shape - 1 / 3;\n  const c = 1 / Math.sqrt(9 * d);\n  for (;;) {\n    const x = rng.normal();\n    const root = 1 + c * x;\n    if (root <= 0) continue;\n    const v = root * root * root;\n    const u = rng.uniform();\n    if (u < 1 - 0.0331 * x ** 4 || Math.log(u) < x * x / 2 + d * (1 - v + Math.log(v))) return scale * d * v;\n  }\n}\n\nfunction poisson(rng, mean) {\n  if (!(mean >= 0) || !Number.isFinite(mean)) throw new RangeError('Poisson mean must be finite and nonnegative');\n  if (mean === 0) return 0;\n  if (mean < 30) {\n    let remaining = rng.uniform();\n    let probability = Math.exp(-mean);\n    let count = 0;\n    while (remaining > probability) {\n      remaining -= probability;\n      count++;\n      probability *= mean / count;\n    }\n    return count;\n  }\n  // Hörmann's PTRS transformed rejection method for larger means.\n  const b = 0.931 + 2.53 * Math.sqrt(mean);\n  const a = -0.059 + 0.02483 * b;\n  const inverseAlpha = 1.1239 + 1.1328 / (b - 3.4);\n  const vr = 0.9277 - 3.6224 / (b - 2);\n  for (;;) {\n    const u = rng.uniform() - 0.5;\n    const v = rng.uniform();\n    const us = 0.5 - Math.abs(u);\n    const count = Math.floor((2 * a / us + b) * u + mean + 0.43);\n    if (us >= 0.07 && v <= vr) return count;\n    if (count < 0 || (us < 0.013 && v > us)) continue;\n    if (Math.log(v) + Math.log(inverseAlpha) - Math.log(a / (us * us) + b)\n        <= -mean + count * Math.log(mean) - logFactorial(count)) return count;\n  }\n}\n\nfunction binomial(rng, trials, probability) {\n  if (!Number.isInteger(trials) || trials < 0 || !(probability >= 0 && probability <= 1)) throw new RangeError('Invalid binomial parameters');\n  if (trials === 0 || probability === 0) return 0;\n  if (probability === 1) return trials;\n  if (probability > 0.5) return trials - binomial(rng, trials, 1 - probability);\n  let remaining = rng.uniform();\n  if (trials < 64) {\n    let mass = (1 - probability) ** trials;\n    let count = 0;\n    while (remaining > mass && count < trials) {\n      remaining -= mass;\n      count++;\n      mass *= (trials - count + 1) / count * probability / (1 - probability);\n    }\n    return count;\n  }\n  // Exact mode-centred chop-down: visit binomial masses from the mode outward.\n  const mode = Math.floor((trials + 1) * probability);\n  const modeMass = Math.exp(logFactorial(trials) - logFactorial(mode) - logFactorial(trials - mode)\n    + mode * Math.log(probability) + (trials - mode) * Math.log1p(-probability));\n  remaining -= modeMass;\n  if (remaining <= 0) return mode;\n  let left = mode, right = mode, leftMass = modeMass, rightMass = modeMass;\n  for (;;) {\n    if (left > 0) {\n      leftMass *= left / (trials - left + 1) * (1 - probability) / probability;\n      left--;\n      remaining -= leftMass;\n      if (remaining <= 0) return left;\n    }\n    if (right < trials) {\n      rightMass *= (trials - right) / (right + 1) * probability / (1 - probability);\n      right++;\n      remaining -= rightMass;\n      if (remaining <= 0) return right;\n    }\n    if (left === 0 && right === trials) return right;\n  }\n}\n\nfunction poissonQuantile(q, mean) {\n  if (!(q > 0 && q < 1) || !(mean >= 0)) throw new RangeError('Invalid Poisson quantile parameters');\n  let mass = Math.exp(-mean);\n  let cumulative = mass;\n  let count = 0;\n  while (cumulative < q) {\n    count++;\n    mass *= mean / count;\n    cumulative += mass;\n  }\n  return count;\n}\n\nfunction binomialCDF(atMost, trials, probability) {\n  if (atMost < 0) return 0;\n  if (atMost >= trials) return 1;\n  if (probability === 0) return 1;\n  if (probability === 1) return 0;\n  let mass = (1 - probability) ** trials;\n  let cumulative = mass;\n  for (let k = 1; k <= atMost; k++) {\n    mass *= (trials - k + 1) / k * probability / (1 - probability);\n    cumulative += mass;\n  }\n  return Math.min(1, cumulative);\n}\n\nfunction binomialTail(atLeast, trials, probability) {\n  if (atLeast <= 0) return 1;\n  if (atLeast > trials) return 0;\n  if (probability === 0) return 0;\n  if (probability === 1) return 1;\n  let mass = Math.exp(logFactorial(trials) - logFactorial(atLeast) - logFactorial(trials - atLeast)\n    + atLeast * Math.log(probability) + (trials - atLeast) * Math.log1p(-probability));\n  let total = mass;\n  for (let k = atLeast + 1; k <= trials; k++) {\n    mass *= (trials - k + 1) / k * probability / (1 - probability);\n    total += mass;\n  }\n  return Math.min(1, total);\n}\n\n// ---- sim/model.js ----\nconst LN2 = Math.log(2);\nconst cutoffCache = new Map();\n\nfunction poissonCutoff(q, baseline) {\n  const key = `${q}|${baseline}`;\n  if (!cutoffCache.has(key)) cutoffCache.set(key, poissonQuantile(q, baseline));\n  return cutoffCache.get(key);\n}\n\nfunction drawRoster(rng, staff, exposure, mix, offender = false, offenderShare = .21) {\n  const roster = new Float64Array(staff);\n  const ordinary = staff - Number(offender);\n  for (let nurse = 0; nurse < ordinary; nurse++) {\n    const u = rng.uniform();\n    let category = 0, cumulative = mix[0];\n    while (u >= cumulative && category < exposure.length - 1) cumulative += mix[++category];\n    roster[nurse] = exposure[category];\n  }\n  if (offender) roster[staff - 1] = offenderShare;\n  return roster;\n}\n\nfunction simulateUnit(rng, mean, cv, preMonths, monitorMonths, extra = 0) {\n  const total = preMonths + monitorMonths;\n  const yearCount = Math.ceil(total / 12);\n  const shape = 1 / (cv * cv);\n  const monthlyMeans = new Float64Array(yearCount);\n  for (let year = 0; year < yearCount; year++) monthlyMeans[year] = mean * gamma(rng, shape, 1 / shape) / 12;\n  const bg = new Uint16Array(total);\n  for (let month = 0; month < total; month++) bg[month] = poisson(rng, monthlyMeans[Math.floor(month / 12)]);\n  const off = extra ? new Uint16Array(total) : null;\n  if (off) for (let month = preMonths; month < preMonths + 12; month++) off[month] = poisson(rng, extra / 12);\n  return { bg, off, monthlyMeans };\n}\n\nfunction alarmChecks(path, rule, type, monitorMonths, inputs, cusumH, quantiles = { A: .977, B: .9987, C: .977 }) {\n  const pre = inputs.pre_months;\n  const annual = rule === 'A' || rule === 'B';\n  const length = annual ? Math.floor(monitorMonths / 12) : monitorMonths;\n  const month = new Int16Array(length), alarm = new Uint8Array(length);\n  const start = new Int16Array(length), end = new Int16Array(length);\n  if (rule === 'A' || rule === 'B' || rule === 'C' || rule === 'D') {\n    const cumulative = new Int32Array(pre + monitorMonths + 1);\n    for (let t = 0; t < pre + monitorMonths; t++) cumulative[t + 1] = cumulative[t] + path.bg[t] + (path.off ? path.off[t] : 0);\n    for (let index = 0; index < length; index++) {\n      const t1 = annual ? pre + 12 * (index + 1) : pre + index + 1;\n      const count = cumulative[t1] - cumulative[t1 - 12];\n      const baseline = Math.max((cumulative[t1 - 12] - cumulative[t1 - 48]) / 3, .5);\n      month[index] = annual ? 12 * index + 11 : index;\n      start[index] = t1 - 12;\n      end[index] = t1;\n      alarm[index] = rule === 'D'\n        ? Number(count >= 2 * baseline && count >= 4)\n        : Number(count > poissonCutoff(quantiles[rule], baseline));\n    }\n  } else {\n    const h = cusumH[`${rule}|${type}`];\n    if (!(h > 0)) throw new RangeError(`Missing CUSUM threshold for ${rule}|${type}`);\n    let statistic = 0, windowStart = pre;\n    for (let index = 0; index < length; index++) {\n      const t = pre + index;\n      statistic = Math.max(0, statistic + path.bg[t] * LN2 + (path.off ? path.off[t] * LN2 : 0) - path.monthlyMeans[Math.floor(t / 12)]);\n      if (statistic === 0) windowStart = t + 1;\n      const hit = statistic >= h;\n      month[index] = index;\n      alarm[index] = Number(hit);\n      start[index] = hit ? windowStart : -1;\n      end[index] = t + 1;\n      if (hit) { statistic = 0; windowStart = t + 1; }\n    }\n  }\n  return { month, alarm, start, end };\n}\n\nfunction alarmEpisodes(checks) {\n  const result = [];\n  let previous = false;\n  for (let index = 0; index < checks.alarm.length; index++) {\n    const hit = checks.alarm[index] === 1;\n    if (hit && !previous) result.push([checks.month[index], checks.start[index], checks.end[index]]);\n    previous = hit;\n  }\n  return result;\n}\n\nfunction reviewRota(rng, roster, deaths, significance = .05) {\n  const attendance = new Uint16Array(roster.length);\n  let firstTop = 0, top = -1, shareSum = 0;\n  for (let nurse = 0; nurse < roster.length; nurse++) {\n    shareSum += roster[nurse];\n    attendance[nurse] = binomial(rng, deaths, roster[nurse]);\n    if (attendance[nurse] > top) { top = attendance[nurse]; firstTop = nurse; }\n  }\n  const averageTail = binomialTail(top, deaths, shareSum / roster.length);\n  const ownTail = binomialTail(top, deaths, roster[firstTop]);\n  let allBelow = 1;\n  for (let nurse = 0; nurse < roster.length; nurse++) allBelow *= binomialCDF(top - 1, deaths, roster[nurse]);\n  const adjustedTail = 1 - allBelow;\n  return { nurse: firstTop, top, averagePass: averageTail < significance,\n    ownPass: ownTail < significance, adjustedPass: adjustedTail < significance };\n}\n\nfunction median(values) {\n  if (!values.length) return null;\n  values.sort((a, b) => a - b);\n  const mid = Math.floor(values.length / 2);\n  return values.length % 2 ? values[mid] : (values[mid - 1] + values[mid]) / 2;\n}\n\nfunction chanceCell(rng, rule, type, reference, reps, settings) {\n  const inputs = settings.inputs;\n  const unit = settings.unitTypes[type];\n  const years = inputs.monitor_months / 12;\n  let alarmingUnitYears = 0, episodeCount = 0, reviewedAlarms = 0;\n  let avgPasses = 0, ownPasses = 0, adjustedPasses = 0, distinctNurses = 0;\n  const reviewedDeaths = [], topAttendance = [];\n  for (let unitIndex = 0; unitIndex < reps; unitIndex++) {\n    const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months);\n    const roster = drawRoster(rng, unit.staff, inputs.exposure, inputs.exposure_mix);\n    const checks = alarmChecks(path, rule, type, inputs.monitor_months, inputs, reference.cusum_h, settings.quantiles);\n    let lastAlarmingYear = -1;\n    for (let index = 0; index < checks.alarm.length; index++) {\n      if (!checks.alarm[index]) continue;\n      const year = Math.floor(checks.month[index] / 12);\n      if (year !== lastAlarmingYear) { alarmingUnitYears++; lastAlarmingYear = year; }\n    }\n    const flagged = new Uint8Array(unit.staff);\n    for (const [, start, end] of alarmEpisodes(checks)) {\n      episodeCount++;\n      let deaths = 0;\n      for (let month = start; month < end; month++) deaths += path.bg[month];\n      if (deaths < 2) continue;\n      const review = reviewRota(rng, roster, deaths, settings.significance);\n      reviewedAlarms++;\n      avgPasses += Number(review.averagePass);\n      ownPasses += Number(review.ownPass);\n      adjustedPasses += Number(review.adjustedPass);\n      reviewedDeaths.push(deaths);\n      topAttendance.push(review.top);\n      if (review.ownPass) flagged[review.nurse] = 1;\n    }\n    for (const selected of flagged) distinctNurses += selected;\n  }\n  const unitYears = reps * years;\n  return {\n    alpha: alarmingUnitYears / unitYears, ep: episodeCount / unitYears, rev: reviewedAlarms / unitYears,\n    s_avg: avgPasses / Math.max(reviewedAlarms, 1), s_own: ownPasses / Math.max(reviewedAlarms, 1),\n    s_adj: adjustedPasses / Math.max(reviewedAlarms, 1), flag_ep: ownPasses / unitYears,\n    flag_distinct: distinctNurses / unitYears, med_k: median(reviewedDeaths), med_top: median(topAttendance),\n    counts: { units: reps, unitYears, alarmingUnitYears, episodes: episodeCount, reviewedAlarms,\n      avgPasses, ownPasses, adjustedPasses, distinctNurses }\n  };\n}\n\nfunction detectionCell(rng, effect, rule, type, reference, reps, settings) {\n  const inputs = settings.inputs;\n  const unit = settings.unitTypes[type];\n  let hits = 0, backgroundHits = 0, reviewedHits = 0, offenderIdentifications = 0, anyNurseFlags = 0;\n  for (let unitIndex = 0; unitIndex < reps; unitIndex++) {\n    const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months, effect);\n    const roster = drawRoster(rng, unit.staff, inputs.exposure, inputs.exposure_mix, true, inputs.offender_f);\n    const checks = alarmChecks(path, rule, type, 12, inputs, reference.cusum_h, settings.quantiles);\n    let first = -1;\n    for (let index = 0; index < checks.alarm.length; index++) if (checks.alarm[index]) { first = index; break; }\n    if (first >= 0 && checks.month[first] < 12) {\n      hits++;\n      let backgroundDeaths = 0, offenderDeaths = 0;\n      for (let month = checks.start[first]; month < checks.end[first]; month++) {\n        backgroundDeaths += path.bg[month];\n        offenderDeaths += path.off[month];\n      }\n      const deaths = backgroundDeaths + offenderDeaths;\n      if (deaths >= 2) {\n        reviewedHits++;\n        const attendance = new Uint16Array(unit.staff);\n        for (let nurse = 0; nurse < unit.staff; nurse++) attendance[nurse] = binomial(rng, backgroundDeaths, roster[nurse]);\n        for (let nurse = 0; nurse < unit.staff; nurse++) attendance[nurse] += binomial(rng, offenderDeaths, roster[nurse]);\n        attendance[unit.staff - 1] = binomial(rng, backgroundDeaths, inputs.offender_f) + offenderDeaths;\n        let top = 0;\n        for (const count of attendance) if (count > top) top = count;\n        let tied = 0, passing = 0, offenderPasses = 0;\n        for (let nurse = 0; nurse < unit.staff; nurse++) {\n          if (attendance[nurse] !== top) continue;\n          tied++;\n          const passes = binomialTail(top, deaths, roster[nurse]) < settings.significance;\n          passing += Number(passes);\n          if (nurse === unit.staff - 1 && passes) offenderPasses++;\n        }\n        anyNurseFlags += passing / tied;\n        offenderIdentifications += offenderPasses / tied;\n      }\n    }\n  }\n  for (let unitIndex = 0; unitIndex < reps; unitIndex++) {\n    const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months);\n    const checks = alarmChecks(path, rule, type, 12, inputs, reference.cusum_h, settings.quantiles);\n    backgroundHits += Number(checks.alarm.includes(1));\n  }\n  return { d: hits / reps, bg: backgroundHits / reps,\n    flag_off: offenderIdentifications / Math.max(hits, 1), flag_any: anyNurseFlags / Math.max(hits, 1),\n    counts: { units: reps, hits, backgroundUnits: reps, backgroundHits, reviewedHits,\n      offenderIdentifications, anyNurseFlags } };\n}\n\nfunction runSimulation(reference, options = {}, onProgress = () => {}) {\n  const inputs = reference.inputs;\n  const settings = {\n    inputs, unitTypes: options.unitTypes || inputs.types, cv: options.cv ?? inputs.cv,\n    significance: options.significance ?? .05,\n    quantiles: options.quantiles || { A: .977, B: .9987, C: .977 }\n  };\n  const seed = options.seed ?? reference.seed;\n  const rng = createRng(seed);\n  const chanceReps = options.chanceReps ?? inputs.reps;\n  const detectionReps = options.detectionReps ?? inputs.det_reps;\n  const rules = options.rules || inputs.rules;\n  const types = options.types || Object.keys(inputs.types);\n  const effects = options.effects || [4, 7];\n  const jobs = [\n    ...rules.flatMap(rule => types.map(type => ({ kind: 'chance', rule, type }))),\n    ...effects.flatMap(effect => rules.flatMap(rule => types.map(type => ({ kind: 'detection', effect, rule, type }))))\n  ];\n  if (options.priority) {\n    const { rule, type, effect } = options.priority;\n    jobs.sort((a, b) => Number(b.rule === rule && b.type === type && (b.kind === 'chance' || b.effect === effect))\n      - Number(a.rule === rule && a.type === type && (a.kind === 'chance' || a.effect === effect)));\n  }\n  const chance = {}, detection = {};\n  let completed = 0;\n  for (const job of jobs) {\n    let value;\n    if (job.kind === 'chance') {\n      value = chanceCell(rng, job.rule, job.type, reference, chanceReps, settings);\n      (chance[job.rule] ||= {})[job.type] = value;\n    } else {\n      value = detectionCell(rng, job.effect, job.rule, job.type, reference, detectionReps, settings);\n      ((detection[job.effect] ||= {})[job.rule] ||= {})[job.type] = value;\n    }\n    onProgress({ ...job, completed: ++completed, total: jobs.length, value });\n  }\n  return { chance, detection, metadata: { seed, chanceReps, detectionReps, rules, types, effects } };\n}\n\n// ---- sim/worker.js ----\n// Bundled into a Blob worker by build.mjs; REFERENCE and the simulation port are in scope.\nself.addEventListener('message', event => {\n  const { type, id, options = {} } = event.data || {};\n  if (type !== 'run') return;\n  try {\n    const started = performance.now();\n    const result = runSimulation(REFERENCE, options, progress => {\n      self.postMessage({ type: 'progress', id, progress });\n    });\n    self.postMessage({ type: 'result', id, result, elapsedMs: performance.now() - started });\n  } catch (error) {\n    self.postMessage({ type: 'error', id, message: error?.message || String(error) });\n  }\n});\nself.postMessage({ type: 'ready' });\n";
+const SIM_WORKER_SOURCE = "'use strict';\nconst REFERENCE = {\"model_version\":7,\"seed\":20261002,\"quick\":false,\"inputs\":{\"types\":{\"NICU\":{\"n\":45,\"mean\":20,\"staff\":100},\"LNU\":{\"n\":85,\"mean\":4,\"staff\":40},\"SCU\":{\"n\":45,\"mean\":1,\"staff\":20}},\"cv\":0.25,\"pre_months\":48,\"monitor_months\":120,\"exposure\":[0.21,0.13,0.27],\"exposure_mix\":[0.5,0.35,0.15],\"offender_f\":0.21,\"rules\":[\"A\",\"B\",\"C\",\"D\",\"E10\",\"E50\"],\"labels\":{\"A\":\"Annual check, 2-sigma\",\"B\":\"Annual check, 3-sigma\",\"C\":\"Rolling 12m, monthly, 2-sigma\",\"D\":\"Rolling 12m, monthly, doubling heuristic\",\"E10\":\"Risk-adjusted CUSUM, 1 false alarm per 10 unit-years\",\"E50\":\"Risk-adjusted CUSUM, 1 false alarm per 50 unit-years\"},\"base_rates\":[0.1,1,3,10,30],\"reference_rates\":[0.1,1],\"q\":[1,0.5,0.25,0.1],\"reps\":2000,\"det_reps\":10000,\"n_cal\":50000,\"n_det\":50000},\"weights\":{\"staff\":{\"NICU\":1.9886363636363635,\"LNU\":0.7954545454545454,\"SCU\":0.3977272727272727},\"equal\":{\"NICU\":1,\"LNU\":1,\"SCU\":1}},\"cusum_h\":{\"E10|NICU\":2.9242587720511253,\"E10|LNU\":2.1924405430066893,\"E10|SCU\":1.3929940386217818,\"E50|NICU\":4.447890175181743,\"E50|LNU\":3.566532116683498,\"E50|SCU\":2.51373475684529},\"chance\":{\"A\":{\"NICU\":{\"alpha\":0.1138,\"ep\":0.10605,\"rev\":0.10605,\"s_avg\":0.9966996699669967,\"s_own\":0.6836397925506836,\"s_adj\":0.03536067892503536,\"flag_ep\":0.0725,\"flag_distinct\":0.07205,\"med_k\":30,\"med_top\":13},\"LNU\":{\"alpha\":0.05795,\"ep\":0.0567,\"rev\":0.0567,\"s_avg\":0.7116402116402116,\"s_own\":0.5343915343915344,\"s_adj\":0.013227513227513227,\"flag_ep\":0.0303,\"flag_distinct\":0.0303,\"med_k\":8,\"med_top\":4},\"SCU\":{\"alpha\":0.02755,\"ep\":0.0274,\"rev\":0.0274,\"s_avg\":0.31386861313868614,\"s_own\":0.3175182481751825,\"s_adj\":0.01824817518248175,\"flag_ep\":0.0087,\"flag_distinct\":0.0087,\"med_k\":3.5,\"med_top\":2}},\"B\":{\"NICU\":{\"alpha\":0.04275,\"ep\":0.04165,\"rev\":0.04165,\"s_avg\":0.9987995198079231,\"s_own\":0.687875150060024,\"s_adj\":0.027611044417767107,\"flag_ep\":0.02865,\"flag_distinct\":0.02865,\"med_k\":34,\"med_top\":14},\"LNU\":{\"alpha\":0.0121,\"ep\":0.0121,\"rev\":0.0121,\"s_avg\":0.6859504132231405,\"s_own\":0.45867768595041325,\"s_adj\":0.0371900826446281,\"flag_ep\":0.00555,\"flag_distinct\":0.00555,\"med_k\":10,\"med_top\":5},\"SCU\":{\"alpha\":0.0025,\"ep\":0.0025,\"rev\":0.0025,\"s_avg\":0.4,\"s_own\":0.32,\"s_adj\":0.04,\"flag_ep\":0.0008,\"flag_distinct\":0.0008,\"med_k\":5,\"med_top\":3}},\"C\":{\"NICU\":{\"alpha\":0.2783,\"ep\":0.2632,\"rev\":0.2632,\"s_avg\":0.996580547112462,\"s_own\":0.6914893617021277,\"s_adj\":0.030585106382978722,\"flag_ep\":0.182,\"flag_distinct\":0.1789,\"med_k\":28,\"med_top\":12},\"LNU\":{\"alpha\":0.17675,\"ep\":0.17655,\"rev\":0.17655,\"s_avg\":0.6833758142169357,\"s_own\":0.5111866326819597,\"s_adj\":0.0184083828943642,\"flag_ep\":0.09025,\"flag_distinct\":0.0885,\"med_k\":8,\"med_top\":4},\"SCU\":{\"alpha\":0.0878,\"ep\":0.0747,\"rev\":0.0747,\"s_avg\":0.2643908969210174,\"s_own\":0.2603748326639893,\"s_adj\":0.014056224899598393,\"flag_ep\":0.01945,\"flag_distinct\":0.01935,\"med_k\":3,\"med_top\":2}},\"D\":{\"NICU\":{\"alpha\":0.07065,\"ep\":0.0672,\"rev\":0.0672,\"s_avg\":0.9985119047619048,\"s_own\":0.6875,\"s_adj\":0.029017857142857144,\"flag_ep\":0.0462,\"flag_distinct\":0.046,\"med_k\":31,\"med_top\":13},\"LNU\":{\"alpha\":0.3275,\"ep\":0.32755,\"rev\":0.32755,\"s_avg\":0.6391390627385132,\"s_own\":0.48969622958326975,\"s_adj\":0.011448633796366967,\"flag_ep\":0.1604,\"flag_distinct\":0.1559,\"med_k\":6,\"med_top\":4},\"SCU\":{\"alpha\":0.067,\"ep\":0.0595,\"rev\":0.0595,\"s_avg\":0.4588235294117647,\"s_own\":0.3235294117647059,\"s_adj\":0.041176470588235294,\"flag_ep\":0.01925,\"flag_distinct\":0.019,\"med_k\":4,\"med_top\":2}},\"E10\":{\"NICU\":{\"alpha\":0.09455,\"ep\":0.09755,\"rev\":0.09755,\"s_avg\":0.9548949256791389,\"s_own\":0.7298821117375704,\"s_adj\":0.025627883136852898,\"flag_ep\":0.0712,\"flag_distinct\":0.0707,\"med_k\":12,\"med_top\":7},\"LNU\":{\"alpha\":0.09975,\"ep\":0.10195,\"rev\":0.10195,\"s_avg\":0.6414909269249632,\"s_own\":0.48749386954389407,\"s_adj\":0.014713094654242276,\"flag_ep\":0.0497,\"flag_distinct\":0.0494,\"med_k\":7,\"med_top\":4},\"SCU\":{\"alpha\":0.0968,\"ep\":0.0983,\"rev\":0.0983,\"s_avg\":0.2736520854526958,\"s_own\":0.2807731434384537,\"s_adj\":0.015259409969481181,\"flag_ep\":0.0276,\"flag_distinct\":0.0275,\"med_k\":3,\"med_top\":2}},\"E50\":{\"NICU\":{\"alpha\":0.0185,\"ep\":0.01855,\"rev\":0.01855,\"s_avg\":0.9811320754716981,\"s_own\":0.7008086253369272,\"s_adj\":0.02425876010781671,\"flag_ep\":0.013,\"flag_distinct\":0.013,\"med_k\":20,\"med_top\":9},\"LNU\":{\"alpha\":0.02065,\"ep\":0.0207,\"rev\":0.0207,\"s_avg\":0.7898550724637681,\"s_own\":0.5265700483091788,\"s_adj\":0.014492753623188406,\"flag_ep\":0.0109,\"flag_distinct\":0.0109,\"med_k\":12,\"med_top\":6},\"SCU\":{\"alpha\":0.02,\"ep\":0.02,\"rev\":0.02,\"s_avg\":0.46,\"s_own\":0.3275,\"s_adj\":0.03,\"flag_ep\":0.00655,\"flag_distinct\":0.00655,\"med_k\":7,\"med_top\":3}}},\"detection\":{\"4\":{\"A\":{\"NICU\":{\"d\":0.2375,\"bg\":0.1188,\"flag_off\":0.1435478696741854,\"flag_any\":0.7475388471177944},\"LNU\":{\"d\":0.4036,\"bg\":0.0578,\"flag_off\":0.6456557647836143,\"flag_any\":0.8624017768653548},\"SCU\":{\"d\":0.6572,\"bg\":0.0286,\"flag_off\":0.8628068573747207,\"flag_any\":0.9231287859026753}},\"B\":{\"NICU\":{\"d\":0.1005,\"bg\":0.0397,\"flag_off\":0.1426723525230988,\"flag_any\":0.7163657900971334},\"LNU\":{\"d\":0.1686,\"bg\":0.0128,\"flag_off\":0.6663898774219057,\"flag_any\":0.8777175243367414},\"SCU\":{\"d\":0.3789,\"bg\":0.0034,\"flag_off\":0.9067915896894521,\"flag_any\":0.9443212809008532}},\"C\":{\"NICU\":{\"d\":0.4041,\"bg\":0.2727,\"flag_off\":0.05947372762517529,\"flag_any\":0.7057932972743666},\"LNU\":{\"d\":0.5482,\"bg\":0.1756,\"flag_off\":0.34453232223206615,\"flag_any\":0.6957374929784629},\"SCU\":{\"d\":0.7317,\"bg\":0.0847,\"flag_off\":0.5768826021593558,\"flag_any\":0.7121465341637542}},\"D\":{\"NICU\":{\"d\":0.1126,\"bg\":0.0699,\"flag_off\":0.08926879810538779,\"flag_any\":0.6985938425103613},\"LNU\":{\"d\":0.6687,\"bg\":0.3276,\"flag_off\":0.27275701966146065,\"flag_any\":0.6552304756207846},\"SCU\":{\"d\":0.7694,\"bg\":0.0658,\"flag_off\":0.6068863183432979,\"flag_any\":0.7539944545533319}},\"E10\":{\"NICU\":{\"d\":0.2537,\"bg\":0.0841,\"flag_off\":0.10457936820766935,\"flag_any\":0.7998836555202339},\"LNU\":{\"d\":0.5457,\"bg\":0.0668,\"flag_off\":0.4623694337548107,\"flag_any\":0.7627728038255795},\"SCU\":{\"d\":0.8323,\"bg\":0.061,\"flag_off\":0.6112579598702392,\"flag_any\":0.744186362518093}},\"E50\":{\"NICU\":{\"d\":0.0792,\"bg\":0.0136,\"flag_off\":0.15808080808080807,\"flag_any\":0.8011198292448294},\"LNU\":{\"d\":0.2295,\"bg\":0.0074,\"flag_off\":0.627182280319535,\"flag_any\":0.8476372030293601},\"SCU\":{\"d\":0.5305,\"bg\":0.0037,\"flag_off\":0.817876217404964,\"flag_any\":0.8868111844172164}}},\"7\":{\"A\":{\"NICU\":{\"d\":0.3593,\"bg\":0.1189,\"flag_off\":0.4160987634686491,\"flag_any\":0.8418846831802582},\"LNU\":{\"d\":0.7064,\"bg\":0.0579,\"flag_off\":0.8901425066062657,\"flag_any\":0.9666338038612955},\"SCU\":{\"d\":0.921,\"bg\":0.0288,\"flag_off\":0.9768729641693813,\"flag_any\":0.9907347086500182}},\"B\":{\"NICU\":{\"d\":0.173,\"bg\":0.0407,\"flag_off\":0.38650289017341044,\"flag_any\":0.8294315992292876},\"LNU\":{\"d\":0.4409,\"bg\":0.0139,\"flag_off\":0.9165419218265675,\"flag_any\":0.9787107539772543},\"SCU\":{\"d\":0.7674,\"bg\":0.0031,\"flag_off\":0.9840152897228738,\"flag_any\":0.9934410563808531}},\"C\":{\"NICU\":{\"d\":0.5213,\"bg\":0.2735,\"flag_off\":0.17048747179669885,\"flag_any\":0.7521427657961323},\"LNU\":{\"d\":0.7901,\"bg\":0.1802,\"flag_off\":0.5349398207580729,\"flag_any\":0.8020481132587186},\"SCU\":{\"d\":0.9394,\"bg\":0.0926,\"flag_off\":0.6840607479951735,\"flag_any\":0.7979234465768417}},\"D\":{\"NICU\":{\"d\":0.1738,\"bg\":0.0679,\"flag_off\":0.21182941531042787,\"flag_any\":0.7699038303468679},\"LNU\":{\"d\":0.8567,\"bg\":0.3275,\"flag_off\":0.4434311894478827,\"flag_any\":0.7482752662949927},\"SCU\":{\"d\":0.9615,\"bg\":0.0674,\"flag_off\":0.7081660599757309,\"flag_any\":0.8236730802565442}},\"E10\":{\"NICU\":{\"d\":0.4274,\"bg\":0.082,\"flag_off\":0.26224151569846527,\"flag_any\":0.8385615632223019},\"LNU\":{\"d\":0.8382,\"bg\":0.0707,\"flag_off\":0.6484800195430099,\"flag_any\":0.8528966076210164},\"SCU\":{\"d\":0.9775,\"bg\":0.0609,\"flag_off\":0.7403529411764693,\"flag_any\":0.8414977469248556}},\"E50\":{\"NICU\":{\"d\":0.1879,\"bg\":0.0163,\"flag_off\":0.35335348082820167,\"flag_any\":0.8523573183365628},\"LNU\":{\"d\":0.5951,\"bg\":0.0068,\"flag_off\":0.828423794320282,\"flag_any\":0.9429345608181098},\"SCU\":{\"d\":0.8826,\"bg\":0.0039,\"flag_off\":0.9013048568623001,\"flag_any\":0.9459740161643628}}}},\"exact_count_ratio_p1\":{\"A\":1845.0434433546864,\"B\":1318.469807111687,\"C\":3579.5108218063465,\"D\":4559.474563261347,\"E10\":2228.0803093578584,\"E50\":1293.2277366449368},\"sweep\":[{\"target\":0.2,\"alarms_per_year\":35,\"detection\":{\"NICU\":0.38846,\"LNU\":0.6965,\"SCU\":0.90982},\"background\":{\"NICU\":0.17248,\"LNU\":0.15458,\"SCU\":0.1561},\"h\":{\"NICU\":2.295879484508446,\"LNU\":1.673638911969117,\"SCU\":1.0574610954307435}},{\"target\":0.1,\"alarms_per_year\":17.5,\"detection\":{\"NICU\":0.24746,\"LNU\":0.54458,\"SCU\":0.8319},\"background\":{\"NICU\":0.08766,\"LNU\":0.0683,\"SCU\":0.0587},\"h\":{\"NICU\":2.9242587720511253,\"LNU\":2.1924405430066893,\"SCU\":1.3929940386217818}},{\"target\":0.05,\"alarms_per_year\":8.75,\"detection\":{\"NICU\":0.15248,\"LNU\":0.39906,\"SCU\":0.71564},\"background\":{\"NICU\":0.0413,\"LNU\":0.02658,\"SCU\":0.02038},\"h\":{\"NICU\":3.569212846363369,\"LNU\":2.7598000353663172,\"SCU\":1.8556402960166414}},{\"target\":0.02,\"alarms_per_year\":3.5,\"detection\":{\"NICU\":0.07654,\"LNU\":0.23536,\"SCU\":0.52938},\"background\":{\"NICU\":0.0145,\"LNU\":0.00666,\"SCU\":0.00372},\"h\":{\"NICU\":4.447890175181743,\"LNU\":3.566532116683498,\"SCU\":2.51373475684529}},{\"target\":0.01,\"alarms_per_year\":1.75,\"detection\":{\"NICU\":0.04476,\"LNU\":0.14706,\"SCU\":0.38996},\"background\":{\"NICU\":0.00678,\"LNU\":0.00198,\"SCU\":0.00104},\"h\":{\"NICU\":5.113850786522865,\"LNU\":4.196445159831103,\"SCU\":3.022980503815591}},{\"target\":0.005,\"alarms_per_year\":0.875,\"detection\":{\"NICU\":0.02502,\"LNU\":0.08444,\"SCU\":0.2697},\"background\":{\"NICU\":0.00304,\"LNU\":0.00046,\"SCU\":0.00024},\"h\":{\"NICU\":5.809801946994689,\"LNU\":4.83359498401514,\"SCU\":3.5475560102082233}},{\"target\":0.002,\"alarms_per_year\":0.35,\"detection\":{\"NICU\":0.01162,\"LNU\":0.03632,\"SCU\":0.15314},\"background\":{\"NICU\":0.001,\"LNU\":0.00008,\"SCU\":0.00002},\"h\":{\"NICU\":6.707173304562751,\"LNU\":5.692274372798084,\"SCU\":4.222016139585123}},{\"target\":0.001,\"alarms_per_year\":0.175,\"detection\":{\"NICU\":0.00608,\"LNU\":0.0193,\"SCU\":0.09798},\"background\":{\"NICU\":0.00036,\"LNU\":0,\"SCU\":0},\"h\":{\"NICU\":7.389619706112353,\"LNU\":6.304249005765782,\"SCU\":4.722914029685687}},{\"target\":0.0005,\"alarms_per_year\":0.0875,\"detection\":{\"NICU\":0.0034,\"LNU\":0.0088,\"SCU\":0.05848},\"background\":{\"NICU\":0.00028,\"LNU\":0,\"SCU\":0},\"h\":{\"NICU\":8.042018097792424,\"LNU\":6.99923973960613,\"SCU\":5.1952510104769}},{\"target\":0.0002,\"alarms_per_year\":0.035,\"detection\":{\"NICU\":0.00182,\"LNU\":0.00348,\"SCU\":0.0266},\"background\":{\"NICU\":0.00008,\"LNU\":0,\"SCU\":0},\"h\":{\"NICU\":8.851330795877203,\"LNU\":7.75847488025635,\"SCU\":5.877891412515856}},{\"target\":0.0001,\"alarms_per_year\":0.0175,\"detection\":{\"NICU\":0.00082,\"LNU\":0.00172,\"SCU\":0.01376},\"background\":{\"NICU\":0.00002,\"LNU\":0,\"SCU\":0},\"h\":{\"NICU\":9.527512158673948,\"LNU\":8.285211274488185,\"SCU\":6.387791655515725}}]};\n\n// ---- sim/random.js ----\n// Xoshiro128** with SplitMix32 seeding. One stream belongs to one simulation run.\nconst UINT32_SCALE = 1 / 0x100000000;\nconst rotl = (value, bits) => (value << bits) | (value >>> (32 - bits));\n\nfunction createRng(seed) {\n  if (!Number.isInteger(seed)) throw new RangeError('The simulation seed must be an integer');\n  let seedState = seed >>> 0;\n  const splitmix32 = () => {\n    seedState = (seedState + 0x9e3779b9) >>> 0;\n    let value = seedState;\n    value = Math.imul(value ^ (value >>> 16), 0x85ebca6b);\n    value = Math.imul(value ^ (value >>> 13), 0xc2b2ae35);\n    return (value ^ (value >>> 16)) >>> 0;\n  };\n  let a = splitmix32(), b = splitmix32(), c = splitmix32(), d = splitmix32();\n  let spareNormal = null;\n  const nextUint = () => {\n    const result = Math.imul(rotl(Math.imul(b, 5), 7), 9) >>> 0;\n    const temp = b << 9;\n    c ^= a; d ^= b; b ^= c; a ^= d; c ^= temp; d = rotl(d, 11);\n    return result;\n  };\n  const uniform = () => (nextUint() + 0.5) * UINT32_SCALE;\n  const normal = () => {\n    if (spareNormal !== null) {\n      const value = spareNormal;\n      spareNormal = null;\n      return value;\n    }\n    const radius = Math.sqrt(-2 * Math.log(uniform()));\n    const angle = 2 * Math.PI * uniform();\n    spareNormal = radius * Math.sin(angle);\n    return radius * Math.cos(angle);\n  };\n  return { nextUint, uniform, normal };\n}\n\n// ---- sim/distributions.js ----\nconst LOG_FACTORIAL = [0];\n\nfunction logFactorial(n) {\n  for (let i = LOG_FACTORIAL.length; i <= n; i++) LOG_FACTORIAL[i] = LOG_FACTORIAL[i - 1] + Math.log(i);\n  return LOG_FACTORIAL[n];\n}\n\nfunction gamma(rng, shape, scale = 1) {\n  if (!(shape > 0) || !(scale > 0)) throw new RangeError('Gamma shape and scale must be positive');\n  if (shape < 1) return gamma(rng, shape + 1, scale) * rng.uniform() ** (1 / shape);\n  const d = shape - 1 / 3;\n  const c = 1 / Math.sqrt(9 * d);\n  for (;;) {\n    const x = rng.normal();\n    const root = 1 + c * x;\n    if (root <= 0) continue;\n    const v = root * root * root;\n    const u = rng.uniform();\n    if (u < 1 - 0.0331 * x ** 4 || Math.log(u) < x * x / 2 + d * (1 - v + Math.log(v))) return scale * d * v;\n  }\n}\n\nfunction poisson(rng, mean) {\n  if (!(mean >= 0) || !Number.isFinite(mean)) throw new RangeError('Poisson mean must be finite and nonnegative');\n  if (mean === 0) return 0;\n  if (mean < 30) {\n    let remaining = rng.uniform();\n    let probability = Math.exp(-mean);\n    let count = 0;\n    while (remaining > probability) {\n      remaining -= probability;\n      count++;\n      probability *= mean / count;\n    }\n    return count;\n  }\n  // Hörmann's PTRS transformed rejection method for larger means.\n  const b = 0.931 + 2.53 * Math.sqrt(mean);\n  const a = -0.059 + 0.02483 * b;\n  const inverseAlpha = 1.1239 + 1.1328 / (b - 3.4);\n  const vr = 0.9277 - 3.6224 / (b - 2);\n  for (;;) {\n    const u = rng.uniform() - 0.5;\n    const v = rng.uniform();\n    const us = 0.5 - Math.abs(u);\n    const count = Math.floor((2 * a / us + b) * u + mean + 0.43);\n    if (us >= 0.07 && v <= vr) return count;\n    if (count < 0 || (us < 0.013 && v > us)) continue;\n    if (Math.log(v) + Math.log(inverseAlpha) - Math.log(a / (us * us) + b)\n        <= -mean + count * Math.log(mean) - logFactorial(count)) return count;\n  }\n}\n\nfunction binomial(rng, trials, probability) {\n  if (!Number.isInteger(trials) || trials < 0 || !(probability >= 0 && probability <= 1)) throw new RangeError('Invalid binomial parameters');\n  if (trials === 0 || probability === 0) return 0;\n  if (probability === 1) return trials;\n  if (probability > 0.5) return trials - binomial(rng, trials, 1 - probability);\n  let remaining = rng.uniform();\n  if (trials < 64) {\n    let mass = (1 - probability) ** trials;\n    let count = 0;\n    while (remaining > mass && count < trials) {\n      remaining -= mass;\n      count++;\n      mass *= (trials - count + 1) / count * probability / (1 - probability);\n    }\n    return count;\n  }\n  // Exact mode-centred chop-down: visit binomial masses from the mode outward.\n  const mode = Math.floor((trials + 1) * probability);\n  const modeMass = Math.exp(logFactorial(trials) - logFactorial(mode) - logFactorial(trials - mode)\n    + mode * Math.log(probability) + (trials - mode) * Math.log1p(-probability));\n  remaining -= modeMass;\n  if (remaining <= 0) return mode;\n  let left = mode, right = mode, leftMass = modeMass, rightMass = modeMass;\n  for (;;) {\n    if (left > 0) {\n      leftMass *= left / (trials - left + 1) * (1 - probability) / probability;\n      left--;\n      remaining -= leftMass;\n      if (remaining <= 0) return left;\n    }\n    if (right < trials) {\n      rightMass *= (trials - right) / (right + 1) * probability / (1 - probability);\n      right++;\n      remaining -= rightMass;\n      if (remaining <= 0) return right;\n    }\n    if (left === 0 && right === trials) return right;\n  }\n}\n\nfunction poissonQuantile(q, mean) {\n  if (!(q > 0 && q < 1) || !(mean >= 0)) throw new RangeError('Invalid Poisson quantile parameters');\n  let mass = Math.exp(-mean);\n  let cumulative = mass;\n  let count = 0;\n  while (cumulative < q) {\n    count++;\n    mass *= mean / count;\n    cumulative += mass;\n  }\n  return count;\n}\n\nfunction binomialCDF(atMost, trials, probability) {\n  if (atMost < 0) return 0;\n  if (atMost >= trials) return 1;\n  if (probability === 0) return 1;\n  if (probability === 1) return 0;\n  let mass = (1 - probability) ** trials;\n  let cumulative = mass;\n  for (let k = 1; k <= atMost; k++) {\n    mass *= (trials - k + 1) / k * probability / (1 - probability);\n    cumulative += mass;\n  }\n  return Math.min(1, cumulative);\n}\n\nfunction binomialTail(atLeast, trials, probability) {\n  if (atLeast <= 0) return 1;\n  if (atLeast > trials) return 0;\n  if (probability === 0) return 0;\n  if (probability === 1) return 1;\n  let mass = Math.exp(logFactorial(trials) - logFactorial(atLeast) - logFactorial(trials - atLeast)\n    + atLeast * Math.log(probability) + (trials - atLeast) * Math.log1p(-probability));\n  let total = mass;\n  for (let k = atLeast + 1; k <= trials; k++) {\n    mass *= (trials - k + 1) / k * probability / (1 - probability);\n    total += mass;\n  }\n  return Math.min(1, total);\n}\n\n// ---- sim/model.js ----\nconst LN2 = Math.log(2);\nconst cutoffCache = new Map();\n\nfunction poissonCutoff(q, baseline) {\n  const key = `${q}|${baseline}`;\n  if (!cutoffCache.has(key)) cutoffCache.set(key, poissonQuantile(q, baseline));\n  return cutoffCache.get(key);\n}\n\nfunction drawRoster(rng, staff, exposure, mix, offender = false, offenderShare = .21) {\n  const roster = new Float64Array(staff);\n  const ordinary = staff - Number(offender);\n  for (let nurse = 0; nurse < ordinary; nurse++) {\n    const u = rng.uniform();\n    let category = 0, cumulative = mix[0];\n    while (u >= cumulative && category < exposure.length - 1) cumulative += mix[++category];\n    roster[nurse] = exposure[category];\n  }\n  if (offender) roster[staff - 1] = offenderShare;\n  return roster;\n}\n\nfunction simulateUnit(rng, mean, cv, preMonths, monitorMonths, extra = 0) {\n  const total = preMonths + monitorMonths;\n  const yearCount = Math.ceil(total / 12);\n  const shape = 1 / (cv * cv);\n  const monthlyMeans = new Float64Array(yearCount);\n  for (let year = 0; year < yearCount; year++) monthlyMeans[year] = mean * gamma(rng, shape, 1 / shape) / 12;\n  const bg = new Uint16Array(total);\n  for (let month = 0; month < total; month++) bg[month] = poisson(rng, monthlyMeans[Math.floor(month / 12)]);\n  const off = extra ? new Uint16Array(total) : null;\n  if (off) for (let month = preMonths; month < preMonths + 12; month++) off[month] = poisson(rng, extra / 12);\n  return { bg, off, monthlyMeans };\n}\n\nfunction alarmChecks(path, rule, type, monitorMonths, inputs, cusumH, quantiles = { A: .977, B: .9987, C: .977 }) {\n  const pre = inputs.pre_months;\n  const annual = rule === 'A' || rule === 'B';\n  const length = annual ? Math.floor(monitorMonths / 12) : monitorMonths;\n  const month = new Int16Array(length), alarm = new Uint8Array(length);\n  const start = new Int16Array(length), end = new Int16Array(length);\n  if (rule === 'A' || rule === 'B' || rule === 'C' || rule === 'D') {\n    const cumulative = new Int32Array(pre + monitorMonths + 1);\n    for (let t = 0; t < pre + monitorMonths; t++) cumulative[t + 1] = cumulative[t] + path.bg[t] + (path.off ? path.off[t] : 0);\n    for (let index = 0; index < length; index++) {\n      const t1 = annual ? pre + 12 * (index + 1) : pre + index + 1;\n      const count = cumulative[t1] - cumulative[t1 - 12];\n      const baseline = Math.max((cumulative[t1 - 12] - cumulative[t1 - 48]) / 3, .5);\n      month[index] = annual ? 12 * index + 11 : index;\n      start[index] = t1 - 12;\n      end[index] = t1;\n      alarm[index] = rule === 'D'\n        ? Number(count >= 2 * baseline && count >= 4)\n        : Number(count > poissonCutoff(quantiles[rule], baseline));\n    }\n  } else {\n    const h = cusumH[`${rule}|${type}`];\n    if (!(h > 0)) throw new RangeError(`Missing CUSUM threshold for ${rule}|${type}`);\n    let statistic = 0, windowStart = pre;\n    for (let index = 0; index < length; index++) {\n      const t = pre + index;\n      statistic = Math.max(0, statistic + path.bg[t] * LN2 + (path.off ? path.off[t] * LN2 : 0) - path.monthlyMeans[Math.floor(t / 12)]);\n      if (statistic === 0) windowStart = t + 1;\n      const hit = statistic >= h;\n      month[index] = index;\n      alarm[index] = Number(hit);\n      start[index] = hit ? windowStart : -1;\n      end[index] = t + 1;\n      if (hit) { statistic = 0; windowStart = t + 1; }\n    }\n  }\n  return { month, alarm, start, end };\n}\n\nfunction alarmEpisodes(checks) {\n  const result = [];\n  let previous = false;\n  for (let index = 0; index < checks.alarm.length; index++) {\n    const hit = checks.alarm[index] === 1;\n    if (hit && !previous) result.push([checks.month[index], checks.start[index], checks.end[index]]);\n    previous = hit;\n  }\n  return result;\n}\n\nfunction reviewRota(rng, roster, deaths, significance = .05) {\n  const attendance = new Uint16Array(roster.length);\n  let firstTop = 0, top = -1, shareSum = 0;\n  for (let nurse = 0; nurse < roster.length; nurse++) {\n    shareSum += roster[nurse];\n    attendance[nurse] = binomial(rng, deaths, roster[nurse]);\n    if (attendance[nurse] > top) { top = attendance[nurse]; firstTop = nurse; }\n  }\n  const averageTail = binomialTail(top, deaths, shareSum / roster.length);\n  const ownTail = binomialTail(top, deaths, roster[firstTop]);\n  let allBelow = 1;\n  for (let nurse = 0; nurse < roster.length; nurse++) allBelow *= binomialCDF(top - 1, deaths, roster[nurse]);\n  const adjustedTail = 1 - allBelow;\n  return { nurse: firstTop, top, averagePass: averageTail < significance,\n    ownPass: ownTail < significance, adjustedPass: adjustedTail < significance };\n}\n\nfunction median(values) {\n  if (!values.length) return null;\n  values.sort((a, b) => a - b);\n  const mid = Math.floor(values.length / 2);\n  return values.length % 2 ? values[mid] : (values[mid - 1] + values[mid]) / 2;\n}\n\nfunction chanceCell(rng, rule, type, reference, reps, settings) {\n  const inputs = settings.inputs;\n  const unit = settings.unitTypes[type];\n  const years = inputs.monitor_months / 12;\n  let alarmingUnitYears = 0, episodeCount = 0, reviewedAlarms = 0;\n  let avgPasses = 0, ownPasses = 0, adjustedPasses = 0, distinctNurses = 0;\n  const reviewedDeaths = [], topAttendance = [];\n  for (let unitIndex = 0; unitIndex < reps; unitIndex++) {\n    const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months);\n    const roster = drawRoster(rng, unit.staff, inputs.exposure, inputs.exposure_mix);\n    const checks = alarmChecks(path, rule, type, inputs.monitor_months, inputs, reference.cusum_h, settings.quantiles);\n    let lastAlarmingYear = -1;\n    for (let index = 0; index < checks.alarm.length; index++) {\n      if (!checks.alarm[index]) continue;\n      const year = Math.floor(checks.month[index] / 12);\n      if (year !== lastAlarmingYear) { alarmingUnitYears++; lastAlarmingYear = year; }\n    }\n    const flagged = new Uint8Array(unit.staff);\n    for (const [, start, end] of alarmEpisodes(checks)) {\n      episodeCount++;\n      let deaths = 0;\n      for (let month = start; month < end; month++) deaths += path.bg[month];\n      if (deaths < 2) continue;\n      const review = reviewRota(rng, roster, deaths, settings.significance);\n      reviewedAlarms++;\n      avgPasses += Number(review.averagePass);\n      ownPasses += Number(review.ownPass);\n      adjustedPasses += Number(review.adjustedPass);\n      reviewedDeaths.push(deaths);\n      topAttendance.push(review.top);\n      if (review.ownPass) flagged[review.nurse] = 1;\n    }\n    for (const selected of flagged) distinctNurses += selected;\n  }\n  const unitYears = reps * years;\n  return {\n    alpha: alarmingUnitYears / unitYears, ep: episodeCount / unitYears, rev: reviewedAlarms / unitYears,\n    s_avg: avgPasses / Math.max(reviewedAlarms, 1), s_own: ownPasses / Math.max(reviewedAlarms, 1),\n    s_adj: adjustedPasses / Math.max(reviewedAlarms, 1), flag_ep: ownPasses / unitYears,\n    flag_distinct: distinctNurses / unitYears, med_k: median(reviewedDeaths), med_top: median(topAttendance),\n    counts: { units: reps, unitYears, alarmingUnitYears, episodes: episodeCount, reviewedAlarms,\n      avgPasses, ownPasses, adjustedPasses, distinctNurses, reviewedDeaths, topAttendance }\n  };\n}\n\nfunction detectionCell(rng, effect, rule, type, reference, reps, settings) {\n  const inputs = settings.inputs;\n  const unit = settings.unitTypes[type];\n  let hits = 0, backgroundHits = 0, reviewedHits = 0, offenderIdentifications = 0, anyNurseFlags = 0;\n  let offenderIdentificationsAdjusted = 0, anyNurseFlagsAdjusted = 0;\n  for (let unitIndex = 0; unitIndex < reps; unitIndex++) {\n    const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months, effect);\n    const roster = drawRoster(rng, unit.staff, inputs.exposure, inputs.exposure_mix, true, inputs.offender_f);\n    const checks = alarmChecks(path, rule, type, 12, inputs, reference.cusum_h, settings.quantiles);\n    let first = -1;\n    for (let index = 0; index < checks.alarm.length; index++) if (checks.alarm[index]) { first = index; break; }\n    if (first >= 0 && checks.month[first] < 12) {\n      hits++;\n      let backgroundDeaths = 0, offenderDeaths = 0;\n      for (let month = checks.start[first]; month < checks.end[first]; month++) {\n        backgroundDeaths += path.bg[month];\n        offenderDeaths += path.off[month];\n      }\n      const deaths = backgroundDeaths + offenderDeaths;\n      if (deaths >= 2) {\n        reviewedHits++;\n        const attendance = new Uint16Array(unit.staff);\n        for (let nurse = 0; nurse < unit.staff; nurse++) attendance[nurse] = binomial(rng, backgroundDeaths, roster[nurse]);\n        for (let nurse = 0; nurse < unit.staff; nurse++) attendance[nurse] += binomial(rng, offenderDeaths, roster[nurse]);\n        attendance[unit.staff - 1] = binomial(rng, backgroundDeaths, inputs.offender_f) + offenderDeaths;\n        let top = 0;\n        for (const count of attendance) if (count > top) top = count;\n        let tied = 0, passing = 0, offenderPasses = 0;\n        for (let nurse = 0; nurse < unit.staff; nurse++) {\n          if (attendance[nurse] !== top) continue;\n          tied++;\n          const passes = binomialTail(top, deaths, roster[nurse]) < settings.significance;\n          passing += Number(passes);\n          if (nurse === unit.staff - 1 && passes) offenderPasses++;\n        }\n        anyNurseFlags += passing / tied;\n        offenderIdentifications += offenderPasses / tied;\n        let allBelow = 1;\n        for (let nurse = 0; nurse < unit.staff; nurse++) allBelow *= binomialCDF(top - 1, deaths, roster[nurse]);\n        if (1 - allBelow < settings.significance) {\n          anyNurseFlagsAdjusted++;\n          if (attendance[unit.staff - 1] === top) offenderIdentificationsAdjusted += 1 / tied;\n        }\n      }\n    }\n  }\n  for (let unitIndex = 0; unitIndex < reps; unitIndex++) {\n    const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months);\n    const checks = alarmChecks(path, rule, type, 12, inputs, reference.cusum_h, settings.quantiles);\n    backgroundHits += Number(checks.alarm.includes(1));\n  }\n  return { d: hits / reps, bg: backgroundHits / reps,\n    flag_off: offenderIdentifications / Math.max(hits, 1), flag_any: anyNurseFlags / Math.max(hits, 1),\n    flag_off_adj: offenderIdentificationsAdjusted / Math.max(hits, 1),\n    flag_any_adj: anyNurseFlagsAdjusted / Math.max(hits, 1),\n    counts: { units: reps, hits, backgroundUnits: reps, backgroundHits, reviewedHits,\n      offenderIdentifications, anyNurseFlags, offenderIdentificationsAdjusted, anyNurseFlagsAdjusted } };\n}\n\nfunction runSimulation(reference, options = {}, onProgress = () => {}) {\n  const inputs = reference.inputs;\n  const settings = {\n    inputs, unitTypes: options.unitTypes || inputs.types, cv: options.cv ?? inputs.cv,\n    significance: options.significance ?? .05,\n    quantiles: options.quantiles || { A: .977, B: .9987, C: .977 }\n  };\n  const seed = options.seed ?? reference.seed;\n  const rng = createRng(seed);\n  const chanceReps = options.chanceReps ?? inputs.reps;\n  const detectionReps = options.detectionReps ?? inputs.det_reps;\n  const rules = options.rules || inputs.rules;\n  const types = options.types || Object.keys(inputs.types);\n  const effects = options.effects || [4, 7];\n  const jobs = options.jobs || [\n    ...rules.flatMap(rule => types.map(type => ({ kind: 'chance', rule, type }))),\n    ...effects.flatMap(effect => rules.flatMap(rule => types.map(type => ({ kind: 'detection', effect, rule, type }))))\n  ];\n  if (options.priority) {\n    const { rule, type, effect } = options.priority;\n    jobs.sort((a, b) => Number(b.rule === rule && b.type === type && (b.kind === 'chance' || b.effect === effect))\n      - Number(a.rule === rule && a.type === type && (a.kind === 'chance' || a.effect === effect)));\n  }\n  const chance = {}, detection = {};\n  let completed = 0;\n  for (const job of jobs) {\n    let value;\n    if (job.kind === 'chance') {\n      value = chanceCell(rng, job.rule, job.type, reference, chanceReps, settings);\n      (chance[job.rule] ||= {})[job.type] = value;\n    } else {\n      value = detectionCell(rng, job.effect, job.rule, job.type, reference, detectionReps, settings);\n      ((detection[job.effect] ||= {})[job.rule] ||= {})[job.type] = value;\n    }\n    onProgress({ ...job, completed: ++completed, total: jobs.length, value });\n  }\n  return { chance, detection, metadata: { seed, chanceReps, detectionReps, rules, types, effects } };\n}\n\n// ---- sim/worker.js ----\n// Bundled into a Blob worker by build.mjs; REFERENCE and the simulation port are in scope.\nself.addEventListener('message', event => {\n  const { type, id, options = {} } = event.data || {};\n  if (type !== 'run') return;\n  try {\n    const started = performance.now();\n    const result = runSimulation(REFERENCE, options, progress => {\n      self.postMessage({ type: 'progress', id, progress });\n    });\n    self.postMessage({ type: 'result', id, result, elapsedMs: performance.now() - started });\n  } catch (error) {\n    self.postMessage({ type: 'error', id, message: error?.message || String(error) });\n  }\n});\nself.postMessage({ type: 'ready' });\n";
 
 // ---- sim/worker-client.js ----
 // Stage 3a exposes the dormant worker factory to browser smoke tests and Stage 3b.
@@ -54,6 +54,9 @@ const PAPER_DEFAULT = Object.freeze({
   prevalencePer10k: 1,            // neonatal reference scenario
   unitType: 'LNU',                 // Figure 2 uses local-unit detection on x-axis
   expectedExtraDeaths: 4,
+  alarmSD: 2,
+  significance: .05,
+  seed: 20261007,
   riskAllocation: 'staff',
   q: 1,
   investigationMonths: 18,
@@ -62,6 +65,8 @@ const PAPER_DEFAULT = Object.freeze({
   figureOpen: false,
   worldOpen: false,
   unitCounts: Object.freeze({ NICU: 45, LNU: 85, SCU: 45 }),
+  deathsPerYear: Object.freeze({ NICU: 20, LNU: 4, SCU: 1 }),
+  staffPerRoster: Object.freeze({ NICU: 100, LNU: 40, SCU: 20 }),
   annualBackgroundDeaths: Object.freeze({ NICU: 20, LNU: 4, SCU: 1 }),
   caseMixCV: .25
 });
@@ -235,9 +240,11 @@ function riskWeights(counts, allocation, reference) {
 
 function chanceForRule(rule, counts, reference) {
   const byType = reference.chance[rule];
-  const sum = key => TYPES.reduce((total, type) => total + counts[type] * byType[type][key], 0);
+  const sum = key => TYPES.some(type => counts[type] && byType[type][key] === null) ? null
+    : TYPES.reduce((total, type) => total + counts[type] * byType[type][key], 0);
   const reviewed = sum('rev');
-  const weightedShare = key => reviewed ? TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type][key], 0) / reviewed : null;
+  const weightedShare = key => reviewed && !TYPES.some(type => counts[type] && byType[type][key] === null)
+    ? TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type][key], 0) / reviewed : null;
   return {
     byType,
     alarmUnitYears: sum('alpha'),
@@ -245,9 +252,11 @@ function chanceForRule(rule, counts, reference) {
     reviewed,
     shares: { avg: weightedShare('s_avg'), own: weightedShare('s_own'), adj: weightedShare('s_adj') },
     flags: {
-      avg: TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type].s_avg, 0),
+      avg: TYPES.some(type => counts[type] && byType[type].s_avg === null) ? null
+        : TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type].s_avg, 0),
       own: sum('flag_ep'),
-      adj: TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type].s_adj, 0)
+      adj: TYPES.some(type => counts[type] && byType[type].s_adj === null) ? null
+        : TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type].s_adj, 0)
     },
     distinctOwn: sum('flag_distinct')
   };
@@ -259,6 +268,8 @@ function falseTrue(rule, baseRatePer10k, effect, allocation, counts, reference) 
   let falseFlagged = 0;
   let detected = 0;
   for (const type of TYPES) {
+    if (counts[type] && (reference.chance[rule][type].alpha === null || reference.detection[String(effect)][rule][type].d === null))
+      return { falseFlagged: null, detected: null, ratio: null, years: null, weights };
     const prevalence = p * weights[type];
     falseFlagged += counts[type] * (1 - prevalence) * reference.chance[rule][type].alpha;
     detected += counts[type] * prevalence * reference.detection[String(effect)][rule][type].d;
@@ -267,18 +278,25 @@ function falseTrue(rule, baseRatePer10k, effect, allocation, counts, reference) 
     years: detected ? 1 / detected : null, weights };
 }
 
-function posteriorParts(rule, baseRatePer10k, effect, allocation, counts, reference) {
+function posteriorParts(rule, baseRatePer10k, effect, allocation, counts, reference, test = 'own') {
   const p = baseRatePer10k / 10000;
   const weights = riskWeights(counts, allocation, reference);
   let offenderFlagged = 0;
   let anyFlaggedWithOffender = 0;
   let backgroundFlags = 0;
   for (const type of TYPES) {
+    if (!counts[type]) continue;
     const prevalence = p * weights[type];
     const detection = reference.detection[String(effect)][rule][type];
-    offenderFlagged += counts[type] * prevalence * detection.d * detection.flag_off;
-    anyFlaggedWithOffender += counts[type] * prevalence * detection.d * detection.flag_any;
-    backgroundFlags += counts[type] * (1 - prevalence) * reference.chance[rule][type].flag_ep;
+    const offenderRate = test === 'adj' ? detection.flag_off_adj : detection.flag_off;
+    const anyRate = test === 'adj' ? detection.flag_any_adj : detection.flag_any;
+    const chance = reference.chance[rule][type];
+    const backgroundRate = test === 'adj' ? chance.rev * chance.s_adj : chance.flag_ep;
+    if (counts[type] && [detection.d, offenderRate, anyRate, backgroundRate].some(value => value === null || value === undefined))
+      return { offenderFlagged: null, anyFlaggedWithOffender: null, backgroundFlags: null, denominator: null, value: null };
+    offenderFlagged += counts[type] * prevalence * detection.d * offenderRate;
+    anyFlaggedWithOffender += counts[type] * prevalence * detection.d * anyRate;
+    backgroundFlags += counts[type] * (1 - prevalence) * backgroundRate;
   }
   const denominator = anyFlaggedWithOffender + backgroundFlags;
   return { offenderFlagged, anyFlaggedWithOffender, backgroundFlags, denominator,
@@ -316,7 +334,7 @@ function mechanismProbability(rosterSize, deathsReviewed, reference, significanc
   return 1 - (1 - singleNurseFlag) ** rosterSize;
 }
 
-function deriveAll(state, reference) {
+function deriveAll(state, reference, options = {}) {
   const rules = reference.inputs.rules;
   const counts = state.unitCounts;
   const chance = Object.fromEntries(rules.map(rule => [rule, chanceForRule(rule, counts, reference)]));
@@ -325,17 +343,295 @@ function deriveAll(state, reference) {
     current: falseTrue(rule, state.prevalencePer10k, state.expectedExtraDeaths, state.riskAllocation, counts, reference),
     printedRates: Object.fromEntries(reference.inputs.base_rates.map(rate => [rate, falseTrue(rule, rate, state.expectedExtraDeaths, state.riskAllocation, counts, reference)]))
   }]));
-  const posteriorDetails = Object.fromEntries(rules.map(rule => [rule, posteriorParts(rule, state.prevalencePer10k, state.expectedExtraDeaths, state.riskAllocation, counts, reference)]));
+  const posteriorDetails = Object.fromEntries(rules.map(rule => [rule, posteriorParts(rule, state.prevalencePer10k, state.expectedExtraDeaths, state.riskAllocation, counts, reference, options.adjustedPosterior ? 'adj' : 'own')]));
   const posteriors = Object.fromEntries(rules.map(rule => [rule, posteriorDetails[rule].value]));
   const flags = Object.fromEntries(rules.map(rule => [rule, {
     base: chance[rule].flags[state.rotaTest],
-    current: chance[rule].flags[state.rotaTest] * state.q,
-    offWards: chance[rule].flags[state.rotaTest] * state.q * state.investigationMonths / 12,
-    byQ: Object.fromEntries(reference.inputs.q.map(q => [q, chance[rule].flags[state.rotaTest] * q]))
+    current: chance[rule].flags[state.rotaTest] === null ? null : chance[rule].flags[state.rotaTest] * state.q,
+    offWards: chance[rule].flags[state.rotaTest] === null ? null : chance[rule].flags[state.rotaTest] * state.q * state.investigationMonths / 12,
+    byQ: Object.fromEntries(reference.inputs.q.map(q => [q, chance[rule].flags[state.rotaTest] === null ? null : chance[rule].flags[state.rotaTest] * q]))
   }]));
   return { rules, counts, chance, detection, ratio, posteriors, posteriorDetails, flags,
-    mechanism: { selected: mechanismProbability(state.mechanismRoster, state.mechanismDeaths, reference),
-      curve: Array.from({ length: 21 }, (_, index) => ({ roster: index * 10, probability: mechanismProbability(index * 10, state.mechanismDeaths, reference) })) } };
+    mechanism: { selected: mechanismProbability(state.mechanismRoster, state.mechanismDeaths, reference, state.significance ?? .05),
+      curve: Array.from({ length: 21 }, (_, index) => ({ roster: index * 10, probability: mechanismProbability(index * 10, state.mechanismDeaths, reference, state.significance ?? .05) })) } };
+}
+
+// ---- sim/random.js ----
+// Xoshiro128** with SplitMix32 seeding. One stream belongs to one simulation run.
+const UINT32_SCALE = 1 / 0x100000000;
+const rotl = (value, bits) => (value << bits) | (value >>> (32 - bits));
+
+function createRng(seed) {
+  if (!Number.isInteger(seed)) throw new RangeError('The simulation seed must be an integer');
+  let seedState = seed >>> 0;
+  const splitmix32 = () => {
+    seedState = (seedState + 0x9e3779b9) >>> 0;
+    let value = seedState;
+    value = Math.imul(value ^ (value >>> 16), 0x85ebca6b);
+    value = Math.imul(value ^ (value >>> 13), 0xc2b2ae35);
+    return (value ^ (value >>> 16)) >>> 0;
+  };
+  let a = splitmix32(), b = splitmix32(), c = splitmix32(), d = splitmix32();
+  let spareNormal = null;
+  const nextUint = () => {
+    const result = Math.imul(rotl(Math.imul(b, 5), 7), 9) >>> 0;
+    const temp = b << 9;
+    c ^= a; d ^= b; b ^= c; a ^= d; c ^= temp; d = rotl(d, 11);
+    return result;
+  };
+  const uniform = () => (nextUint() + 0.5) * UINT32_SCALE;
+  const normal = () => {
+    if (spareNormal !== null) {
+      const value = spareNormal;
+      spareNormal = null;
+      return value;
+    }
+    const radius = Math.sqrt(-2 * Math.log(uniform()));
+    const angle = 2 * Math.PI * uniform();
+    spareNormal = radius * Math.sin(angle);
+    return radius * Math.cos(angle);
+  };
+  return { nextUint, uniform, normal };
+}
+
+// ---- sim/scenario.js ----
+const CHANCE_ROTA = ['s_avg', 's_own', 's_adj', 'flag_ep', 'flag_distinct', 'med_top'];
+const CHANCE_SIGNIFICANCE = ['s_avg', 's_own', 's_adj', 'flag_ep', 'flag_distinct'];
+const CHANCE_ALL = ['alpha', 'ep', 'rev', ...CHANCE_ROTA, 'med_k'];
+const DET_ROTA = ['flag_off', 'flag_any', 'flag_off_adj', 'flag_any_adj'];
+const DET_ALL = ['d', 'bg', ...DET_ROTA];
+const RULES_ALARM_LINE = new Set(['A', 'B', 'C']);
+
+function normalCDF(x) {
+  const z = Math.abs(x) / Math.SQRT2;
+  const t = 1 / (1 + .3275911 * z);
+  const erf = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - .284496736) * t + .254829592) * t * Math.exp(-z * z);
+  return (1 + Math.sign(x) * erf) / 2;
+}
+
+function alarmQuantiles(sd) {
+  const quantile = value => value === 2 ? .977 : value === 3 ? .9987 : normalCDF(value);
+  return { A: quantile(sd), B: quantile(sd + 1), C: quantile(sd) };
+}
+
+function isPaperMode(state, reference) {
+  return state.alarmSD === 2 && state.significance === .05 && [4, 7].includes(state.expectedExtraDeaths)
+    && TYPES.every(type => state.deathsPerYear[type] === reference.inputs.types[type].mean
+      && state.staffPerRoster[type] === reference.inputs.types[type].staff);
+}
+
+function ruleEUnavailable(state, reference, type) {
+  return state.deathsPerYear[type] !== reference.inputs.types[type].mean;
+}
+
+function simulationPlan(state, reference) {
+  const paperMode = isPaperMode(state, reference);
+  const chanceFields = {}, detectionFields = {}, jobs = [];
+  if (paperMode) return { paperMode, chanceFields, detectionFields, jobs };
+  const alarmChanged = state.alarmSD !== 2;
+  const sigChanged = state.significance !== .05;
+  const effectChanged = ![4, 7].includes(state.expectedExtraDeaths);
+  for (const rule of reference.inputs.rules) for (const type of TYPES) {
+    const meanChanged = ruleEUnavailable(state, reference, type);
+    const rosterChanged = state.staffPerRoster[type] !== reference.inputs.types[type].staff;
+    const lineChanged = alarmChanged && RULES_ALARM_LINE.has(rule);
+    const unavailable = rule.startsWith('E') && meanChanged;
+    const chance = unavailable ? CHANCE_ALL : meanChanged || lineChanged ? CHANCE_ALL
+      : rosterChanged ? CHANCE_ROTA : sigChanged ? CHANCE_SIGNIFICANCE : [];
+    const detection = unavailable ? DET_ALL : meanChanged || lineChanged ? DET_ALL
+      : effectChanged ? ['d', ...DET_ROTA] : rosterChanged || sigChanged ? DET_ROTA
+        : state.rotaTest === 'adj' ? ['flag_off_adj', 'flag_any_adj'] : [];
+    if (chance.length) chanceFields[`${rule}|${type}`] = { fields: chance, unavailable };
+    if (detection.length) detectionFields[`${state.expectedExtraDeaths}|${rule}|${type}`] = { fields: detection, unavailable };
+    if (!unavailable && chance.length) jobs.push({ kind: 'chance', rule, type });
+    if (!unavailable && detection.length) jobs.push({ kind: 'detection', effect: state.expectedExtraDeaths, rule, type });
+  }
+  jobs.sort((a, b) => {
+    const score = job => (job.rule === state.rule ? 4 : 0) + (job.type === state.unitType ? 2 : 0)
+      + (job.kind === (state.activeTab === 3 || state.activeTab === 4 || state.activeTab === 5 ? 'detection' : 'chance') ? 1 : 0);
+    return score(b) - score(a);
+  });
+  return { paperMode, chanceFields, detectionFields, jobs };
+}
+
+function simulationOptions(state, reference, plan) {
+  return {
+    seed: state.seed,
+    unitTypes: Object.fromEntries(TYPES.map(type => [type, { ...reference.inputs.types[type], mean: state.deathsPerYear[type], staff: state.staffPerRoster[type] }])),
+    significance: state.significance,
+    quantiles: alarmQuantiles(state.alarmSD),
+    jobs: plan.jobs,
+    chanceReps: reference.inputs.reps,
+    detectionReps: reference.inputs.det_reps
+  };
+}
+
+function effectiveReference(state, reference, plan, results = { chance: {}, detection: {} }, previous = null) {
+  const chance = {}, detection = {};
+  const effect = String(state.expectedExtraDeaths);
+  for (const rule of reference.inputs.rules) {
+    chance[rule] = {};
+    for (const type of TYPES) {
+      const base = reference.chance[rule][type];
+      const spec = plan.chanceFields[`${rule}|${type}`];
+      const sim = results.chance?.[rule]?.[type];
+      const stale = previous?.chance?.[rule]?.[type];
+      const cell = { ...base, _source: {}, _pending: Boolean(spec && !spec.unavailable && !sim) };
+      for (const key of CHANCE_ALL) {
+        cell._source[key] = spec?.unavailable ? 'unavailable' : spec?.fields.includes(key) ? sim ? 'simulated' : 'pending' : 'paper';
+        if (spec?.unavailable) cell[key] = null;
+        else if (sim && spec?.fields.includes(key)) cell[key] = sim[key];
+        else if (stale && spec?.fields.includes(key)) cell[key] = stale[key];
+      }
+      if (sim) cell.counts = sim.counts;
+      chance[rule][type] = cell;
+    }
+  }
+  detection[effect] = {};
+  for (const rule of reference.inputs.rules) {
+    detection[effect][rule] = {};
+    for (const type of TYPES) {
+      const base = reference.detection[effect]?.[rule]?.[type] || reference.detection['4'][rule][type];
+      const spec = plan.detectionFields[`${effect}|${rule}|${type}`];
+      const sim = results.detection?.[effect]?.[rule]?.[type];
+      const stale = previous?.detection?.[effect]?.[rule]?.[type];
+      const cell = { ...base, _source: {}, _pending: Boolean(spec && !spec.unavailable && !sim) };
+      for (const key of DET_ALL) {
+        cell._source[key] = spec?.unavailable ? 'unavailable' : spec?.fields.includes(key) ? sim ? 'simulated' : 'pending' : 'paper';
+        if (spec?.unavailable) cell[key] = null;
+        else if (sim && spec?.fields.includes(key)) cell[key] = sim[key];
+        else if (stale && spec?.fields.includes(key)) cell[key] = stale[key];
+      }
+      if (sim) cell.counts = sim.counts;
+      detection[effect][rule][type] = cell;
+    }
+  }
+  return { ...reference,
+    inputs: { ...reference.inputs,
+      types: Object.fromEntries(TYPES.map(type => [type, { ...reference.inputs.types[type], staff: state.staffPerRoster[type], mean: state.deathsPerYear[type] }])) },
+    chance, detection };
+}
+
+// ---- sim/intervals.js ----
+const Z95 = 1.959963984540054;
+const clamp = value => Math.min(1, Math.max(0, value));
+const finite = value => Number.isFinite(value);
+
+function directInterval(cell, key) {
+  if (!cell || cell._source?.[key] !== 'simulated' || !cell.counts) return null;
+  const counts = cell.counts;
+  if (key === 'med_k' || key === 'med_top') {
+    const sorted = [...(key === 'med_k' ? counts.reviewedDeaths : counts.topAttendance) || []].sort((a, b) => a - b);
+    if (!sorted.length) return null;
+    const spread = .98 * Math.sqrt(sorted.length);
+    return [sorted[Math.max(0, Math.floor(sorted.length / 2 - spread))],
+      sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length / 2 + spread))]];
+  }
+  const rateKeys = new Set(['ep', 'rev', 'flag_ep', 'flag_distinct']);
+  let n;
+  if (key === 'alpha') n = counts.unitYears;
+  else if (rateKeys.has(key)) n = counts.unitYears;
+  else if (key.startsWith('s_')) n = counts.reviewedAlarms;
+  else if (key === 'd' || key === 'bg') n = counts.units;
+  else if (key.startsWith('flag_')) n = counts.hits;
+  else return null;
+  if (!n) return null;
+  const value = cell[key];
+  if (!rateKeys.has(key)) {
+    // Wilson's binomial interval also gives a meaningful bound at 0 or 100%.
+    const denominator = 1 + Z95 ** 2 / n;
+    const center = (value + Z95 ** 2 / (2 * n)) / denominator;
+    const half = Z95 * Math.sqrt(Math.max(0, value * (1 - value)) / n + Z95 ** 2 / (4 * n * n)) / denominator;
+    return [value === 0 ? 0 : Math.max(0, center - half), value === 1 ? 1 : Math.min(1, center + half)];
+  }
+  if (value === 0) return [0, -Math.log(.05) / n];
+  const sd = Math.sqrt(value / n);
+  return [Math.max(0, value - Z95 * sd), value + Z95 * sd];
+}
+
+function sampleCell(cell, rng, chance) {
+  const result = { ...cell };
+  if (!cell.counts) return result;
+  for (const [key, source] of Object.entries(cell._source || {})) {
+    if (source !== 'simulated' || !finite(cell[key]) || key.startsWith('med_')) continue;
+    let n;
+    const rate = chance && ['ep', 'rev', 'flag_ep', 'flag_distinct'].includes(key);
+    if (chance) n = key.startsWith('s_') ? cell.counts.reviewedAlarms : cell.counts.unitYears;
+    else n = key.startsWith('flag_') ? cell.counts.hits : cell.counts.units;
+    if (!n) continue;
+    // Half-count variance avoids false certainty for an observed zero or one.
+    const variancePoint = cell[key] === 0 || (!rate && cell[key] === 1)
+      ? (n * cell[key] + .5) / (n + 1) : cell[key];
+    const sd = rate ? Math.sqrt(variancePoint / n) : Math.sqrt(Math.max(0, variancePoint * (1 - variancePoint)) / n);
+    result[key] = rate ? Math.max(0, cell[key] + sd * rng.normal()) : clamp(cell[key] + sd * rng.normal());
+  }
+  return result;
+}
+
+function percentile(values, point) {
+  if (!finite(point) || !values.length) return null;
+  values.sort((a, b) => a - b);
+  const quantile = p => {
+    const at = (values.length - 1) * p, lower = Math.floor(at);
+    return values[lower] + (values[Math.min(values.length - 1, lower + 1)] - values[lower]) * (at - lower);
+  };
+  return [Math.min(point, quantile(.025)), Math.max(point, quantile(.975))];
+}
+
+function derivedIntervals(state, reference, derived, adjustedPosterior, draws = 500) {
+  const rng = createRng((state.seed ^ 0x4c957f2d) >>> 0);
+  const observed = {};
+  const effects = String(state.expectedExtraDeaths);
+  const add = (key, value) => { if (finite(value)) (observed[key] ||= []).push(value); };
+  for (let draw = 0; draw < draws; draw++) {
+    const chance = {}, detection = { [effects]: {} };
+    for (const rule of reference.inputs.rules) {
+      chance[rule] = {};
+      detection[effects][rule] = {};
+      for (const type of TYPES) {
+        chance[rule][type] = sampleCell(reference.chance[rule][type], rng, true);
+        detection[effects][rule][type] = sampleCell(reference.detection[effects][rule][type], rng, false);
+      }
+    }
+    const sampled = { ...reference, chance, detection };
+    for (const rule of reference.inputs.rules) {
+      const rates = chanceForRule(rule, state.unitCounts, sampled);
+      for (const key of ['alarmUnitYears', 'episodes', 'reviewed', 'distinctOwn']) add(`${key}|${rule}`, rates[key]);
+      for (const key of ['avg', 'own', 'adj']) {
+        add(`share|${rule}|${key}`, rates.shares[key]);
+        add(`baseFlags|${rule}|${key}`, rates.flags[key]);
+      }
+      for (const rate of [...reference.inputs.base_rates, state.prevalencePer10k]) {
+        const ratio = falseTrue(rule, rate, state.expectedExtraDeaths, state.riskAllocation, state.unitCounts, sampled);
+        add(`ratio|${rule}|${rate}`, ratio.ratio);
+        add(`years|${rule}|${rate}`, ratio.years);
+      }
+      const base = rates.flags[state.rotaTest];
+      if (finite(base)) {
+        for (const q of [...reference.inputs.q, state.q]) add(`flags|${rule}|${q}`, base * q);
+        add(`offWards|${rule}`, base * state.q * state.investigationMonths / 12);
+      }
+      const posterior = posteriorParts(rule, state.prevalencePer10k, state.expectedExtraDeaths,
+        state.riskAllocation, state.unitCounts, sampled, adjustedPosterior ? 'adj' : 'own').value;
+      add(`posterior|${rule}`, posterior);
+    }
+  }
+  const result = {};
+  for (const [key, values] of Object.entries(observed)) {
+    const [kind, rule, detail] = key.split('|');
+    let point;
+    if (kind === 'ratio' || kind === 'years') point = detail === String(state.prevalencePer10k)
+      ? derived.ratio[rule].current[kind] : derived.ratio[rule].printedRates[detail]?.[kind];
+    else if (kind === 'flags') point = derived.flags[rule].base * Number(detail);
+    else if (kind === 'offWards') point = derived.flags[rule].offWards;
+    else if (kind === 'posterior') point = derived.posteriors[rule];
+    else if (kind === 'share') point = derived.chance[rule].shares[detail];
+    else if (kind === 'baseFlags') point = derived.chance[rule].flags[detail];
+    else point = derived.chance[rule][kind];
+    const bounds = percentile(values, point);
+    if (bounds && bounds[1] > bounds[0]) result[key] = bounds;
+  }
+  return result;
 }
 
 // ---- tabs/common.js ----
@@ -380,7 +676,8 @@ function formatPercent(value, digits = 1) {
 function formatRatio(value) { return value === null || !Number.isFinite(value) ? 'not computed' : `${formatNumber(value, 0)}:1`; }
 
 function formatPosterior(value) {
-  if (value === null || !Number.isFinite(value) || value <= 0) return { odds: 'not computed', percentage: null };
+  if (value === 0) return { odds: '0 observed', percentage: '0.000%' };
+  if (value === null || !Number.isFinite(value) || value < 0) return { odds: 'not computed', percentage: null };
   const reciprocal = 1 / value;
   const decimalPlaces = 1 - Math.floor(Math.log10(reciprocal));
   const scale = 10 ** Math.max(0, -decimalPlaces);
@@ -395,10 +692,20 @@ function posteriorDisplay(value) {
     : '<span class="posterior-display unavailable">not computed</span>';
 }
 
-function compareCell(value, paper, formatter = value => formatNumber(value)) {
+function compareCell(value, paper, formatter = value => formatNumber(value), options = {}) {
   const liveText = formatter(value);
   const paperText = formatter(paper);
-  return `<td><span class="live-value">${liveText}</span>${liveText !== paperText ? `<small class="paper-value">paper ${paperText}</small>` : ''}</td>`;
+  const source = options.source || (liveText === paperText ? 'paper' : 'derived');
+  const interval = options.interval && source !== 'paper'
+    ? ` <span class="interval-value">(${formatter(options.interval[0])}–${formatter(options.interval[1])})</span>` : '';
+  const paperComparison = source === 'simulated' || source === 'pending' || (source === 'derived' && options.interval) || liveText !== paperText;
+  return `<td data-source="${source}"><span class="live-value">${liveText}${interval}</span>${source === 'simulated' || source === 'pending' || interval ? `<small class="source-value">${source === 'pending' ? 'updating' : source === 'derived' ? 'derived · 95% interval' : 'simulated · 95% interval'}</small>` : ''}${paperComparison ? `<small class="paper-value">paper ${paperText}</small>` : ''}</td>`;
+}
+
+function cellSource(cell, key) { return cell?._source?.[key] || 'paper'; }
+
+function estimateText(value, formatter, interval) {
+  return `${formatter(value)}${interval ? ` (${formatter(interval[0])}–${formatter(interval[1])})` : ''}`;
 }
 
 function rangeControl(field, title, min, max, step, value, display, help = '') {
@@ -425,9 +732,11 @@ function renderLayout(id, view) {
     </div><p class="takeaway" data-part="takeaway"><strong>Takeaway.</strong> ${view.takeaway}</p>`;
 }
 
-function bar(label, value, maximum, valueText, className = '') {
+function bar(label, value, maximum, valueText, className = '', interval = null) {
   const width = maximum > 0 ? Math.max(0, Math.min(100, value / maximum * 100)) : 0;
-  return `<div class="bar-row ${className}"><span class="bar-label">${label}</span><div class="bar-track"><span class="bar-fill" style="width:${width.toFixed(2)}%"></span></div><strong>${valueText}</strong></div>`;
+  const low = interval && maximum > 0 ? Math.max(0, Math.min(100, interval[0] / maximum * 100)) : 0;
+  const high = interval && maximum > 0 ? Math.max(0, Math.min(100, interval[1] / maximum * 100)) : 0;
+  return `<div class="bar-row ${className}"><span class="bar-label">${label}</span><div class="bar-track"><span class="bar-fill" style="width:${width.toFixed(2)}%"></span>${interval ? `<i class="bar-error" style="left:${low.toFixed(2)}%;width:${(high - low).toFixed(2)}%"></i>` : ''}</div><strong>${valueText}</strong></div>`;
 }
 
 function table(headers, rows, caption) {
@@ -435,33 +744,41 @@ function table(headers, rows, caption) {
 }
 
 // ---- tabs/tab1.js ----
-function dotsFor(type, count, expected) {
+function dotsFor(type, count, expected, interval) {
+  if (expected === null) return `<div class="dot-group unavailable-rule"><div class="dot-label"><strong>${TYPE_NAMES[type]}</strong><span>needs recalibration; coming in 3c</span></div></div>`;
   const full = Math.floor(expected);
   const remainder = expected - full;
   const dots = Array.from({ length: count }, (_, index) => {
     const opacity = index < full ? 1 : index === full ? remainder : 0;
     return `<i class="unit-dot" style="--lit:${opacity.toFixed(4)}"></i>`;
   }).join('');
-  return `<div class="dot-group" aria-label="${TYPE_NAMES[type]}: ${formatNumber(expected, 1)} of ${count} expected to alarm"><div class="dot-label"><strong>${TYPE_NAMES[type]}</strong><span>${formatNumber(expected, 1)} of ${count}</span></div><div class="dot-field">${dots || '<span class="muted">No units selected</span>'}</div></div>`;
+  return `<div class="dot-group" aria-label="${TYPE_NAMES[type]}: ${formatNumber(expected, 1)} of ${count} expected to alarm"><div class="dot-label"><strong>${TYPE_NAMES[type]}</strong><span>${formatNumber(expected, 1)} of ${count}</span></div><div class="dot-field">${dots || '<span class="muted">No units selected</span>'}</div>${interval ? `<div class="chart-interval" role="img" aria-label="95% interval ${formatNumber(interval[0], 1)} to ${formatNumber(interval[1], 1)} expected alarms"><i></i><span>95% ${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)}</span></div>` : ''}</div>`;
 }
 
-function renderTab1(state, live, paper, reference) {
+function renderTab1(state, live, paper, reference, context = {}) {
   const current = live.chance[state.rule];
   const controls = choiceControl('rule', 'Monitoring rule', live.rules.map(rule => [rule, RULE_NAMES[rule]]), state.rule)
+    + rangeControl('alarmSD', 'Alarm line for A and C', 1.5, 3.5, .1, state.alarmSD, `${formatNumber(state.alarmSD, 1)} SD`, 'B stays one SD stricter. Rules D and E do not use this line.')
     + '<p class="control-note">Rule E assumes perfect knowledge of each month’s expected deaths.</p>';
   const graph = `<p class="graph-note">Expected count, a typical year · ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years among ${Object.values(state.unitCounts).reduce((a, b) => a + b, 0)} units</p>
-    ${TYPES.map(type => dotsFor(type, state.unitCounts[type], state.unitCounts[type] * current.byType[type].alpha)).join('')}`;
+    ${TYPES.map(type => {
+      const cell = current.byType[type];
+      const interval = directInterval(cell, 'alpha');
+      return dotsFor(type, state.unitCounts[type], cell.alpha === null ? null : state.unitCounts[type] * cell.alpha,
+        interval ? interval.map(value => value * state.unitCounts[type]) : null);
+    }).join('')}`;
   const rows = live.rules.map(rule => {
     const cell = live.chance[rule];
     const baseline = paper.chance[rule];
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th><td class="trigger-cell">${reference.inputs.labels[rule]}</td>${compareCell(cell.alarmUnitYears, baseline.alarmUnitYears, value => formatNumber(value, 1))}${compareCell(cell.episodes, baseline.episodes, value => formatNumber(value, 1))}${TYPES.map(type => compareCell(cell.byType[type].alpha, baseline.byType[type].alpha, value => formatNumber(value, 3))).join('')}</tr>`;
+    const unavailable = TYPES.some(type => cell.byType[type].alpha === null && state.unitCounts[type]);
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${unavailable ? 'unavailable-row' : ''}"><th scope="row">${rule}</th><td class="trigger-cell">${reference.inputs.labels[rule]}${unavailable ? '<small>needs recalibration; coming in 3c</small>' : ''}</td>${compareCell(cell.alarmUnitYears, baseline.alarmUnitYears, value => formatNumber(value, 1), { source: context.simMode && cell.alarmUnitYears !== baseline.alarmUnitYears ? 'derived' : undefined, interval: context.intervals?.[`alarmUnitYears|${rule}`] })}${compareCell(cell.episodes, baseline.episodes, value => formatNumber(value, 1), { interval: context.intervals?.[`episodes|${rule}`] })}${TYPES.map(type => compareCell(cell.byType[type].alpha, baseline.byType[type].alpha, value => formatNumber(value, 3), { source: cellSource(cell.byType[type], 'alpha'), interval: directInterval(cell.byType[type], 'alpha') })).join('')}</tr>`;
   });
   const liveTable = table(['Rule', 'Alarm condition', 'Alarming unit-years / yr', 'Episodes / yr', 'Intensive care', 'Local', 'Special care'], rows, 'Table 1 · chance alarms; per-type columns are shares of unit-years');
   const terms = TYPES.map(type => `${state.unitCounts[type]} × ${formatNumber(current.byType[type].alpha, 3)}`).join(' + ');
   const working = `<p><strong>Alarming unit-years a year</strong> = Σ units of each type × chance that type alarms.</p><p class="formula">${terms} = <strong>${formatNumber(current.alarmUnitYears, 1)}</strong>.</p><p>Episodes use the separate per-unit episode rates. Figure 2’s 11-point false-crossing target can be tuned in Tab 4; it does not supply intermediate Table 1 alarm-unit-year rates.</p>`;
   return { kicker: 'Noise', title: 'Chance alarms', question: 'How many alarms does chance alone produce?', controls,
     graphTitle: 'Where the expected alarms land', graph, tableTitle: 'Live Table 1', table: liveTable, working,
-    fixed: fixedList(['Mortality means: 20 / 4 / 1 deaths per year in intensive care, local and special care units.', 'Year-to-year rate variation: 25%.', 'Rules A–D use the preceding three-year average, with a 0.5-death floor.', 'Four years of history and ten years of monitoring.', 'The idealised CUSUM is tuned to a doubling of deaths.']),
+    fixed: fixedList(['Year-to-year rate variation: 25%.', 'Rules A–D use the preceding three-year average, with a 0.5-death floor.', 'Four years of history and ten years of monitoring.', 'The idealised CUSUM is tuned to a doubling of deaths.']),
     takeaway: `Chance alone produces between 3 and 34 alarms a year in England and Wales, depending on the rule. Under ${state.rule}, chance produces ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years and ${formatNumber(current.episodes, 1)} episodes a year across the selected unit mix.` };
 }
 
@@ -473,63 +790,70 @@ function mechanismPlot(mechanism, roster) {
   return `<svg class="mechanism-plot" viewBox="0 0 360 180" role="img" aria-label="Chance of at least one nominally significant nurse as the roster grows"><line x1="28" x2="334" y1="145" y2="145"/><line x1="28" x2="28" y1="30" y2="145"/><text x="28" y="168">0</text><text x="314" y="168">200 nurses</text><text x="1" y="32">100%</text><path d="${path}"/><circle cx="${x(roster)}" cy="${y(mechanism.selected)}" r="6"/></svg>`;
 }
 
-function renderTab2(state, live, paper) {
+function renderTab2(state, live, paper, reference, context = {}) {
   const current = live.chance[state.rule];
   // The published Table 2 is rule C; other rules are live generalisations.
   const baseline = paper.chance.C;
   const selectedFlags = current.flags[state.rotaTest];
   const controls = choiceControl('rotaTest', 'Rota test', [['avg', TEST_NAMES.avg], ['own', TEST_NAMES.own], ['adj', TEST_NAMES.adj]], state.rotaTest)
+    + rangeControl('significance', 'Significance level', .01, .1, .005, state.significance, `${formatPercent(state.significance, 1)}`)
     + '<h4>The mechanism</h4><p class="control-note">These sliders explain the selection effect. They do not change Table 2’s simulated rates.</p>'
     + rangeControl('mechanismRoster', 'Nurses on a hypothetical roster', 20, 200, 1, state.mechanismRoster, `${state.mechanismRoster} nurses`)
     + rangeControl('mechanismDeaths', 'Deaths reviewed', 2, 40, 1, state.mechanismDeaths, `${state.mechanismDeaths} deaths`);
   const graph = `<p class="graph-note">Selected rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} test</p>
-    ${bar('Chance alarming unit-years', current.alarmUnitYears, Math.max(current.alarmUnitYears, selectedFlags), formatNumber(current.alarmUnitYears, 1))}
-    ${bar('Nurse-flagging episodes', selectedFlags, Math.max(current.alarmUnitYears, selectedFlags), formatNumber(selectedFlags, 1), 'accent-bar')}
-    <div class="mechanism-panel"><h4>The mechanism, not Table 2</h4><p>With ${state.mechanismDeaths} deaths and the model’s shift mix, a roster of ${state.mechanismRoster} has a <strong>${formatPercent(live.mechanism.selected, 0)}</strong> chance that at least one nurse passes an unadjusted own-exposure test at 5% by chance.</p>${mechanismPlot(live.mechanism, state.mechanismRoster)}</div>`;
+    ${bar('Chance alarming unit-years', current.alarmUnitYears, Math.max(current.alarmUnitYears || 0, selectedFlags || 0), formatNumber(current.alarmUnitYears, 1), '', context.intervals?.[`alarmUnitYears|${state.rule}`])}
+    ${bar('Nurse-flagging episodes', selectedFlags, Math.max(current.alarmUnitYears || 0, selectedFlags || 0), formatNumber(selectedFlags, 1), 'accent-bar', context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`])}
+    <div class="mechanism-panel"><h4>The mechanism, not Table 2</h4><p>With ${state.mechanismDeaths} deaths and the model’s shift mix, a roster of ${state.mechanismRoster} has a <strong>${formatPercent(live.mechanism.selected, 0)}</strong> chance that at least one nurse passes an unadjusted own-exposure test at ${formatPercent(state.significance, 1)} by chance.</p>${mechanismPlot(live.mechanism, state.mechanismRoster)}</div>`;
   const rows = TYPES.map(type => {
     const cell = current.byType[type];
     const prior = baseline.byType[type];
-    return `<tr><th scope="row">${TYPE_NAMES[type]}</th>${compareCell(cell.med_k, prior.med_k, value => formatNumber(value, 0))}${compareCell(cell.med_top, prior.med_top, value => formatNumber(value, 0))}${compareCell(cell.s_avg, prior.s_avg, value => formatPercent(value, 0))}${compareCell(cell.s_own, prior.s_own, value => formatPercent(value, 0))}${compareCell(cell.s_adj, prior.s_adj, value => formatPercent(value, 1))}</tr>`;
+    const display = (key, formatter) => compareCell(cell[key], prior[key], formatter,
+      { source: cellSource(cell, key), interval: directInterval(cell, key) });
+    return `<tr><th scope="row">${TYPE_NAMES[type]}</th>${display('med_k', value => formatNumber(value, 0))}${display('med_top', value => formatNumber(value, 0))}${display('s_avg', value => formatPercent(value, 0))}${display('s_own', value => formatPercent(value, 0))}${display('s_adj', value => formatPercent(value, 1))}</tr>`;
   });
-  rows.push(`<tr class="selected-row"><th scope="row">All reviewed alarms</th><td>—</td><td>—</td>${compareCell(current.shares.avg, baseline.shares.avg, value => formatPercent(value, 0))}${compareCell(current.shares.own, baseline.shares.own, value => formatPercent(value, 0))}${compareCell(current.shares.adj, baseline.shares.adj, value => formatPercent(value, 1))}</tr>`);
-  rows.push(`<tr class="footer-row"><th scope="row" colspan="5">Nurse-flagging episodes a year · selected test</th>${compareCell(selectedFlags, baseline.flags.own, value => formatNumber(value, 1))}</tr>`);
+  rows.push(`<tr class="selected-row"><th scope="row">All reviewed alarms</th><td>—</td><td>—</td>${compareCell(current.shares.avg, baseline.shares.avg, value => formatPercent(value, 0), { interval: context.intervals?.[`share|${state.rule}|avg`] })}${compareCell(current.shares.own, baseline.shares.own, value => formatPercent(value, 0), { interval: context.intervals?.[`share|${state.rule}|own`] })}${compareCell(current.shares.adj, baseline.shares.adj, value => formatPercent(value, 1), { interval: context.intervals?.[`share|${state.rule}|adj`] })}</tr>`);
+  rows.push(`<tr class="footer-row"><th scope="row" colspan="5">Nurse-flagging episodes a year · selected test</th>${compareCell(selectedFlags, baseline.flags.own, value => formatNumber(value, 1), { interval: context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`] })}</tr>`);
   const liveTable = table(['Unit type', 'Deaths reviewed, median', 'Top nurse present, median', 'Average-exposure', 'Own-exposure', 'Maximum-adjusted'], rows, `Table 2 · rule ${state.rule}; paper values are rule C; shares among reviewed chance alarms`);
   const formula = state.rotaTest === 'own' ? 'Σ units × own-exposure flag episodes per unit-year' : `Σ units × reviewed alarms per unit-year × ${TEST_NAMES[state.rotaTest].toLowerCase()} share`;
   const working = `<p><strong>Nurse-flagging episodes a year</strong> = ${formula}.</p><p class="formula">${TYPES.map(type => `${state.unitCounts[type]} × ${formatNumber(current.byType[type].rev, 3)} × ${formatNumber(current.byType[type][`s_${state.rotaTest}`], 3)}`).join(' + ')} ≈ <strong>${formatNumber(selectedFlags, 1)}</strong>.</p><p>The mechanism curve instead tests every nurse on a hypothetical roster independently; it is an exact calculation under the model’s shift mix, not the simulated Table 2 result.</p>`;
   return { kicker: 'Named nurse', title: 'The rota selection step', question: 'How often does a rota search after a chance alarm produce a “significant” nurse?', controls,
     graphTitle: 'From alarms to names', graph, tableTitle: 'Live Table 2', table: liveTable, working,
-    fixed: fixedList(['Independent nurse attendance at each death in the synthetic rota.', 'Shift shares of 13%, 21% and 27%, held by 35%, 50% and 15% of nurses.', 'Nominal significance threshold: 5%.', 'At least two deaths are required for rota review.', 'Roster sizes in the simulated units: 100 / 40 / 20 nurses.']),
+    fixed: fixedList(['Independent nurse attendance at each death in the synthetic rota.', 'Shift shares of 13%, 21% and 27%, held by 35%, 50% and 15% of nurses.', 'At least two deaths are required for rota review.']),
     takeaway: `About half of chance alarms produce a "significant" nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
 }
 
 // ---- tabs/tab3.js ----
 function detectionRow(type, cell, selected) {
-  return `<div class="detection-row ${selected ? 'highlighted' : ''}"><div class="detection-heading"><strong>${TYPE_NAMES[type]}</strong><span>${formatPercent(cell.d, 1)} unit alarms</span></div><div class="detection-track"><span class="detection-fill" style="width:${(cell.d * 100).toFixed(2)}%"></span><span class="background-mark" style="left:${(cell.bg * 100).toFixed(2)}%" title="Background alarm rate ${formatPercent(cell.bg, 1)}"></span><span class="identification-mark" style="left:${(cell.flag_off * 100).toFixed(2)}%" title="Identification among alarms ${formatPercent(cell.flag_off, 1)}"></span></div></div>`;
+  if (cell.d === null) return `<div class="detection-row unavailable-rule"><strong>${TYPE_NAMES[type]}</strong><p>Rule E needs recalibration; coming in 3c.</p></div>`;
+  const interval = directInterval(cell, 'd');
+  return `<div class="detection-row ${selected ? 'highlighted' : ''}"><div class="detection-heading"><strong>${TYPE_NAMES[type]}</strong><span>${formatPercent(cell.d, 1)} unit alarms${interval ? ` · 95% ${formatPercent(interval[0], 1)}–${formatPercent(interval[1], 1)}` : ''}</span></div><div class="detection-track"><span class="detection-fill" style="width:${(cell.d * 100).toFixed(2)}%"></span>${interval ? `<i class="detection-error" style="left:${(interval[0] * 100).toFixed(2)}%;width:${((interval[1] - interval[0]) * 100).toFixed(2)}%"></i>` : ''}<span class="background-mark" style="left:${(cell.bg * 100).toFixed(2)}%" title="Background alarm rate ${formatPercent(cell.bg, 1)}"></span><span class="identification-mark" style="left:${(cell.flag_off * 100).toFixed(2)}%" title="Identification among alarms ${formatPercent(cell.flag_off, 1)}"></span></div></div>`;
 }
 
-function renderTab3(state, live, paper) {
+function renderTab3(state, live, paper, reference, context = {}) {
   const selected = live.detection[state.rule][state.unitType];
-  const controls = choiceControl('expectedExtraDeaths', 'Offender’s expected extra deaths', [[4, '+4 in 12 months'], [7, '+7 in 12 months']], state.expectedExtraDeaths)
+  const controls = rangeControl('expectedExtraDeaths', 'Offender’s expected extra deaths', 1, 15, 1, state.expectedExtraDeaths, `+${formatNumber(state.expectedExtraDeaths, 0)} in 12 months`)
+    + choiceControl('expectedExtraDeaths', 'Paper presets', [[4, '+4'], [7, '+7']], state.expectedExtraDeaths)
     + choiceControl('unitType', 'Unit type highlighted', [['NICU', 'Intensive care'], ['LNU', 'Local'], ['SCU', 'Special care']], state.unitType);
   const graph = `<p class="graph-note">Rule ${state.rule} · expected +${state.expectedExtraDeaths} deaths</p>${TYPES.map(type => detectionRow(type, live.detection[state.rule][type], type === state.unitType)).join('')}
     <div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>unit alarm</span><span class="graph-key-item"><span class="key-swatch grey"></span>background alarm</span><span class="graph-key-item"><span class="key-swatch orange"></span>offender identified among alarmed units</span></div><p class="graph-note">The orange identification marker has a different denominator from the alarm bar.</p>`;
   const rows = live.rules.map(rule => {
     const cell = live.detection[rule];
     const baseline = paper.detection[rule];
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${TYPES.map(type => compareCell(cell[type].d, baseline[type].d, value => formatPercent(value, 0))).join('')}${compareCell(cell.LNU.flag_off, baseline.LNU.flag_off, value => formatPercent(value, 0))}${compareCell(cell.LNU.bg, baseline.LNU.bg, value => formatPercent(value, 0))}</tr>`;
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${TYPES.map(type => compareCell(cell[type].d, baseline[type].d, value => formatPercent(value, 0), { source: cellSource(cell[type], 'd'), interval: directInterval(cell[type], 'd') })).join('')}${compareCell(cell.LNU.flag_off, baseline.LNU.flag_off, value => formatPercent(value, 0), { source: cellSource(cell.LNU, 'flag_off'), interval: directInterval(cell.LNU, 'flag_off') })}${compareCell(cell.LNU.bg, baseline.LNU.bg, value => formatPercent(value, 0), { source: cellSource(cell.LNU, 'bg'), interval: directInterval(cell.LNU, 'bg') })}</tr>`;
   });
   const liveTable = table(['Rule', 'Intensive care alarm', 'Local alarm', 'Special care alarm', 'Local identification if alarmed', 'Local background alarm'], rows, `Table 3 · +${state.expectedExtraDeaths} expected deaths in one year`);
   const working = `<p><strong>One-year detection sensitivity</strong> means the unit alarms at least once while an offender is present. For ${TYPE_NAMES[state.unitType].toLowerCase()} under rule ${state.rule}, this is <strong>${formatPercent(selected.d, 1)}</strong>.</p><p>With no offender, the same unit type alarms <strong>${formatPercent(selected.bg, 1)}</strong> of the time. If the offender unit alarms, the rota review identifies the offender <strong>${formatPercent(selected.flag_off, 1)}</strong> of the time. Alarm and identification are separate outcomes.</p>`;
   return { kicker: 'Offender present', title: 'Alarm is not identification', question: 'When an offender is present, how often does the unit alarm, and how often does the rota point to them?', controls,
     graphTitle: 'Three outcomes by unit type', graph, tableTitle: 'Live Table 3', table: liveTable, working,
-    fixed: fixedList(['The offender is present at every extra death they cause.', 'The effect is a Poisson mean of +4 or +7 deaths over the first 12 months.', 'The offender has a 21% shift share.', 'Ties for top attendance are shared fairly among tied nurses.', 'Detection counts any unit alarm in the offender-year, even if background deaths caused it.']),
+    fixed: fixedList(['The offender is present at every extra death they cause.', 'The effect is a Poisson mean over the first 12 months.', 'The offender has a 21% shift share.', 'Ties for top attendance are shared fairly among tied nurses.', 'Detection counts any unit alarm in the offender-year, even if background deaths caused it.']),
     takeaway: `No rule does both: rules that alarm often point to the wrong nurse, and rules that point correctly rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
 }
 
 // ---- tabs/tab4.js ----
-function ratioBar(rule, value, years, selected) {
-  const width = value ? Math.max(0, Math.min(100, (Math.log10(value) - 1) / 4 * 100)) : 0;
-  return `<div class="ratio-row ${selected ? 'highlighted' : ''}"><span>${rule}</span><div class="ratio-track"><i style="width:${width.toFixed(2)}%"></i></div><strong>${formatRatio(value)}</strong><small>${years === null ? 'not computed' : `${formatNumber(years, 0)} years`}</small></div>`;
+function ratioBar(rule, value, years, selected, interval, yearsInterval) {
+  const position = number => number ? Math.max(0, Math.min(100, (Math.log10(number) - 1) / 4 * 100)) : 0;
+  const width = position(value);
+  return `<div class="ratio-row ${selected ? 'highlighted' : ''}"><span>${rule}</span><div class="ratio-track"><i style="width:${width.toFixed(2)}%"></i>${interval ? `<b class="ratio-error" style="left:${position(interval[0]).toFixed(2)}%;width:${(position(interval[1]) - position(interval[0])).toFixed(2)}%"></b>` : ''}</div><strong>${formatRatio(value)}</strong><small>${years === null ? 'not computed' : `${formatNumber(years, 0)} years`}${yearsInterval ? ` (95% ${formatNumber(yearsInterval[0], 0)}–${formatNumber(yearsInterval[1], 0)})` : ''}${interval ? ` · ratio 95% ${formatRatio(interval[0])}–${formatRatio(interval[1])}` : ''}</small></div>`;
 }
 
 function figure2Markup(state) {
@@ -551,14 +875,14 @@ function figure2Markup(state) {
     </div></details>`;
 }
 
-function renderTab4(state, live, paper, reference) {
+function renderTab4(state, live, paper, reference, context = {}) {
   const selected = live.ratio[state.rule].current;
   const controls = rangeControl('prevalencePer10k', 'Offender base rate', 0, 100, 1, prevalenceToSlider(state.prevalencePer10k),
     `${formatNumber(state.prevalencePer10k, 2)} per 10,000 unit-years`, 'Logarithmic slider. The two references are scenarios, not prevalence estimates.')
     + `<div class="preset-row">${printedRates.map(rate => `<button type="button" data-set-field="prevalencePer10k" data-value="${rate}" aria-pressed="${state.prevalencePer10k === rate}">${rate}</button>`).join('')}</div>`
     + choiceControl('riskAllocation', 'Risk allocation', [['staff', 'In proportion to staff'], ['equal', 'Equal per unit']], state.riskAllocation);
-  const graph = `<p class="graph-note">Falsely flagged unit-years per detected offender-year · log scale · current base rate ${formatNumber(state.prevalencePer10k, 2)} in 10,000</p>${live.rules.map(rule => ratioBar(rule, live.ratio[rule].current.ratio, live.ratio[rule].current.years, rule === state.rule)).join('')}`;
-  const rows = live.rules.map(rule => `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${printedRates.map(rate => compareCell(live.ratio[rule].printedRates[rate].ratio, paper.ratio[rule].printedRates[rate].ratio, formatRatio)).join('')}${compareCell(live.ratio[rule].current.ratio, paper.ratio[rule].current.ratio, formatRatio)}</tr>`);
+  const graph = `<p class="graph-note">Falsely flagged unit-years per detected offender-year · log scale · current base rate ${formatNumber(state.prevalencePer10k, 2)} in 10,000</p>${live.rules.map(rule => ratioBar(rule, live.ratio[rule].current.ratio, live.ratio[rule].current.years, rule === state.rule, context.intervals?.[`ratio|${rule}|${state.prevalencePer10k}`], context.intervals?.[`years|${rule}|${state.prevalencePer10k}`])).join('')}`;
+  const rows = live.rules.map(rule => `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${printedRates.map(rate => compareCell(live.ratio[rule].printedRates[rate].ratio, paper.ratio[rule].printedRates[rate].ratio, formatRatio, { interval: context.intervals?.[`ratio|${rule}|${rate}`] })).join('')}${compareCell(live.ratio[rule].current.ratio, paper.ratio[rule].current.ratio, formatRatio, { interval: context.intervals?.[`ratio|${rule}|${state.prevalencePer10k}`] })}</tr>`);
   const liveTable = table(['Rule', ...printedRates.map(rate => `${rate} / 10k`), 'Your rate'], rows, 'Table 4 · falsely flagged unit-years per detected offender-year; paper baseline is staff-proportional, +4');
   const weights = selected.weights;
   const working = `<p><strong>False flagged / yr</strong> = Σ n<sub>t</sub> × (1 − p × w<sub>t</sub>) × alarm share<sub>t</sub> = <strong>${formatNumber(selected.falseFlagged, 3)}</strong>.</p><p><strong>Detected offender-years / yr</strong> = Σ n<sub>t</sub> × p × w<sub>t</sub> × detection sensitivity<sub>t</sub> = <strong>${formatNumber(selected.detected, 5)}</strong>.</p><p class="formula">${formatNumber(selected.falseFlagged, 3)} ÷ ${formatNumber(selected.detected, 5)} = <strong>${formatRatio(selected.ratio)}</strong>; 1 ÷ ${formatNumber(selected.detected, 5)} = <strong>${selected.years === null ? 'not computed' : `${formatNumber(selected.years, 0)} years`}</strong>.</p><p>For this unit mix, the ${state.riskAllocation === 'staff' ? 'staff-proportional' : 'equal'} risk weights are ${Object.entries(weights).map(([type, weight]) => `${type} ${formatNumber(weight, 3)}`).join(' · ')}.</p>`;
@@ -570,13 +894,17 @@ function renderTab4(state, live, paper, reference) {
 }
 
 // ---- tabs/tab5.js ----
-function costPlot(state, live) {
+function costPlot(state, live, intervals) {
   const base = live.flags[state.rule].base;
+  if (base === null) return '<p class="unavailable-rule">Rule E needs recalibration; coming in 3c.</p>';
   const months = state.investigationMonths;
-  const upper = Math.max(base, base * months / 12, 1);
+  const upper = Math.max(base || 0, (base || 0) * months / 12, 1);
   const x = q => 58 + q * 307;
   const y = value => 215 - value / upper * 183;
   const path = factor => `M${x(0)},${y(0)} L${x(1)},${y(base * factor)}`;
+  const flagRange = intervals?.[`flags|${state.rule}|${state.q}`];
+  const wardsRange = intervals?.[`offWards|${state.rule}`];
+  const errorBar = (range, className) => range ? `<line class="cost-error ${className}" x1="${x(state.q)}" x2="${x(state.q)}" y1="${y(range[0])}" y2="${y(range[1])}"/>` : '';
   return `<svg class="cost-plot" viewBox="0 0 390 290" role="img" aria-label="People flagged per year and off wards against share of alarms searched">
     <line class="axis" x1="58" y1="215" x2="365" y2="215"/><line class="axis" x1="58" y1="32" x2="58" y2="215"/>
     <line class="plot-grid" x1="58" y1="${y(upper / 2)}" x2="365" y2="${y(upper / 2)}"/><line class="plot-grid" x1="58" y1="32" x2="365" y2="32"/>
@@ -584,48 +912,51 @@ function costPlot(state, live) {
     <text class="axis-tick" x="58" y="238" text-anchor="middle">0</text><text class="axis-tick" x="${x(.5)}" y="238" text-anchor="middle">0.5</text><text class="axis-tick" x="365" y="238" text-anchor="middle">1</text>
     <text class="axis-title" x="211" y="276" text-anchor="middle">Share of alarms searched (q)</text><text class="axis-title" x="16" y="128" text-anchor="middle" transform="rotate(-90 16 128)">People</text>
     <path class="flag-line" d="${path(1)}"/><path class="wards-line" d="${path(months / 12)}"/>
+    ${errorBar(flagRange, 'flag-error')}${errorBar(wardsRange, 'wards-error')}
     <circle class="flag-point" cx="${x(state.q)}" cy="${y(base * state.q)}" r="6"/>
     <circle class="wards-point" cx="${x(state.q)}" cy="${y(base * state.q * months / 12)}" r="6"/>
   </svg>`;
 }
 
-function renderTab5(state, live, paper) {
+function renderTab5(state, live, paper, reference, context = {}) {
   const selected = live.flags[state.rule];
   const details = live.posteriorDetails[state.rule];
-  const posteriorAvailable = state.rotaTest === 'own';
+  const posteriorAvailable = state.rotaTest === 'own' || (context.simMode && state.rotaTest === 'adj');
   const posteriorValue = posteriorAvailable ? live.posteriors[state.rule] : null;
   const controls = rangeControl('q', 'Share of chance alarms searched (q)', 0, 1, .01, state.q, formatPercent(state.q, 0))
     + `<div class="preset-row">${[1, .5, .25, .1].map(q => `<button type="button" data-set-field="q" data-value="${q}" aria-pressed="${state.q === q}">q = ${q}</button>`).join('')}</div>`
     + rangeControl('investigationMonths', 'Investigation length', 1, 36, 1, state.investigationMonths, `${state.investigationMonths} months`);
   const graph = `<p class="graph-note">Rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} · ${formatNumber(selected.current, 1)} nurse-flagging episodes a year at your q</p>
-    ${costPlot(state, live)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>flagging episodes per year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
+    ${costPlot(state, live, context.intervals)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>flagging episodes per year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
     <p class="graph-note">At q = ${formatNumber(state.q, 2)}, ${formatNumber(selected.offWards, 1)} nurses are off wards at any one time if each investigation lasts ${state.investigationMonths} months.</p>
-    <div class="chart-posterior"><span>Chance a flagged nurse is the offender</span>${posteriorDisplay(posteriorValue)}</div>`;
+    <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${posteriorDisplay(posteriorValue)}${context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
   const rows = live.rules.map(rule => {
     const now = live.flags[rule];
     const baseline = paper.flags[rule];
     const qCells = printedQs.map(q => {
       const liveText = formatNumber(now.byQ[q], 1);
-      const liveDistinct = posteriorAvailable ? `${formatNumber(live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
+      const liveDistinct = state.rotaTest === 'own' ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
       const paperText = `${formatNumber(baseline.byQ[q], 1)} (${formatNumber(paper.chance[rule].distinctOwn * q, 1)} distinct)`;
       const same = posteriorAvailable && `${liveText} (${liveDistinct})` === paperText;
-      return `<td><span class="live-value">${liveText}</span><small class="distinct-value">${liveDistinct}</small>${same ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
+      const interval = context.intervals?.[`flags|${rule}|${q}`];
+      return `<td data-source="${interval ? 'derived' : same ? 'paper' : 'derived'}"><span class="live-value">${liveText}${interval ? ` (${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)})` : ''}</span><small class="distinct-value">${liveDistinct}</small>${same && !interval ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
     }).join('');
     const currentPosterior = posteriorAvailable ? live.posteriors[rule] : null;
     const livePosterior = formatPosterior(currentPosterior);
     const paperPosterior = formatPosterior(paper.posteriors[rule]);
-    const paperComparison = posteriorAvailable && (livePosterior.odds !== paperPosterior.odds || livePosterior.percentage !== paperPosterior.percentage)
-      ? `<small class="paper-value">paper ${paperPosterior.odds}<br>${paperPosterior.percentage}</small>` : '';
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1))}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1))}<td class="posterior-cell">${posteriorDisplay(currentPosterior)}${paperComparison}</td></tr>`;
+    const posteriorInterval = context.intervals?.[`posterior|${rule}`];
+    const paperComparison = posteriorAvailable && (context.simMode || livePosterior.odds !== paperPosterior.odds || livePosterior.percentage !== paperPosterior.percentage)
+      ? `<small class="paper-value">paper ${context.adjustedPosterior ? 'not computed' : `${paperPosterior.odds}<br>${paperPosterior.percentage}`}</small>` : '';
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${posteriorDisplay(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
   });
   const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Off wards', 'Posterior'], rows,
-    'Table 5 · nurse-flagging episodes per year with distinct nurses underneath; posterior for own-exposure test only');
+    `Table 5 · nurse-flagging episodes per year with distinct nurses underneath; posterior for ${context.adjustedPosterior ? 'maximum-adjusted test, simulated' : 'own-exposure test'}`);
   const working = `<p><strong>Flagging episodes / yr</strong> = ${formatNumber(selected.base, 3)} × ${formatNumber(state.q, 2)} = <strong>${formatNumber(selected.current, 3)}</strong>.</p>
     <p><strong>Off wards at one time</strong> = ${formatNumber(selected.current, 3)} × ${state.investigationMonths} ÷ 12 = <strong>${formatNumber(selected.offWards, 3)}</strong>.</p>
-    ${posteriorAvailable ? `<p><strong>Chance a flagged nurse is the offender</strong> = offender correctly identified ÷ all flags = ${formatNumber(details.offenderFlagged, 6)} ÷ (${formatNumber(details.anyFlaggedWithOffender, 6)} + ${formatNumber(details.backgroundFlags, 6)}) = ${posteriorDisplay(posteriorValue)}. The factor q cancels from numerator and denominator.</p>` : `<p><strong>Chance a flagged nurse is the offender: not computed.</strong> The reference run exported offender-identification and any-flag rates for the own-exposure test only; a ${TEST_NAMES[state.rotaTest].toLowerCase()} posterior is unavailable.</p>`}`;
+    ${posteriorAvailable ? `<p><strong>Chance a flagged nurse is the offender</strong> = offender correctly identified ÷ all flags = ${formatNumber(details.offenderFlagged, 6)} ÷ (${formatNumber(details.anyFlaggedWithOffender, 6)} + ${formatNumber(details.backgroundFlags, 6)}) = ${posteriorDisplay(posteriorValue)}. The factor q cancels from numerator and denominator.${context.adjustedPosterior ? ' This maximum-adjusted result is simulated.' : ''}</p>` : `<p><strong>Chance a flagged nurse is the offender: not computed.</strong> The reference run exported offender-identification and any-flag rates for the own-exposure test only; a ${TEST_NAMES[state.rotaTest].toLowerCase()} posterior is unavailable.</p>`}`;
   return { kicker: 'Human cost', title: 'What happens after an alarm', question: 'How many people are flagged, and how likely is a flagged nurse to be the offender?', controls,
     graphTitle: 'People affected as searches change', graph, tableTitle: 'Live Table 5', table: liveTable, working,
-    fixed: fixedList(['The chance-alarm and rota-test rates come from the Python reference run.', 'The model assumes every searched alarm receives the selected rota test.', 'Posterior estimates use the own-exposure test and count both background and offender-year flags.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
+    fixed: fixedList(['The model assumes every searched alarm receives the selected rota test.', 'Posterior estimates count both background and offender-year flags.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
     takeaway: `q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
 }
 
@@ -636,22 +967,28 @@ const hashKeys = {
   prevalencePer10k: 'rate', unitType: 'unit', expectedExtraDeaths: 'effect',
   riskAllocation: 'allocation', q: 'q', investigationMonths: 'months',
   mechanismRoster: 'roster', mechanismDeaths: 'deaths', figureOpen: 'figure',
-  worldOpen: 'world'
+  worldOpen: 'world', alarmSD: 'line', significance: 'sig', seed: 'seed'
 };
-const numericFields = new Set(['activeTab', 'thresholdIndex', 'prevalencePer10k', 'expectedExtraDeaths', 'q', 'investigationMonths', 'mechanismRoster', 'mechanismDeaths']);
+const numericFields = new Set(['activeTab', 'thresholdIndex', 'prevalencePer10k', 'expectedExtraDeaths', 'q', 'investigationMonths', 'mechanismRoster', 'mechanismDeaths', 'alarmSD', 'significance', 'seed']);
 const allowed = {
   rule: REFERENCE.inputs.rules, rotaTest: ['avg', 'own', 'adj'],
   unitType: ['NICU', 'LNU', 'SCU'], riskAllocation: ['staff', 'equal']
 };
 const ranges = {
   activeTab: [1, 5], thresholdIndex: [0, SWEEP.length - 1], prevalencePer10k: [.1, 30],
-  expectedExtraDeaths: [4, 7], q: [0, 1], investigationMonths: [1, 36],
+  expectedExtraDeaths: [1, 15], alarmSD: [1.5, 3.5], significance: [.01, .1], seed: [0, 4294967295], q: [0, 1], investigationMonths: [1, 36],
   mechanismRoster: [20, 200], mechanismDeaths: [2, 40]
 };
 let state = cloneDefaults();
+let plan = simulationPlan(state, REFERENCE);
+let simulation = { chance: {}, detection: {} };
+let previousSimulation = null;
+let worker = null, debounce = null, runId = 0, completed = 0, loading = false, simulationError = '';
+let intervalCache = null, intervalCacheKey = '';
 
 function cloneDefaults() {
-  return { ...PAPER_DEFAULT, unitCounts: { ...PAPER_DEFAULT.unitCounts } };
+  return { ...PAPER_DEFAULT, unitCounts: { ...PAPER_DEFAULT.unitCounts },
+    deathsPerYear: { ...PAPER_DEFAULT.deathsPerYear }, staffPerRoster: { ...PAPER_DEFAULT.staffPerRoster } };
 }
 
 function readHash() {
@@ -664,13 +1001,18 @@ function readHash() {
     else if (numericFields.has(field)) {
       const value = Number(raw);
       if (Number.isFinite(value) && value >= ranges[field][0] && value <= ranges[field][1] &&
-          (field !== 'expectedExtraDeaths' || value === 4 || value === 7)) next[field] = value;
+          (field !== 'seed' || Number.isInteger(value))) next[field] = value;
     } else if (allowed[field].includes(raw)) next[field] = raw;
   }
   for (const type of ['NICU', 'LNU', 'SCU']) {
     const raw = params.get(type.toLowerCase());
     const value = Number(raw);
     if (raw !== null && Number.isInteger(value) && value >= 0 && value <= 150) next.unitCounts[type] = value;
+    for (const [prefix, field, min, max, integer] of [['mean', 'deathsPerYear', .5, 60, false], ['staff', 'staffPerRoster', 10, 200, true]]) {
+      const text = params.get(`${prefix}-${type.toLowerCase()}`);
+      const number = Number(text);
+      if (text !== null && Number.isFinite(number) && number >= min && number <= max && (!integer || Number.isInteger(number))) next[field][type] = number;
+    }
   }
   return next;
 }
@@ -679,6 +1021,10 @@ function writeHash() {
   const params = new URLSearchParams();
   for (const [field, key] of Object.entries(hashKeys)) params.set(key, typeof state[field] === 'boolean' ? (state[field] ? '1' : '0') : String(state[field]));
   for (const type of ['NICU', 'LNU', 'SCU']) params.set(type.toLowerCase(), String(state.unitCounts[type]));
+  for (const type of ['NICU', 'LNU', 'SCU']) {
+    params.set(`mean-${type.toLowerCase()}`, String(state.deathsPerYear[type]));
+    params.set(`staff-${type.toLowerCase()}`, String(state.staffPerRoster[type]));
+  }
   const target = '#' + params.toString();
   if (location.hash !== target) history.replaceState(null, '', target);
 }
@@ -691,7 +1037,9 @@ function updateScenario() {
     [4, formatNumber(state.prevalencePer10k, 2) + ' in 10,000'],
     [4, state.riskAllocation === 'staff' ? 'Staff-proportional risk' : 'Equal risk'],
     [5, 'q = ' + formatNumber(state.q, 2)],
-    [5, state.investigationMonths + ' months']
+    [5, state.investigationMonths + ' months'],
+    [1, formatNumber(state.alarmSD, 1) + ' SD alarm line'],
+    [2, formatNumber(state.significance * 100, 1) + '% significance']
   ];
   document.querySelector('#scenario-items').innerHTML = items.map(([tab, label]) =>
     '<button type="button" data-go-tab="' + tab + '">' + label + '</button>').join('<span aria-hidden="true">·</span>');
@@ -703,8 +1051,20 @@ function renderWorld(preserve) {
   details.open = state.worldOpen;
   const controls = document.querySelector('#world-controls');
   if (preserve) return;
-  controls.innerHTML = ['NICU', 'LNU', 'SCU'].map(type =>
-    rangeControl('count-' + type, TYPE_NAMES[type] + ' units', 0, 150, 1, state.unitCounts[type], String(state.unitCounts[type]))).join('');
+  controls.innerHTML = ['NICU', 'LNU', 'SCU'].map(type => `<div class="world-type"><h3>${TYPE_NAMES[type]}</h3>
+    ${rangeControl('count-' + type, 'Units', 0, 150, 1, state.unitCounts[type], String(state.unitCounts[type]))}
+    ${rangeControl('mean-' + type, 'Expected deaths a year', .5, 60, .5, state.deathsPerYear[type], formatNumber(state.deathsPerYear[type], 1))}
+    ${rangeControl('staff-' + type, 'Nurses on each roster', 10, 200, 1, state.staffPerRoster[type], String(state.staffPerRoster[type]))}</div>`).join('');
+}
+
+function updateSimulationBanner() {
+  const banner = document.querySelector('#simulation-banner');
+  banner.hidden = plan.paperMode;
+  if (plan.paperMode) return;
+  const status = simulationError ? `Simulation error: ${simulationError}` : loading
+    ? `Updating · ${completed} of ${plan.jobs.length} cells` : 'Estimates ready';
+  banner.innerHTML = `<strong>Simulation mode</strong> · estimates from ${REFERENCE.inputs.reps.toLocaleString()} chance / ${REFERENCE.inputs.det_reps.toLocaleString()} detection simulated units per cell · seed ${state.seed}
+    <span class="simulation-progress">${status}</span><button type="button" data-sim-action="baseline">Return to paper baseline</button><button type="button" data-sim-action="seed">Re-run with a new seed</button>`;
 }
 
 function drawFigure() {
@@ -720,10 +1080,25 @@ function drawFigure() {
 }
 
 function render(preserveField = null) {
-  const live = deriveAll(state, REFERENCE);
+  if (!preserveField && document.activeElement?.matches('input[type="range"][data-field]'))
+    preserveField = document.activeElement.dataset.field;
+  const currentReference = plan.paperMode ? REFERENCE : effectiveReference(state, REFERENCE, plan, simulation, previousSimulation);
+  const adjustedPosterior = !plan.paperMode && state.rotaTest === 'adj';
+  const live = deriveAll(state, currentReference, { adjustedPosterior });
   const paper = deriveAll(PAPER_DEFAULT, REFERENCE);
+  const cacheKey = JSON.stringify([state, completed, loading, adjustedPosterior]);
+  if (!plan.paperMode && !loading && !simulationError && cacheKey !== intervalCacheKey) {
+    intervalCache = derivedIntervals(state, currentReference, live, adjustedPosterior);
+    intervalCacheKey = cacheKey;
+  }
+  const context = { reference: currentReference, intervals: loading ? null : intervalCache,
+    simMode: !plan.paperMode, loading, adjustedPosterior, plan };
+  document.querySelector('.scope-note').textContent = plan.paperMode
+    ? 'The live tables use the validated Python reference run and exact arithmetic. Counts for hypothetical settings are scenarios, not estimates of real offender prevalence.'
+    : 'Simulation estimates carry 95% intervals; paper values remain beside them. This is a hypothetical scenario, not an estimate of real offender prevalence.';
   updateScenario();
-  renderWorld(preserveField && preserveField.startsWith('count-'));
+  updateSimulationBanner();
+  renderWorld(preserveField && /^(count|mean|staff)-/.test(preserveField));
   tabViews.forEach((viewFunction, index) => {
     const tabNumber = index + 1;
     const tab = document.querySelector('#tab-' + tabNumber);
@@ -732,7 +1107,9 @@ function render(preserveField = null) {
     tab.setAttribute('aria-selected', String(active));
     tab.tabIndex = active ? 0 : -1;
     panel.hidden = !active;
-    const markup = renderLayout(tabNumber, viewFunction(state, live, paper, REFERENCE));
+    const view = viewFunction(state, live, paper, REFERENCE, context);
+    if (!plan.paperMode) view.working = `<p class="source-explainer"><strong>Sources.</strong> “Simulated” cells use the current worker run; “derived” values combine those estimates with the shown scenario. Other cells retain the Python paper baseline. Pending values are dimmed until their new estimates arrive.</p>${view.working}`;
+    const markup = renderLayout(tabNumber, view);
     if (preserveField && active) {
       const temp = document.createElement('div');
       temp.innerHTML = markup;
@@ -747,17 +1124,94 @@ function render(preserveField = null) {
       });
     } else panel.innerHTML = markup;
   });
-  if (preserveField && preserveField.startsWith('count-')) {
-    const type = preserveField.slice(6);
+  if (preserveField && /^(count|mean|staff)-/.test(preserveField)) {
+    const [kind, type] = preserveField.split('-');
     const output = document.querySelector('#world-controls [data-output="' + preserveField + '"]');
-    if (output) output.textContent = String(state.unitCounts[type]);
+    if (output) output.textContent = String(kind === 'count' ? state.unitCounts[type]
+      : kind === 'mean' ? state.deathsPerYear[type] : state.staffPerRoster[type]);
   }
+  document.querySelectorAll('[role="tabpanel"]').forEach(panel => panel.classList.toggle('sim-updating', loading));
   drawFigure();
 }
 
+function stopSimulation() {
+  if (debounce) clearTimeout(debounce);
+  debounce = null;
+  if (worker) worker.terminate();
+  worker = null;
+  runId++;
+  loading = false;
+  completed = 0;
+  simulationError = '';
+  if (plan.paperMode) simulation = { chance: {}, detection: {} };
+  if (plan.paperMode) previousSimulation = null;
+  intervalCache = null;
+  intervalCacheKey = '';
+}
+
+function scheduleSimulation() {
+  previousSimulation = simulation;
+  stopSimulation();
+  simulation = { chance: {}, detection: {} };
+  loading = true;
+  const id = runId;
+  debounce = setTimeout(() => {
+    debounce = null;
+    if (id !== runId || plan.paperMode) return;
+    if (!plan.jobs.length) { loading = false; render(); return; }
+    try {
+      worker = createSimulationWorker();
+      worker.addEventListener('message', event => {
+        const message = event.data;
+        if (id !== runId) return;
+        if (message.type === 'ready') {
+          worker.postMessage({ type: 'run', id, options: simulationOptions(state, REFERENCE, plan) });
+        } else if (message.id === id && message.type === 'progress') {
+          const job = message.progress;
+          if (job.kind === 'chance') (simulation.chance[job.rule] ||= {})[job.type] = job.value;
+          else ((simulation.detection[job.effect] ||= {})[job.rule] ||= {})[job.type] = job.value;
+          completed = job.completed;
+          render();
+        } else if (message.id === id && message.type === 'result') {
+          simulation = message.result;
+          previousSimulation = null;
+          completed = plan.jobs.length;
+          loading = false;
+          worker.terminate();
+          worker = null;
+          render();
+        } else if (message.id === id && message.type === 'error') {
+          simulationError = message.message;
+          loading = false;
+          worker.terminate();
+          worker = null;
+          render();
+        }
+      });
+      worker.addEventListener('error', event => {
+        if (id !== runId) return;
+        simulationError = event.message || 'Worker failed';
+        loading = false;
+        worker.terminate(); worker = null; render();
+      });
+    } catch (error) {
+      simulationError = error.message;
+      loading = false;
+      render();
+    }
+  }, 300);
+}
+
 function setState(patch, preserveField = null) {
+  const previousPlan = plan;
   state = { ...state, ...patch };
+  plan = simulationPlan(state, REFERENCE);
   writeHash();
+  const simInputChanged = ['deathsPerYear', 'staffPerRoster', 'alarmSD', 'significance', 'expectedExtraDeaths', 'seed'].some(key => Object.hasOwn(patch, key));
+  const priorityChanged = loading && ['activeTab', 'rule', 'unitType'].some(key => Object.hasOwn(patch, key));
+  const adjChanged = !plan.paperMode && state.rotaTest === 'adj' && patch.rotaTest === 'adj';
+  if (plan.paperMode) stopSimulation();
+  else if (simInputChanged || priorityChanged || adjChanged || previousPlan.paperMode) scheduleSimulation();
   render(preserveField);
 }
 
@@ -767,6 +1221,14 @@ function setField(field, raw, preserve = false, log = false) {
     if (!Object.hasOwn(state.unitCounts, type)) return;
     setState({ unitCounts: { ...state.unitCounts, [type]: Number(raw) } }, preserve ? field : null);
     return;
+  }
+  for (const [prefix, key] of [['mean-', 'deathsPerYear'], ['staff-', 'staffPerRoster']]) {
+    if (field.startsWith(prefix)) {
+      const type = field.slice(prefix.length);
+      if (!Object.hasOwn(state[key], type)) return;
+      setState({ [key]: { ...state[key], [type]: Number(raw) } }, preserve ? field : null);
+      return;
+    }
   }
   if (!Object.hasOwn(hashKeys, field)) return;
   let value = log ? sliderToPrevalence(raw) : numericFields.has(field) ? Number(raw) : raw;
@@ -781,7 +1243,11 @@ document.addEventListener('click', event => {
   if (scenario) { const next = Number(scenario.dataset.goTab); setState({ activeTab: next }); document.querySelector('#tab-' + next).focus(); return; }
   const choice = event.target.closest('[data-set-field]');
   if (choice) { setField(choice.dataset.setField, choice.dataset.value); return; }
-  if (event.target.closest('#reset-button')) { state = cloneDefaults(); writeHash(); render(); }
+  const action = event.target.closest('[data-sim-action]');
+  if (action?.dataset.simAction === 'seed') { setState({ seed: (state.seed + 1) >>> 0 }); return; }
+  if (action?.dataset.simAction === 'baseline' || event.target.closest('#reset-button')) {
+    state = cloneDefaults(); plan = simulationPlan(state, REFERENCE); stopSimulation(); writeHash(); render();
+  }
 });
 
 document.addEventListener('input', event => {
@@ -807,9 +1273,15 @@ document.addEventListener('toggle', event => {
     if (field === 'figureOpen' && event.target.open) drawFigure();
   }
 }, true);
-window.addEventListener('hashchange', () => { state = readHash(); render(); });
+window.addEventListener('hashchange', () => {
+  state = readHash(); plan = simulationPlan(state, REFERENCE);
+  if (plan.paperMode) stopSimulation(); else scheduleSimulation();
+  render();
+});
 window.addEventListener('resize', () => { if (state.activeTab === 4) drawFigure(); });
 state = readHash();
+plan = simulationPlan(state, REFERENCE);
+if (!plan.paperMode) scheduleSimulation();
 render();
 
 })();

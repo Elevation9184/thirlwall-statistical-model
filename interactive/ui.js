@@ -3,6 +3,8 @@ import { SWEEP } from './reference/figure2-data.js';
 import { calculate, prevalenceToSlider, sliderToPrevalence } from './model.js';
 import { drawTradeoff, drawUnitChart } from './charts.js';
 import { deriveAll } from './derive.js';
+import { simulationPlan, simulationOptions, effectiveReference, isPaperMode } from './sim/scenario.js';
+import { derivedIntervals } from './sim/intervals.js';
 import { TEST_NAMES, TYPE_NAMES, formatNumber, rangeControl, renderLayout } from './tabs/common.js';
 import { renderTab1 } from './tabs/tab1.js';
 import { renderTab2 } from './tabs/tab2.js';
@@ -16,22 +18,28 @@ const hashKeys = {
   prevalencePer10k: 'rate', unitType: 'unit', expectedExtraDeaths: 'effect',
   riskAllocation: 'allocation', q: 'q', investigationMonths: 'months',
   mechanismRoster: 'roster', mechanismDeaths: 'deaths', figureOpen: 'figure',
-  worldOpen: 'world'
+  worldOpen: 'world', alarmSD: 'line', significance: 'sig', seed: 'seed'
 };
-const numericFields = new Set(['activeTab', 'thresholdIndex', 'prevalencePer10k', 'expectedExtraDeaths', 'q', 'investigationMonths', 'mechanismRoster', 'mechanismDeaths']);
+const numericFields = new Set(['activeTab', 'thresholdIndex', 'prevalencePer10k', 'expectedExtraDeaths', 'q', 'investigationMonths', 'mechanismRoster', 'mechanismDeaths', 'alarmSD', 'significance', 'seed']);
 const allowed = {
   rule: REFERENCE.inputs.rules, rotaTest: ['avg', 'own', 'adj'],
   unitType: ['NICU', 'LNU', 'SCU'], riskAllocation: ['staff', 'equal']
 };
 const ranges = {
   activeTab: [1, 5], thresholdIndex: [0, SWEEP.length - 1], prevalencePer10k: [.1, 30],
-  expectedExtraDeaths: [4, 7], q: [0, 1], investigationMonths: [1, 36],
+  expectedExtraDeaths: [1, 15], alarmSD: [1.5, 3.5], significance: [.01, .1], seed: [0, 4294967295], q: [0, 1], investigationMonths: [1, 36],
   mechanismRoster: [20, 200], mechanismDeaths: [2, 40]
 };
 let state = cloneDefaults();
+let plan = simulationPlan(state, REFERENCE);
+let simulation = { chance: {}, detection: {} };
+let previousSimulation = null;
+let worker = null, debounce = null, runId = 0, completed = 0, loading = false, simulationError = '';
+let intervalCache = null, intervalCacheKey = '';
 
 function cloneDefaults() {
-  return { ...PAPER_DEFAULT, unitCounts: { ...PAPER_DEFAULT.unitCounts } };
+  return { ...PAPER_DEFAULT, unitCounts: { ...PAPER_DEFAULT.unitCounts },
+    deathsPerYear: { ...PAPER_DEFAULT.deathsPerYear }, staffPerRoster: { ...PAPER_DEFAULT.staffPerRoster } };
 }
 
 function readHash() {
@@ -44,13 +52,18 @@ function readHash() {
     else if (numericFields.has(field)) {
       const value = Number(raw);
       if (Number.isFinite(value) && value >= ranges[field][0] && value <= ranges[field][1] &&
-          (field !== 'expectedExtraDeaths' || value === 4 || value === 7)) next[field] = value;
+          (field !== 'seed' || Number.isInteger(value))) next[field] = value;
     } else if (allowed[field].includes(raw)) next[field] = raw;
   }
   for (const type of ['NICU', 'LNU', 'SCU']) {
     const raw = params.get(type.toLowerCase());
     const value = Number(raw);
     if (raw !== null && Number.isInteger(value) && value >= 0 && value <= 150) next.unitCounts[type] = value;
+    for (const [prefix, field, min, max, integer] of [['mean', 'deathsPerYear', .5, 60, false], ['staff', 'staffPerRoster', 10, 200, true]]) {
+      const text = params.get(`${prefix}-${type.toLowerCase()}`);
+      const number = Number(text);
+      if (text !== null && Number.isFinite(number) && number >= min && number <= max && (!integer || Number.isInteger(number))) next[field][type] = number;
+    }
   }
   return next;
 }
@@ -59,6 +72,10 @@ function writeHash() {
   const params = new URLSearchParams();
   for (const [field, key] of Object.entries(hashKeys)) params.set(key, typeof state[field] === 'boolean' ? (state[field] ? '1' : '0') : String(state[field]));
   for (const type of ['NICU', 'LNU', 'SCU']) params.set(type.toLowerCase(), String(state.unitCounts[type]));
+  for (const type of ['NICU', 'LNU', 'SCU']) {
+    params.set(`mean-${type.toLowerCase()}`, String(state.deathsPerYear[type]));
+    params.set(`staff-${type.toLowerCase()}`, String(state.staffPerRoster[type]));
+  }
   const target = '#' + params.toString();
   if (location.hash !== target) history.replaceState(null, '', target);
 }
@@ -71,7 +88,9 @@ function updateScenario() {
     [4, formatNumber(state.prevalencePer10k, 2) + ' in 10,000'],
     [4, state.riskAllocation === 'staff' ? 'Staff-proportional risk' : 'Equal risk'],
     [5, 'q = ' + formatNumber(state.q, 2)],
-    [5, state.investigationMonths + ' months']
+    [5, state.investigationMonths + ' months'],
+    [1, formatNumber(state.alarmSD, 1) + ' SD alarm line'],
+    [2, formatNumber(state.significance * 100, 1) + '% significance']
   ];
   document.querySelector('#scenario-items').innerHTML = items.map(([tab, label]) =>
     '<button type="button" data-go-tab="' + tab + '">' + label + '</button>').join('<span aria-hidden="true">·</span>');
@@ -83,8 +102,20 @@ function renderWorld(preserve) {
   details.open = state.worldOpen;
   const controls = document.querySelector('#world-controls');
   if (preserve) return;
-  controls.innerHTML = ['NICU', 'LNU', 'SCU'].map(type =>
-    rangeControl('count-' + type, TYPE_NAMES[type] + ' units', 0, 150, 1, state.unitCounts[type], String(state.unitCounts[type]))).join('');
+  controls.innerHTML = ['NICU', 'LNU', 'SCU'].map(type => `<div class="world-type"><h3>${TYPE_NAMES[type]}</h3>
+    ${rangeControl('count-' + type, 'Units', 0, 150, 1, state.unitCounts[type], String(state.unitCounts[type]))}
+    ${rangeControl('mean-' + type, 'Expected deaths a year', .5, 60, .5, state.deathsPerYear[type], formatNumber(state.deathsPerYear[type], 1))}
+    ${rangeControl('staff-' + type, 'Nurses on each roster', 10, 200, 1, state.staffPerRoster[type], String(state.staffPerRoster[type]))}</div>`).join('');
+}
+
+function updateSimulationBanner() {
+  const banner = document.querySelector('#simulation-banner');
+  banner.hidden = plan.paperMode;
+  if (plan.paperMode) return;
+  const status = simulationError ? `Simulation error: ${simulationError}` : loading
+    ? `Updating · ${completed} of ${plan.jobs.length} cells` : 'Estimates ready';
+  banner.innerHTML = `<strong>Simulation mode</strong> · estimates from ${REFERENCE.inputs.reps.toLocaleString()} chance / ${REFERENCE.inputs.det_reps.toLocaleString()} detection simulated units per cell · seed ${state.seed}
+    <span class="simulation-progress">${status}</span><button type="button" data-sim-action="baseline">Return to paper baseline</button><button type="button" data-sim-action="seed">Re-run with a new seed</button>`;
 }
 
 function drawFigure() {
@@ -100,10 +131,25 @@ function drawFigure() {
 }
 
 function render(preserveField = null) {
-  const live = deriveAll(state, REFERENCE);
+  if (!preserveField && document.activeElement?.matches('input[type="range"][data-field]'))
+    preserveField = document.activeElement.dataset.field;
+  const currentReference = plan.paperMode ? REFERENCE : effectiveReference(state, REFERENCE, plan, simulation, previousSimulation);
+  const adjustedPosterior = !plan.paperMode && state.rotaTest === 'adj';
+  const live = deriveAll(state, currentReference, { adjustedPosterior });
   const paper = deriveAll(PAPER_DEFAULT, REFERENCE);
+  const cacheKey = JSON.stringify([state, completed, loading, adjustedPosterior]);
+  if (!plan.paperMode && !loading && !simulationError && cacheKey !== intervalCacheKey) {
+    intervalCache = derivedIntervals(state, currentReference, live, adjustedPosterior);
+    intervalCacheKey = cacheKey;
+  }
+  const context = { reference: currentReference, intervals: loading ? null : intervalCache,
+    simMode: !plan.paperMode, loading, adjustedPosterior, plan };
+  document.querySelector('.scope-note').textContent = plan.paperMode
+    ? 'The live tables use the validated Python reference run and exact arithmetic. Counts for hypothetical settings are scenarios, not estimates of real offender prevalence.'
+    : 'Simulation estimates carry 95% intervals; paper values remain beside them. This is a hypothetical scenario, not an estimate of real offender prevalence.';
   updateScenario();
-  renderWorld(preserveField && preserveField.startsWith('count-'));
+  updateSimulationBanner();
+  renderWorld(preserveField && /^(count|mean|staff)-/.test(preserveField));
   tabViews.forEach((viewFunction, index) => {
     const tabNumber = index + 1;
     const tab = document.querySelector('#tab-' + tabNumber);
@@ -112,7 +158,9 @@ function render(preserveField = null) {
     tab.setAttribute('aria-selected', String(active));
     tab.tabIndex = active ? 0 : -1;
     panel.hidden = !active;
-    const markup = renderLayout(tabNumber, viewFunction(state, live, paper, REFERENCE));
+    const view = viewFunction(state, live, paper, REFERENCE, context);
+    if (!plan.paperMode) view.working = `<p class="source-explainer"><strong>Sources.</strong> “Simulated” cells use the current worker run; “derived” values combine those estimates with the shown scenario. Other cells retain the Python paper baseline. Pending values are dimmed until their new estimates arrive.</p>${view.working}`;
+    const markup = renderLayout(tabNumber, view);
     if (preserveField && active) {
       const temp = document.createElement('div');
       temp.innerHTML = markup;
@@ -127,17 +175,94 @@ function render(preserveField = null) {
       });
     } else panel.innerHTML = markup;
   });
-  if (preserveField && preserveField.startsWith('count-')) {
-    const type = preserveField.slice(6);
+  if (preserveField && /^(count|mean|staff)-/.test(preserveField)) {
+    const [kind, type] = preserveField.split('-');
     const output = document.querySelector('#world-controls [data-output="' + preserveField + '"]');
-    if (output) output.textContent = String(state.unitCounts[type]);
+    if (output) output.textContent = String(kind === 'count' ? state.unitCounts[type]
+      : kind === 'mean' ? state.deathsPerYear[type] : state.staffPerRoster[type]);
   }
+  document.querySelectorAll('[role="tabpanel"]').forEach(panel => panel.classList.toggle('sim-updating', loading));
   drawFigure();
 }
 
+function stopSimulation() {
+  if (debounce) clearTimeout(debounce);
+  debounce = null;
+  if (worker) worker.terminate();
+  worker = null;
+  runId++;
+  loading = false;
+  completed = 0;
+  simulationError = '';
+  if (plan.paperMode) simulation = { chance: {}, detection: {} };
+  if (plan.paperMode) previousSimulation = null;
+  intervalCache = null;
+  intervalCacheKey = '';
+}
+
+function scheduleSimulation() {
+  previousSimulation = simulation;
+  stopSimulation();
+  simulation = { chance: {}, detection: {} };
+  loading = true;
+  const id = runId;
+  debounce = setTimeout(() => {
+    debounce = null;
+    if (id !== runId || plan.paperMode) return;
+    if (!plan.jobs.length) { loading = false; render(); return; }
+    try {
+      worker = createSimulationWorker();
+      worker.addEventListener('message', event => {
+        const message = event.data;
+        if (id !== runId) return;
+        if (message.type === 'ready') {
+          worker.postMessage({ type: 'run', id, options: simulationOptions(state, REFERENCE, plan) });
+        } else if (message.id === id && message.type === 'progress') {
+          const job = message.progress;
+          if (job.kind === 'chance') (simulation.chance[job.rule] ||= {})[job.type] = job.value;
+          else ((simulation.detection[job.effect] ||= {})[job.rule] ||= {})[job.type] = job.value;
+          completed = job.completed;
+          render();
+        } else if (message.id === id && message.type === 'result') {
+          simulation = message.result;
+          previousSimulation = null;
+          completed = plan.jobs.length;
+          loading = false;
+          worker.terminate();
+          worker = null;
+          render();
+        } else if (message.id === id && message.type === 'error') {
+          simulationError = message.message;
+          loading = false;
+          worker.terminate();
+          worker = null;
+          render();
+        }
+      });
+      worker.addEventListener('error', event => {
+        if (id !== runId) return;
+        simulationError = event.message || 'Worker failed';
+        loading = false;
+        worker.terminate(); worker = null; render();
+      });
+    } catch (error) {
+      simulationError = error.message;
+      loading = false;
+      render();
+    }
+  }, 300);
+}
+
 function setState(patch, preserveField = null) {
+  const previousPlan = plan;
   state = { ...state, ...patch };
+  plan = simulationPlan(state, REFERENCE);
   writeHash();
+  const simInputChanged = ['deathsPerYear', 'staffPerRoster', 'alarmSD', 'significance', 'expectedExtraDeaths', 'seed'].some(key => Object.hasOwn(patch, key));
+  const priorityChanged = loading && ['activeTab', 'rule', 'unitType'].some(key => Object.hasOwn(patch, key));
+  const adjChanged = !plan.paperMode && state.rotaTest === 'adj' && patch.rotaTest === 'adj';
+  if (plan.paperMode) stopSimulation();
+  else if (simInputChanged || priorityChanged || adjChanged || previousPlan.paperMode) scheduleSimulation();
   render(preserveField);
 }
 
@@ -147,6 +272,14 @@ function setField(field, raw, preserve = false, log = false) {
     if (!Object.hasOwn(state.unitCounts, type)) return;
     setState({ unitCounts: { ...state.unitCounts, [type]: Number(raw) } }, preserve ? field : null);
     return;
+  }
+  for (const [prefix, key] of [['mean-', 'deathsPerYear'], ['staff-', 'staffPerRoster']]) {
+    if (field.startsWith(prefix)) {
+      const type = field.slice(prefix.length);
+      if (!Object.hasOwn(state[key], type)) return;
+      setState({ [key]: { ...state[key], [type]: Number(raw) } }, preserve ? field : null);
+      return;
+    }
   }
   if (!Object.hasOwn(hashKeys, field)) return;
   let value = log ? sliderToPrevalence(raw) : numericFields.has(field) ? Number(raw) : raw;
@@ -161,7 +294,11 @@ document.addEventListener('click', event => {
   if (scenario) { const next = Number(scenario.dataset.goTab); setState({ activeTab: next }); document.querySelector('#tab-' + next).focus(); return; }
   const choice = event.target.closest('[data-set-field]');
   if (choice) { setField(choice.dataset.setField, choice.dataset.value); return; }
-  if (event.target.closest('#reset-button')) { state = cloneDefaults(); writeHash(); render(); }
+  const action = event.target.closest('[data-sim-action]');
+  if (action?.dataset.simAction === 'seed') { setState({ seed: (state.seed + 1) >>> 0 }); return; }
+  if (action?.dataset.simAction === 'baseline' || event.target.closest('#reset-button')) {
+    state = cloneDefaults(); plan = simulationPlan(state, REFERENCE); stopSimulation(); writeHash(); render();
+  }
 });
 
 document.addEventListener('input', event => {
@@ -187,7 +324,13 @@ document.addEventListener('toggle', event => {
     if (field === 'figureOpen' && event.target.open) drawFigure();
   }
 }, true);
-window.addEventListener('hashchange', () => { state = readHash(); render(); });
+window.addEventListener('hashchange', () => {
+  state = readHash(); plan = simulationPlan(state, REFERENCE);
+  if (plan.paperMode) stopSimulation(); else scheduleSimulation();
+  render();
+});
 window.addEventListener('resize', () => { if (state.activeTab === 4) drawFigure(); });
 state = readHash();
+plan = simulationPlan(state, REFERENCE);
+if (!plan.paperMode) scheduleSimulation();
 render();

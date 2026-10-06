@@ -2,9 +2,10 @@ import { SWEEP } from '../reference/figure2-data.js';
 import { calculate, prevalenceToSlider } from '../model.js';
 import { RULE_NAMES, choiceControl, compareCell, fixedList, formatNumber, formatRatio, printedRates, rangeControl, table } from './common.js';
 
-function ratioBar(rule, value, years, selected) {
-  const width = value ? Math.max(0, Math.min(100, (Math.log10(value) - 1) / 4 * 100)) : 0;
-  return `<div class="ratio-row ${selected ? 'highlighted' : ''}"><span>${rule}</span><div class="ratio-track"><i style="width:${width.toFixed(2)}%"></i></div><strong>${formatRatio(value)}</strong><small>${years === null ? 'not computed' : `${formatNumber(years, 0)} years`}</small></div>`;
+function ratioBar(rule, value, years, selected, interval, yearsInterval) {
+  const position = number => number ? Math.max(0, Math.min(100, (Math.log10(number) - 1) / 4 * 100)) : 0;
+  const width = position(value);
+  return `<div class="ratio-row ${selected ? 'highlighted' : ''}"><span>${rule}</span><div class="ratio-track"><i style="width:${width.toFixed(2)}%"></i>${interval ? `<b class="ratio-error" style="left:${position(interval[0]).toFixed(2)}%;width:${(position(interval[1]) - position(interval[0])).toFixed(2)}%"></b>` : ''}</div><strong>${formatRatio(value)}</strong><small>${years === null ? 'not computed' : `${formatNumber(years, 0)} years`}${yearsInterval ? ` (95% ${formatNumber(yearsInterval[0], 0)}–${formatNumber(yearsInterval[1], 0)})` : ''}${interval ? ` · ratio 95% ${formatRatio(interval[0])}–${formatRatio(interval[1])}` : ''}</small></div>`;
 }
 
 function figure2Markup(state) {
@@ -26,14 +27,14 @@ function figure2Markup(state) {
     </div></details>`;
 }
 
-export function renderTab4(state, live, paper, reference) {
+export function renderTab4(state, live, paper, reference, context = {}) {
   const selected = live.ratio[state.rule].current;
   const controls = rangeControl('prevalencePer10k', 'Offender base rate', 0, 100, 1, prevalenceToSlider(state.prevalencePer10k),
     `${formatNumber(state.prevalencePer10k, 2)} per 10,000 unit-years`, 'Logarithmic slider. The two references are scenarios, not prevalence estimates.')
     + `<div class="preset-row">${printedRates.map(rate => `<button type="button" data-set-field="prevalencePer10k" data-value="${rate}" aria-pressed="${state.prevalencePer10k === rate}">${rate}</button>`).join('')}</div>`
     + choiceControl('riskAllocation', 'Risk allocation', [['staff', 'In proportion to staff'], ['equal', 'Equal per unit']], state.riskAllocation);
-  const graph = `<p class="graph-note">Falsely flagged unit-years per detected offender-year · log scale · current base rate ${formatNumber(state.prevalencePer10k, 2)} in 10,000</p>${live.rules.map(rule => ratioBar(rule, live.ratio[rule].current.ratio, live.ratio[rule].current.years, rule === state.rule)).join('')}`;
-  const rows = live.rules.map(rule => `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${printedRates.map(rate => compareCell(live.ratio[rule].printedRates[rate].ratio, paper.ratio[rule].printedRates[rate].ratio, formatRatio)).join('')}${compareCell(live.ratio[rule].current.ratio, paper.ratio[rule].current.ratio, formatRatio)}</tr>`);
+  const graph = `<p class="graph-note">Falsely flagged unit-years per detected offender-year · log scale · current base rate ${formatNumber(state.prevalencePer10k, 2)} in 10,000</p>${live.rules.map(rule => ratioBar(rule, live.ratio[rule].current.ratio, live.ratio[rule].current.years, rule === state.rule, context.intervals?.[`ratio|${rule}|${state.prevalencePer10k}`], context.intervals?.[`years|${rule}|${state.prevalencePer10k}`])).join('')}`;
+  const rows = live.rules.map(rule => `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${printedRates.map(rate => compareCell(live.ratio[rule].printedRates[rate].ratio, paper.ratio[rule].printedRates[rate].ratio, formatRatio, { interval: context.intervals?.[`ratio|${rule}|${rate}`] })).join('')}${compareCell(live.ratio[rule].current.ratio, paper.ratio[rule].current.ratio, formatRatio, { interval: context.intervals?.[`ratio|${rule}|${state.prevalencePer10k}`] })}</tr>`);
   const liveTable = table(['Rule', ...printedRates.map(rate => `${rate} / 10k`), 'Your rate'], rows, 'Table 4 · falsely flagged unit-years per detected offender-year; paper baseline is staff-proportional, +4');
   const weights = selected.weights;
   const working = `<p><strong>False flagged / yr</strong> = Σ n<sub>t</sub> × (1 − p × w<sub>t</sub>) × alarm share<sub>t</sub> = <strong>${formatNumber(selected.falseFlagged, 3)}</strong>.</p><p><strong>Detected offender-years / yr</strong> = Σ n<sub>t</sub> × p × w<sub>t</sub> × detection sensitivity<sub>t</sub> = <strong>${formatNumber(selected.detected, 5)}</strong>.</p><p class="formula">${formatNumber(selected.falseFlagged, 3)} ÷ ${formatNumber(selected.detected, 5)} = <strong>${formatRatio(selected.ratio)}</strong>; 1 ÷ ${formatNumber(selected.detected, 5)} = <strong>${selected.years === null ? 'not computed' : `${formatNumber(selected.years, 0)} years`}</strong>.</p><p>For this unit mix, the ${state.riskAllocation === 'staff' ? 'staff-proportional' : 'equal'} risk weights are ${Object.entries(weights).map(([type, weight]) => `${type} ${formatNumber(weight, 3)}`).join(' · ')}.</p>`;

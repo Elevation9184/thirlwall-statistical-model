@@ -10,9 +10,11 @@ export function riskWeights(counts, allocation, reference) {
 
 export function chanceForRule(rule, counts, reference) {
   const byType = reference.chance[rule];
-  const sum = key => TYPES.reduce((total, type) => total + counts[type] * byType[type][key], 0);
+  const sum = key => TYPES.some(type => counts[type] && byType[type][key] === null) ? null
+    : TYPES.reduce((total, type) => total + counts[type] * byType[type][key], 0);
   const reviewed = sum('rev');
-  const weightedShare = key => reviewed ? TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type][key], 0) / reviewed : null;
+  const weightedShare = key => reviewed && !TYPES.some(type => counts[type] && byType[type][key] === null)
+    ? TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type][key], 0) / reviewed : null;
   return {
     byType,
     alarmUnitYears: sum('alpha'),
@@ -20,9 +22,11 @@ export function chanceForRule(rule, counts, reference) {
     reviewed,
     shares: { avg: weightedShare('s_avg'), own: weightedShare('s_own'), adj: weightedShare('s_adj') },
     flags: {
-      avg: TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type].s_avg, 0),
+      avg: TYPES.some(type => counts[type] && byType[type].s_avg === null) ? null
+        : TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type].s_avg, 0),
       own: sum('flag_ep'),
-      adj: TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type].s_adj, 0)
+      adj: TYPES.some(type => counts[type] && byType[type].s_adj === null) ? null
+        : TYPES.reduce((total, type) => total + counts[type] * byType[type].rev * byType[type].s_adj, 0)
     },
     distinctOwn: sum('flag_distinct')
   };
@@ -34,6 +38,8 @@ export function falseTrue(rule, baseRatePer10k, effect, allocation, counts, refe
   let falseFlagged = 0;
   let detected = 0;
   for (const type of TYPES) {
+    if (counts[type] && (reference.chance[rule][type].alpha === null || reference.detection[String(effect)][rule][type].d === null))
+      return { falseFlagged: null, detected: null, ratio: null, years: null, weights };
     const prevalence = p * weights[type];
     falseFlagged += counts[type] * (1 - prevalence) * reference.chance[rule][type].alpha;
     detected += counts[type] * prevalence * reference.detection[String(effect)][rule][type].d;
@@ -42,18 +48,25 @@ export function falseTrue(rule, baseRatePer10k, effect, allocation, counts, refe
     years: detected ? 1 / detected : null, weights };
 }
 
-export function posteriorParts(rule, baseRatePer10k, effect, allocation, counts, reference) {
+export function posteriorParts(rule, baseRatePer10k, effect, allocation, counts, reference, test = 'own') {
   const p = baseRatePer10k / 10000;
   const weights = riskWeights(counts, allocation, reference);
   let offenderFlagged = 0;
   let anyFlaggedWithOffender = 0;
   let backgroundFlags = 0;
   for (const type of TYPES) {
+    if (!counts[type]) continue;
     const prevalence = p * weights[type];
     const detection = reference.detection[String(effect)][rule][type];
-    offenderFlagged += counts[type] * prevalence * detection.d * detection.flag_off;
-    anyFlaggedWithOffender += counts[type] * prevalence * detection.d * detection.flag_any;
-    backgroundFlags += counts[type] * (1 - prevalence) * reference.chance[rule][type].flag_ep;
+    const offenderRate = test === 'adj' ? detection.flag_off_adj : detection.flag_off;
+    const anyRate = test === 'adj' ? detection.flag_any_adj : detection.flag_any;
+    const chance = reference.chance[rule][type];
+    const backgroundRate = test === 'adj' ? chance.rev * chance.s_adj : chance.flag_ep;
+    if (counts[type] && [detection.d, offenderRate, anyRate, backgroundRate].some(value => value === null || value === undefined))
+      return { offenderFlagged: null, anyFlaggedWithOffender: null, backgroundFlags: null, denominator: null, value: null };
+    offenderFlagged += counts[type] * prevalence * detection.d * offenderRate;
+    anyFlaggedWithOffender += counts[type] * prevalence * detection.d * anyRate;
+    backgroundFlags += counts[type] * (1 - prevalence) * backgroundRate;
   }
   const denominator = anyFlaggedWithOffender + backgroundFlags;
   return { offenderFlagged, anyFlaggedWithOffender, backgroundFlags, denominator,
@@ -91,7 +104,7 @@ export function mechanismProbability(rosterSize, deathsReviewed, reference, sign
   return 1 - (1 - singleNurseFlag) ** rosterSize;
 }
 
-export function deriveAll(state, reference) {
+export function deriveAll(state, reference, options = {}) {
   const rules = reference.inputs.rules;
   const counts = state.unitCounts;
   const chance = Object.fromEntries(rules.map(rule => [rule, chanceForRule(rule, counts, reference)]));
@@ -100,15 +113,15 @@ export function deriveAll(state, reference) {
     current: falseTrue(rule, state.prevalencePer10k, state.expectedExtraDeaths, state.riskAllocation, counts, reference),
     printedRates: Object.fromEntries(reference.inputs.base_rates.map(rate => [rate, falseTrue(rule, rate, state.expectedExtraDeaths, state.riskAllocation, counts, reference)]))
   }]));
-  const posteriorDetails = Object.fromEntries(rules.map(rule => [rule, posteriorParts(rule, state.prevalencePer10k, state.expectedExtraDeaths, state.riskAllocation, counts, reference)]));
+  const posteriorDetails = Object.fromEntries(rules.map(rule => [rule, posteriorParts(rule, state.prevalencePer10k, state.expectedExtraDeaths, state.riskAllocation, counts, reference, options.adjustedPosterior ? 'adj' : 'own')]));
   const posteriors = Object.fromEntries(rules.map(rule => [rule, posteriorDetails[rule].value]));
   const flags = Object.fromEntries(rules.map(rule => [rule, {
     base: chance[rule].flags[state.rotaTest],
-    current: chance[rule].flags[state.rotaTest] * state.q,
-    offWards: chance[rule].flags[state.rotaTest] * state.q * state.investigationMonths / 12,
-    byQ: Object.fromEntries(reference.inputs.q.map(q => [q, chance[rule].flags[state.rotaTest] * q]))
+    current: chance[rule].flags[state.rotaTest] === null ? null : chance[rule].flags[state.rotaTest] * state.q,
+    offWards: chance[rule].flags[state.rotaTest] === null ? null : chance[rule].flags[state.rotaTest] * state.q * state.investigationMonths / 12,
+    byQ: Object.fromEntries(reference.inputs.q.map(q => [q, chance[rule].flags[state.rotaTest] === null ? null : chance[rule].flags[state.rotaTest] * q]))
   }]));
   return { rules, counts, chance, detection, ratio, posteriors, posteriorDetails, flags,
-    mechanism: { selected: mechanismProbability(state.mechanismRoster, state.mechanismDeaths, reference),
-      curve: Array.from({ length: 21 }, (_, index) => ({ roster: index * 10, probability: mechanismProbability(index * 10, state.mechanismDeaths, reference) })) } };
+    mechanism: { selected: mechanismProbability(state.mechanismRoster, state.mechanismDeaths, reference, state.significance ?? .05),
+      curve: Array.from({ length: 21 }, (_, index) => ({ roster: index * 10, probability: mechanismProbability(index * 10, state.mechanismDeaths, reference, state.significance ?? .05) })) } };
 }

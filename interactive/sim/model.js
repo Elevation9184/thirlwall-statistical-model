@@ -151,7 +151,7 @@ function chanceCell(rng, rule, type, reference, reps, settings) {
     s_adj: adjustedPasses / Math.max(reviewedAlarms, 1), flag_ep: ownPasses / unitYears,
     flag_distinct: distinctNurses / unitYears, med_k: median(reviewedDeaths), med_top: median(topAttendance),
     counts: { units: reps, unitYears, alarmingUnitYears, episodes: episodeCount, reviewedAlarms,
-      avgPasses, ownPasses, adjustedPasses, distinctNurses }
+      avgPasses, ownPasses, adjustedPasses, distinctNurses, reviewedDeaths, topAttendance }
   };
 }
 
@@ -159,6 +159,7 @@ function detectionCell(rng, effect, rule, type, reference, reps, settings) {
   const inputs = settings.inputs;
   const unit = settings.unitTypes[type];
   let hits = 0, backgroundHits = 0, reviewedHits = 0, offenderIdentifications = 0, anyNurseFlags = 0;
+  let offenderIdentificationsAdjusted = 0, anyNurseFlagsAdjusted = 0;
   for (let unitIndex = 0; unitIndex < reps; unitIndex++) {
     const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months, effect);
     const roster = drawRoster(rng, unit.staff, inputs.exposure, inputs.exposure_mix, true, inputs.offender_f);
@@ -191,6 +192,12 @@ function detectionCell(rng, effect, rule, type, reference, reps, settings) {
         }
         anyNurseFlags += passing / tied;
         offenderIdentifications += offenderPasses / tied;
+        let allBelow = 1;
+        for (let nurse = 0; nurse < unit.staff; nurse++) allBelow *= binomialCDF(top - 1, deaths, roster[nurse]);
+        if (1 - allBelow < settings.significance) {
+          anyNurseFlagsAdjusted++;
+          if (attendance[unit.staff - 1] === top) offenderIdentificationsAdjusted += 1 / tied;
+        }
       }
     }
   }
@@ -201,8 +208,10 @@ function detectionCell(rng, effect, rule, type, reference, reps, settings) {
   }
   return { d: hits / reps, bg: backgroundHits / reps,
     flag_off: offenderIdentifications / Math.max(hits, 1), flag_any: anyNurseFlags / Math.max(hits, 1),
+    flag_off_adj: offenderIdentificationsAdjusted / Math.max(hits, 1),
+    flag_any_adj: anyNurseFlagsAdjusted / Math.max(hits, 1),
     counts: { units: reps, hits, backgroundUnits: reps, backgroundHits, reviewedHits,
-      offenderIdentifications, anyNurseFlags } };
+      offenderIdentifications, anyNurseFlags, offenderIdentificationsAdjusted, anyNurseFlagsAdjusted } };
 }
 
 export function runSimulation(reference, options = {}, onProgress = () => {}) {
@@ -219,7 +228,7 @@ export function runSimulation(reference, options = {}, onProgress = () => {}) {
   const rules = options.rules || inputs.rules;
   const types = options.types || Object.keys(inputs.types);
   const effects = options.effects || [4, 7];
-  const jobs = [
+  const jobs = options.jobs || [
     ...rules.flatMap(rule => types.map(type => ({ kind: 'chance', rule, type }))),
     ...effects.flatMap(effect => rules.flatMap(rule => types.map(type => ({ kind: 'detection', effect, rule, type }))))
   ];

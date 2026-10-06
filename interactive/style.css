@@ -244,3 +244,31 @@ tbody th { font-weight:750; }
 @media (max-width:1100px) { .tab-layout { grid-template-columns:minmax(200px,250px) minmax(0,1fr); } .tab-controls { grid-row:1 / span 2; } .tab-graph,.tab-table { grid-column:2; } .tab-working,.tab-fixed,.tab-extra { grid-column:1 / 3; } }
 @media (max-width:700px) { .shell { width:calc(100% - 28px); } .intro { padding:28px 0 18px; } .intro h1 { font-size:37px; } .scenario { padding:16px; } .scenario-items>span { display:none; } .scenario-items button { font-size:11px; } .tab-layout { display:flex; flex-direction:column; } .tab-layout>* { width:100%; } .tab-controls { order:1; }.tab-graph { order:2; }.tab-table { order:3; }.tab-working { order:4; }.tab-fixed { order:5; }.tab-extra { order:6; } .tab-fixed ul { grid-template-columns:1fr; } .world-controls,.figure2-controls,.figure2-metrics { grid-template-columns:1fr; } .card { padding:17px; } .tabbar button { padding:11px 12px; } .tab-intro h2 { font-size:28px; } .table-hint { display:block; } }
 @media (max-width:700px) { .cost-plot .axis-tick { font-size:14px; } .cost-plot .axis-title { font-size:15px; } }
+
+/* Stage 3b simulation mode */
+.simulation-banner { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin-top:14px; padding:12px 14px; border:1px solid #aad1cf; border-radius:8px; background:#e7f4f2; color:#214d56; font-size:12px; line-height:1.5; }
+.simulation-banner[hidden] { display:none; }
+.simulation-banner strong { color:#086a70; }
+.simulation-banner button { border:1px solid #8bbfbc; border-radius:6px; padding:6px 9px; background:#fff; color:#086a70; font-size:11px; font-weight:700; cursor:pointer; }
+.simulation-progress { font-weight:700; }
+.world-controls { align-items:start; }
+.world-type { min-width:0; }
+.world-type h3 { margin:4px 0 13px; font-family:Georgia,"Times New Roman",serif; font-size:18px; font-weight:500; }
+.world-type .control-field { margin-bottom:12px; padding-bottom:10px; }
+.world-type .control-field label { font-size:12px; }
+.world-type .control-field output { font-size:14px; margin:6px 0 0; }
+.source-value { display:block; color:#177578; font-size:10px; font-weight:650; }
+.interval-value { font-size:10px; font-weight:500; color:#486575; }
+.sim-updating td[data-source="pending"],.sim-updating .tab-graph,.sim-updating .tab-working { opacity:.58; }
+.unavailable-row,.unavailable-rule { color:#84919b; background:#f3f5f5; }
+.unavailable-row .trigger-cell small { display:block; color:#8b6870; margin-top:4px; }
+.dot-uncertainty,.chart-interval { display:flex; align-items:center; gap:7px; margin-top:5px; color:#5e7581; font-size:11px; }
+.chart-interval i { width:28px; border-top:3px solid #e49448; }
+.bar-row .bar-track { position:relative; }
+.bar-error,.detection-error,.ratio-error { position:absolute; height:4px; top:-6px; border-left:2px solid #d38139; border-right:2px solid #d38139; border-top:2px solid #d38139; box-sizing:border-box; }
+.ratio-track { position:relative; }
+.ratio-error { top:-4px; }
+.cost-error { stroke-width:5; stroke-linecap:round; opacity:.75; }
+.flag-error { stroke:var(--teal); }.wards-error { stroke:var(--orange); }
+.chart-posterior small { color:#5f7380; font-size:11px; }
+@media (max-width:700px) { .world-controls { grid-template-columns:1fr; } .simulation-banner { align-items:flex-start; } }

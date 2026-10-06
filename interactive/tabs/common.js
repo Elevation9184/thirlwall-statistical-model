@@ -39,7 +39,8 @@ export function formatPercent(value, digits = 1) {
 export function formatRatio(value) { return value === null || !Number.isFinite(value) ? 'not computed' : `${formatNumber(value, 0)}:1`; }
 
 export function formatPosterior(value) {
-  if (value === null || !Number.isFinite(value) || value <= 0) return { odds: 'not computed', percentage: null };
+  if (value === 0) return { odds: '0 observed', percentage: '0.000%' };
+  if (value === null || !Number.isFinite(value) || value < 0) return { odds: 'not computed', percentage: null };
   const reciprocal = 1 / value;
   const decimalPlaces = 1 - Math.floor(Math.log10(reciprocal));
   const scale = 10 ** Math.max(0, -decimalPlaces);
@@ -54,10 +55,20 @@ export function posteriorDisplay(value) {
     : '<span class="posterior-display unavailable">not computed</span>';
 }
 
-export function compareCell(value, paper, formatter = value => formatNumber(value)) {
+export function compareCell(value, paper, formatter = value => formatNumber(value), options = {}) {
   const liveText = formatter(value);
   const paperText = formatter(paper);
-  return `<td><span class="live-value">${liveText}</span>${liveText !== paperText ? `<small class="paper-value">paper ${paperText}</small>` : ''}</td>`;
+  const source = options.source || (liveText === paperText ? 'paper' : 'derived');
+  const interval = options.interval && source !== 'paper'
+    ? ` <span class="interval-value">(${formatter(options.interval[0])}–${formatter(options.interval[1])})</span>` : '';
+  const paperComparison = source === 'simulated' || source === 'pending' || (source === 'derived' && options.interval) || liveText !== paperText;
+  return `<td data-source="${source}"><span class="live-value">${liveText}${interval}</span>${source === 'simulated' || source === 'pending' || interval ? `<small class="source-value">${source === 'pending' ? 'updating' : source === 'derived' ? 'derived · 95% interval' : 'simulated · 95% interval'}</small>` : ''}${paperComparison ? `<small class="paper-value">paper ${paperText}</small>` : ''}</td>`;
+}
+
+export function cellSource(cell, key) { return cell?._source?.[key] || 'paper'; }
+
+export function estimateText(value, formatter, interval) {
+  return `${formatter(value)}${interval ? ` (${formatter(interval[0])}–${formatter(interval[1])})` : ''}`;
 }
 
 export function rangeControl(field, title, min, max, step, value, display, help = '') {
@@ -84,9 +95,11 @@ export function renderLayout(id, view) {
     </div><p class="takeaway" data-part="takeaway"><strong>Takeaway.</strong> ${view.takeaway}</p>`;
 }
 
-export function bar(label, value, maximum, valueText, className = '') {
+export function bar(label, value, maximum, valueText, className = '', interval = null) {
   const width = maximum > 0 ? Math.max(0, Math.min(100, value / maximum * 100)) : 0;
-  return `<div class="bar-row ${className}"><span class="bar-label">${label}</span><div class="bar-track"><span class="bar-fill" style="width:${width.toFixed(2)}%"></span></div><strong>${valueText}</strong></div>`;
+  const low = interval && maximum > 0 ? Math.max(0, Math.min(100, interval[0] / maximum * 100)) : 0;
+  const high = interval && maximum > 0 ? Math.max(0, Math.min(100, interval[1] / maximum * 100)) : 0;
+  return `<div class="bar-row ${className}"><span class="bar-label">${label}</span><div class="bar-track"><span class="bar-fill" style="width:${width.toFixed(2)}%"></span>${interval ? `<i class="bar-error" style="left:${low.toFixed(2)}%;width:${(high - low).toFixed(2)}%"></i>` : ''}</div><strong>${valueText}</strong></div>`;
 }
 
 export function table(headers, rows, caption) {
