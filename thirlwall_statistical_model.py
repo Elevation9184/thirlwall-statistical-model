@@ -17,7 +17,7 @@ across England and Wales, evaluated by Monte Carlo simulation, with exact binomi
 calculations for the rota tests. It asks two questions:
 
   1. If a mortality alarm is followed by a look at the rota, how often does chance
-     alone put a nurse in the frame?
+     alone flag a nurse?
   2. What is an alarm worth as evidence of deliberate harm?
 
 Running it
@@ -117,19 +117,6 @@ def sim_unit(mean, extra=0.0):
 
 # ---------------- CUSUM calibration ----------------
 LN2 = np.log(2)
-def cusum_alarm_years(mean, h, reps=4000):
-    """Fraction of monitoring unit-years with >=1 alarm, in control, for threshold h."""
-    rates = mean * rng.gamma(K, 1 / K, size=(reps, MON // 12))
-    mu = np.repeat(rates / 12, 12, axis=1)
-    x = rng.poisson(mu)
-    S = np.zeros(reps); alarmed = np.zeros((reps, MON // 12), bool)
-    for t in range(MON):
-        S = np.maximum(0, S + x[:, t] * LN2 - mu[:, t])
-        a = S >= h
-        alarmed[a, t // 12] = True
-        S[a] = 0
-    return alarmed.mean()
-
 def make_paths(mean, n, months, extra=0.0):
     rates = mean * rng.gamma(K, 1 / K, size=(n, max(months // 12, 1)))
     mu = np.repeat(rates / 12, 12, axis=1)[:, :months]
@@ -331,14 +318,14 @@ for r in RULES:
           + "  ".join(f"{t} {per[(r, t)]['alpha']:.3f}" for t in TYPES))
 
 print("\n=== 2. Rota review of chance alarms, system-weighted shares   [article: Step two, Table 2] ===")
-print("   careless = average-exposure test; naive = own-exposure test; correct = maximum-adjusted test (see MODEL.md)")
+print("   avg-exp = average-exposure test; own-exp = own-exposure test; max-adj = maximum-adjusted test (see MODEL.md)")
 for r in RULES:
-    print(f"{r:4s} careless {sysshare(r,'s_avg'):.2f}  naive {sysshare(r,'s_own'):.2f}  "
-          f"exact-correct {sysshare(r,'s_adj'):.3f}  | flag episodes/yr {sysw(r,'flag_ep'):5.1f}  "
+    print(f"{r:4s} avg-exp {sysshare(r,'s_avg'):.2f}  own-exp {sysshare(r,'s_own'):.2f}  "
+          f"max-adj {sysshare(r,'s_adj'):.3f}  | flag episodes/yr {sysw(r,'flag_ep'):5.1f}  "
           f"distinct nurses/yr {sysw(r,'flag_distinct'):5.1f}")
     for t in TYPES:
         d = per[(r, t)]
-        print(f"       {t}: careless {d['s_avg']:.2f} naive {d['s_own']:.2f} correct {d['s_adj']:.3f}"
+        print(f"       {t}: avg-exp {d['s_avg']:.2f} own-exp {d['s_own']:.2f} max-adj {d['s_adj']:.3f}"
               f"  | median deaths reviewed {d['med_k']:.0f}, median top-nurse attendance {d['med_top']:.0f}")
 
 # ---------------- 3: detection with an offender on the roster ----------------
@@ -348,7 +335,7 @@ for extra in (4, 7):
     for r in RULES:
         row = []
         for t, T in TYPES.items():
-            hit = top_off = flag_off = flag_any = 0
+            hit = flag_off = flag_any = 0
             reps = DET_REPS
             for _ in range(reps):
                 bg, off, mu = sim_unit(T["mean"], extra)
@@ -367,10 +354,13 @@ for extra in (4, 7):
                     continue
                 cnt = rng.binomial(kb, f) + rng.binomial(ko, f)
                 cnt[-1] = rng.binomial(kb, OFFENDER_F) + ko     # present at all own deaths
-                i, top, pa, po, pj = rota_review(f, cnt, k)
-                if po < .05:
-                    flag_any += 1
-                    flag_off += (i == len(f) - 1)
+                # Ties for the top attendance are shared equally among the tied nurses
+                # (the expected result of a random tie-break; no random numbers used).
+                top = cnt.max()
+                tied = np.flatnonzero(cnt == top)
+                passes = stats.binom.sf(top - 1, k, f[tied]) < .05     # own-exposure test
+                flag_any += passes.mean()
+                flag_off += passes[tied == len(f) - 1].sum() / len(tied)
             bg_hit = 0
             for _ in range(reps):
                 bg0, _, mu0 = sim_unit(T["mean"])
@@ -379,7 +369,7 @@ for extra in (4, 7):
             det[(extra, r, t)] = dict(d=hit / reps, bg=bg_hit / reps,
                                       flag_off=flag_off / max(hit, 1),
                                       flag_any=flag_any / max(hit, 1))
-            row.append(f"{t}: {hit/reps:.2f} [bg {bg_hit/reps:.2f}] (offender flagged {flag_off/max(hit,1):.2f})")
+            row.append(f"{t}: {hit/reps:.2f} [bg {bg_hit/reps:.2f}] (offender identified {flag_off/max(hit,1):.2f})")
         print(f"+{extra} {r:4s} " + "  ".join(row))
 
 # ---------------- 4: predictive value ----------------
@@ -422,13 +412,13 @@ def posterior(r, p_10k, weights=W_STAFF):
     den_false = sum(TYPES[t]["n"] * (1 - p * w[t]) * per[(r, t)]["flag_ep"] for t in TYPES)
     return num / (den_true + den_false)
 
-print("\n=== 5. P(flagged nurse is the offender | alarm and naive flag), +4   [article: Step three, closing paragraph] ===")
+print("\n=== 5. P(flagged nurse is the offender | alarm and own-exposure flag), +4   [article: Step three, closing paragraph] ===")
 for label, weights in (("main case, risk in proportion to staff", W_STAFF), ("sensitivity, equal risk per unit", W_EQUAL)):
     print(f"   {label}:")
     for r in RULES:
         print(f"{r:4s} " + "  ".join(f"p={b}: {posterior(r, b, weights)*100:.3f}%" for b in BASE_RATES))
 
-# ---------------- 6: nurses in the frame by q ----------------
+# ---------------- 6: nurses flagged, by q ----------------
 print("\n=== 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, Table 5] ===")
 for r in RULES:
     fe, fd = sysw(r, "flag_ep"), sysw(r, "flag_distinct")

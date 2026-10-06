@@ -40,7 +40,7 @@ If `python` selects a different interpreter, use the path or launcher for Python
 
 Quick mode uses roughly one tenth as many simulations. It is useful for exploring changes, but its estimates are noisier, especially in the rare-event end of the CUSUM threshold sweep. Use the full run for comparisons. Report the seed, software versions, and any changed inputs; another environment may produce different Monte Carlo values.
 
-Numba is included in the reference requirements and compiles the CUSUM loops on first use. The code has a NumPy fallback if Numba is unavailable. Both paths implement the same calculation. Compilation, hardware, and package versions affect elapsed time, which is not a reproducibility target. Observed full-run times were about 1.6 minutes with Numba and 2.0 minutes with the NumPy fallback on a Windows desktop, though the run recorded in [`example_output.txt`](example_output.txt) took about 4 minutes; a two-core Linux machine took about 2.7 minutes in either mode. A quick Linux run took about 17 seconds. These are examples, not promised run times.
+Numba is included in the reference requirements and compiles the CUSUM loops on first use. The code has a NumPy fallback if Numba is unavailable. Both paths implement the same calculation. Compilation, hardware, and package versions affect elapsed time, which is not a reproducibility target. Observed full-run times were about 1.6 minutes with Numba and 2.0 minutes with the NumPy fallback on a Windows desktop, though the run recorded in [`example_output.txt`](example_output.txt) took about 3.3 minutes on a cloud Linux machine; a two-core Linux machine took about 2.7 minutes in either mode. A quick Linux run took about 17 seconds. These are examples, not promised run times.
 
 ## Reading the output
 
@@ -49,11 +49,11 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 | Output block | What it reports | Article |
 | --- | --- | --- |
 | 1 | Chance alarms per year, nationally, under each monitoring rule; share of unit-years with an alarm by unit type | Step one: Table 1 and discussion; Figure 1 |
-| 2 | How often the most-present nurse looks significant under the average-exposure, naive own-exposure, and maximum-adjusted tests; median deaths reviewed and median top-nurse attendance by unit type | Step two: Table 2; Figure 1 |
+| 2 | How often the most-present nurse looks significant under the average-exposure, own-exposure, and maximum-adjusted tests; median deaths reviewed and median top-nurse attendance by unit type | Step two: Table 2; Figure 1 |
 | 3 | How often a unit with an offender is flagged within a year; how often the rota review identifies the offender; background flagging with no offender | Step three: Table 3 and background result |
 | 4 | Each base rate as a rate per nurse-year; falsely flagged unit-years per detected offender-year and national years per detection, at five base rates, with risk in proportion to staff (main case) and equal risk per unit (sensitivity) | Step three: Table 4; Figure 1 |
-| 5 | Scenario-based probability that a naively flagged nurse is the offender, under both allocations | Step three: closing paragraph |
-| 6 | Nurses put in the frame each year, by *q* | Step three: Table 5; Costing the consequences; Figure 1 |
+| 5 | Scenario-based probability that a nurse flagged by the own-exposure test is the offender, under both allocations | Step three: closing paragraph |
+| 6 | Nurses flagged each year, by *q* | Step three: Table 5; Costing the consequences; Figure 1 |
 | 7 | Chance alarms with no case-mix variation and a known baseline | Step one: robustness check |
 | 8 | Exactly four offender deaths instead of an expected four, at the neonatal reference | Step three: exact-count result |
 | 9 | Threshold sweep for the idealised chart: false alarms against detection, at both reference rates | Step three: Figure 2 |
@@ -78,11 +78,11 @@ Each block is labelled with the part of the article it supports. [`MODEL.md`](MO
 
 **Rota tests.** After an alarm, the deaths in the triggering window are matched to the rota and the most-present nurse is tested three ways:
 
-- **Average exposure** (`careless` in the output): compare the nurse's attendance with the average nurse's assumed exposure.
-- **Own exposure, naive** (`naive` in the output): compare it with that nurse's own exposure, as though the nurse had been named before looking at the rota.
-- **Maximum adjusted** (`exact-correct` or `correct` in the output): under the model's independent-attendance assumption, calculate the probability that the most-present nurse on the whole roster would do at least this well: P(max X_j ≥ m) = 1 − ∏ P(X_j < m), with X_j ~ Binomial(k, f_j). Because attendance counts are whole numbers, this test is conservative at a nominal 5% level. A real rota, with fixed staffing, teams and night shifts, would need a test built on the rota itself.
+- **Average exposure** (`avg-exp` in the output): compare the nurse's attendance with the average nurse's assumed exposure.
+- **Own exposure, naive** (`own-exp` in the output): compare it with that nurse's own exposure, as though the nurse had been named before looking at the rota.
+- **Maximum adjusted** (`max-adj` in the output): under the model's independent-attendance assumption, calculate the probability that the most-present nurse on the whole roster would do at least this well: P(max X_j ≥ m) = 1 − ∏ P(X_j < m), with X_j ~ Binomial(k, f_j). Because attendance counts are whole numbers, this test is conservative at a nominal 5% level. A real rota, with fixed staffing, teams and night shifts, would need a test built on the rota itself.
 
-The nurse-flagging episode and distinct-nurse estimates elsewhere in the output use the **naive own-exposure** test at p < 0.05. The maximum-adjusted test is exact only under the specified synthetic roster model.
+The nurse-flagging episode and distinct-nurse estimates elsewhere in the output use the **own-exposure** test at p < 0.05. The maximum-adjusted test is exact only under the specified synthetic roster model.
 
 **Offender.** In detection runs, one nurse on the roster has a 21% attendance fraction, causes an expected 4 (or 7) extra deaths over the first twelve monitoring months (Poisson), and is present at every one of those deaths. Detection means the **unit** alarms within that year, whether or not the offender's deaths caused the alarm. Identifying the offender in the rota review is a separate outcome. Block 3 also reports how often a background unit alarms with no offender present. Detection checks stop after month 12, while retaining 48 history months; CUSUM calibration still uses full ten-year null paths.
 
@@ -98,6 +98,8 @@ The nurse-flagging episode and distinct-nurse estimates elsewhere in the output 
 - The base rate is a set of scenarios anchored to the conviction record, not an estimate. Undetected offenders would raise the true rate and wrongful convictions lower it; the national reference also rests on an approximate count of nurse-years, and the neonatal reference on a single disputed case.
 - The tables compare falsely flagged unit-years with detected offender-years; the threshold sweep counts chart crossings. These are distinct measures.
 - At the strictest settings of the threshold sweep, calibration rests on as few as 50 simulated crossings, so those points are approximate.
+- Where several nurses tie for the highest attendance in a detection run, the offender is credited with an equal share (the expected result of a random tie-break). An earlier version took the first tied nurse, which, because the offender is placed last on the roster, resolved ties against the offender.
+- CUSUM alarm episodes use the same convention as rules A–D: consecutive alarmed months form one episode, although the CUSUM resets after each crossing. This slightly affects E-rule episode and nurse-flag counts, not the calibrated crossing rates or Table 4.
 - In output block 5, the offender side counts the first flagged alarm in the offender's year, while the background side counts every flagged episode. A check during review, using matched event definitions, found its numerical effect negligible at these base rates (a few hundredths of a percentage point).
 - Paediatric wards, which the report's monitoring also covers, are not modelled.
 
@@ -113,7 +115,7 @@ The nurse-flagging episode and distinct-nurse estimates elsewhere in the output 
 
 ## Version history
 
-The model was revised six times during review of the code and article draft. Working versions were named `sim.py` to `sim5.py`; version 6 is the published script itself. The published script adds command-line options, optional Numba compilation of the CUSUM loops, and a shorter checking horizon for the first-year detection runs. The longer null paths used to calibrate CUSUM are retained. The default seed remains `20261002`; [`example_output.txt`](example_output.txt) gives the published reference output.
+The model was revised seven times during review of the code and article draft. Working versions were named `sim.py` to `sim5.py`; versions 6 and 7 are the published script. The published script adds command-line options, optional Numba compilation of the CUSUM loops, and a shorter checking horizon for the first-year detection runs. The longer null paths used to calibrate CUSUM are retained. The default seed remains `20261002`; [`example_output.txt`](example_output.txt) gives the published reference output.
 
 | Version | Main changes |
 | --- | --- |
@@ -123,6 +125,7 @@ The model was revised six times during review of the code and article draft. Wor
 | 4 | Offender effect labelled as expected deaths, with an exact-count check; 10,000 detection runs per cell; full CUSUM excursion as the review window; threshold sweep |
 | 5 | CUSUM calibrated on crossings using fixed null paths; sweep extended to 1 in 10,000; background detection with no offender |
 | 6 | Base rates anchored to the record: national (0.1 per 10,000) and neonatal (1 per 10,000) references added, 3 to 30 kept as stress tests; each rate printed per nurse-year; risk in proportion to staff becomes the main case, equal risk per unit the sensitivity. Simulated alarm and detection rates unchanged |
+| 7 | Fair tie-break in the offender rota review (ties for top attendance shared equally); output labels use the article's test names; unused code removed. Alarm and detection rates unchanged |
 
 ## Try another interpretation
 

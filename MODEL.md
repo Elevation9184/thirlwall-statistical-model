@@ -1,6 +1,6 @@
 # Model specification and interpretation
 
-This document describes the calculations in [`thirlwall_statistical_model.py`](thirlwall_statistical_model.py), version 6. It accompanies the code so that a reader can reproduce the outputs and substitute other assumptions. The model explores what could happen if a mortality-monitoring signal were followed by a retrospective search of staff attendance. It does not assert that the Thirlwall Inquiry prescribed these particular thresholds or that trusts will use this pathway.
+This document describes the calculations in [`thirlwall_statistical_model.py`](thirlwall_statistical_model.py), version 7. It accompanies the code so that a reader can reproduce the outputs and substitute other assumptions. The model explores what could happen if a mortality-monitoring signal were followed by a retrospective search of staff attendance. It does not assert that the Thirlwall Inquiry prescribed these particular thresholds or that trusts will use this pathway.
 
 For the policy context, see the Inquiry's [recommendations, especially 6, 9, and 10](https://thirlwall.public-inquiry.uk/final-report-chapter/volume-iii/part-three/recommendations/) and [Chapter 35 on data and signals](https://thirlwall.public-inquiry.uk/final-report-chapter/volume-iii/part-two/chapter-35/). The simulation's decision rules and numerical inputs are documented below rather than attributed to the Inquiry.
 
@@ -33,23 +33,25 @@ E10 and E50 are idealised Poisson CUSUM rules for a doubling of deaths. At month
 
 For each unit type, thresholds are calibrated on one fixed set of 50,000 ten-year null paths, or 500,000 simulated unit-years. E10 targets 0.10 crossings per unit-year and E50 targets 0.02. The code also sweeps targets from 0.20 down to 0.0001 crossings per unit-year. These are *crossing* rates: a year with multiple crossings contributes multiple events to calibration. The rarest target corresponds to only about 50 expected crossings in 500,000 unit-years per type, so its estimated performance has appreciable Monte Carlo uncertainty.
 
-An **alarm unit-year** is a monitoring year with at least one alarm. An **alarm episode** starts when an alarmed check follows a non-alarmed check. Consecutive alarmed checks belong to one episode. These counts are reported separately. Block 1 also prints, for each rule, the share of unit-years with an alarm in each unit type (`alpha_t` below).
+An **alarm unit-year** is a monitoring year with at least one alarm. An **alarm episode** starts when an alarmed check follows a non-alarmed check. Consecutive alarmed checks belong to one episode. The same convention is applied to the CUSUM rules, although the CUSUM statistic resets after each crossing, so consecutive monthly crossings count as one episode; this slightly affects E-rule episode and nurse-flag counts, but not the calibrated crossing rates or the false:true ratios. These counts are reported separately. Block 1 also prints, for each rule, the share of unit-years with an alarm in each unit type (`alpha_t` below).
 
 ## Rota review after an alarm
 
 The synthetic roster persists throughout each unit's ten-year monitoring path. Nurses' attendance fractions are drawn from three values: 0.21 for 50% of nurses, 0.13 for 35%, and 0.27 for 15%. Given a review window with `k` deaths, each nurse's attendance count is drawn independently as `Binomial(k, f_j)`, where `f_j` is that nurse's assigned fraction. Episodes with fewer than two deaths do not enter the rota-significance review.
 
-The most-present nurse is then tested three ways. The article uses the names below; the output uses the shorthand labels `careless`, `naive` and `exact-correct` (or `correct`).
+The most-present nurse is then tested three ways. The article uses the names below; the output uses the shorthand labels `avg-exp`, `own-exp` and `max-adj`.
 
 1. **Average exposure:** compare the nurse's count with `Binomial(k, mean(f))`.
 2. **Own exposure, naive:** compare it with `Binomial(k, f_j)` as though the nurse had been named before looking at the rota.
 3. **Maximum adjusted:** under this synthetic independent-attendance model, calculate `1 - product_j P(Binomial(k, f_j) < m)`, where `m` is the observed maximum attendance count. This allows for having selected the highest count from the entire roster.
 
-Block 2 also prints, for each rule and unit type, the median number of deaths in a reviewed window and the median attendance of the most-present nurse. The printed nurse-flagging episode and distinct-nurse rates use the *naive own-exposure* test at `p < 0.05`. The maximum-adjusted test is exact **conditional on this model's independent roster probabilities**; it is not a test for an actual rota with fixed shifts, teams, and correlated attendance.
+Block 2 also prints, for each rule and unit type, the median number of deaths in a reviewed window and the median attendance of the most-present nurse. The printed nurse-flagging episode and distinct-nurse rates use the *own-exposure* test at `p < 0.05`. The maximum-adjusted test is exact **conditional on this model's independent roster probabilities**; it is not a test for an actual rota with fixed shifts, teams, and correlated attendance.
 
 ## Offender and detection scenarios
 
 In the detection runs, an offender is added as one nurse on the roster with attendance fraction 0.21. The offender is present at every extra death and may also be present at background deaths. The effect is an *expected* four or seven extra deaths during the first 12 monitoring months; the number and timing of those deaths are Poisson draws. A separate robustness run assigns exactly four extra deaths randomly across those months.
+
+In the rota review of a detection run, if several nurses share the highest attendance count, the offender-identification and flagging rates are apportioned equally among the tied nurses: the offender is credited with 1/m when one of m tied nurses, and only if the offender passes the own-exposure test. This is the expected result of a random tie-break and uses no random numbers. Version 6 took the first tied nurse, which resolved ties against the offender because the offender is placed last on the roster; the correction raises local-unit identification at +4 by about 4 to 7 percentage points and changes no alarm or detection rate.
 
 **Detection means that the unit alarms during those first 12 months**, regardless of whether the offender's deaths caused the alarm. Identification of the offender by the rota review is a distinct result. Each detection cell also has a separate background run with no offender, showing how often the same rule would have alarmed anyway. The detection calculation keeps all 48 history months, and CUSUM calibration remains on 120-month paths. Only the detection *checks* stop after month 12. The current script still generates complete unit paths, preserving its random-number sequence.
 
@@ -73,7 +75,7 @@ years per detection = 1 / detected offender-years/year   (national, all 175 unit
 rate per nurse-year = p * sum_t n_t / sum_t (n_t * staff_t)
 ```
 
-Section 4 prints each scenario as a rate per nurse-year, then the main case, then a sensitivity check with equal risk per unit (`w_t = 1`). The equal-risk figures are those reported as the main case in earlier versions. Changing the allocation or adding scenarios does not alter any simulated alarm or detection rate; only this arithmetic. Section 5 combines simulated nurse-flagging rates under offender and background paths to estimate the chance that a *naively flagged* nurse is the offender, conditional on this model and its base-rate scenario, under both allocations. It is not a case-specific probability.
+Section 4 prints each scenario as a rate per nurse-year, then the main case, then a sensitivity check with equal risk per unit (`w_t = 1`). The equal-risk figures are those reported as the main case in earlier versions. Changing the allocation or adding scenarios does not alter any simulated alarm or detection rate; only this arithmetic. Section 5 combines simulated nurse-flagging rates under offender and background paths to estimate the chance that a nurse flagged by the own-exposure test is the offender, conditional on this model and its base-rate scenario, under both allocations. It is not a case-specific probability.
 
 Section 6 treats `q` as the share of alarms followed by a rota search and scales nurse-flagging counts for `q = 1, 0.5, 0.25, 0.1`. It does not predict which alarm a manager will pursue. Section 7 removes year-to-year gamma variation and gives the unit its true Poisson baseline as a robustness comparison for C and D. Section 8 uses exactly four offender deaths, at the neonatal reference with risk in proportion to staff. Section 9 uses fixed null and offender paths to compare CUSUM thresholds, reporting the ratio and national years per detection at both reference rates with risk in proportion to staff. In section 9, the false-alarm numerator counts *crossings* rather than alarmed unit-years, a slightly different denominator from section 4.
 

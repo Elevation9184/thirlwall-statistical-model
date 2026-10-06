@@ -16,45 +16,45 @@ E50  Risk-adjusted CUSUM, 1 false alarm per 50 unit-years    alarm unit-yrs   3.
        share of unit-years with an alarm: NICU 0.018  LNU 0.021  SCU 0.020
 
 === 2. Rota review of chance alarms, system-weighted shares   [article: Step two, Table 2] ===
-   careless = average-exposure test; naive = own-exposure test; correct = maximum-adjusted test (see MODEL.md)
-A    careless 0.79  naive 0.58  exact-correct 0.024  | flag episodes/yr   6.2  distinct nurses/yr   6.2
-       NICU: careless 1.00 naive 0.68 correct 0.035  | median deaths reviewed 30, median top-nurse attendance 13
-       LNU: careless 0.71 naive 0.53 correct 0.013  | median deaths reviewed 8, median top-nurse attendance 4
-       SCU: careless 0.31 naive 0.32 correct 0.018  | median deaths reviewed 4, median top-nurse attendance 2
-B    careless 0.87  naive 0.60  exact-correct 0.031  | flag episodes/yr   1.8  distinct nurses/yr   1.8
-       NICU: careless 1.00 naive 0.69 correct 0.028  | median deaths reviewed 34, median top-nurse attendance 14
-       LNU: careless 0.69 naive 0.46 correct 0.037  | median deaths reviewed 10, median top-nurse attendance 5
-       SCU: careless 0.40 naive 0.32 correct 0.040  | median deaths reviewed 5, median top-nurse attendance 3
-C    careless 0.76  naive 0.55  exact-correct 0.023  | flag episodes/yr  16.7  distinct nurses/yr  16.4
-       NICU: careless 1.00 naive 0.69 correct 0.031  | median deaths reviewed 28, median top-nurse attendance 12
-       LNU: careless 0.68 naive 0.51 correct 0.018  | median deaths reviewed 8, median top-nurse attendance 4
-       SCU: careless 0.26 naive 0.26 correct 0.014  | median deaths reviewed 3, median top-nurse attendance 2
-D    careless 0.66  naive 0.49  exact-correct 0.015  | flag episodes/yr  16.6  distinct nurses/yr  16.2
-       NICU: careless 1.00 naive 0.69 correct 0.029  | median deaths reviewed 31, median top-nurse attendance 13
-       LNU: careless 0.64 naive 0.49 correct 0.011  | median deaths reviewed 6, median top-nurse attendance 4
-       SCU: careless 0.46 naive 0.32 correct 0.041  | median deaths reviewed 4, median top-nurse attendance 2
-E10  careless 0.63  naive 0.50  exact-correct 0.018  | flag episodes/yr   8.7  distinct nurses/yr   8.6
-       NICU: careless 0.95 naive 0.73 correct 0.026  | median deaths reviewed 12, median top-nurse attendance 7
-       LNU: careless 0.64 naive 0.49 correct 0.015  | median deaths reviewed 7, median top-nurse attendance 4
-       SCU: careless 0.27 naive 0.28 correct 0.015  | median deaths reviewed 3, median top-nurse attendance 2
-E50  careless 0.75  naive 0.52  exact-correct 0.021  | flag episodes/yr   1.8  distinct nurses/yr   1.8
-       NICU: careless 0.98 naive 0.70 correct 0.024  | median deaths reviewed 20, median top-nurse attendance 9
-       LNU: careless 0.79 naive 0.53 correct 0.014  | median deaths reviewed 12, median top-nurse attendance 6
-       SCU: careless 0.46 naive 0.33 correct 0.030  | median deaths reviewed 7, median top-nurse attendance 3
+   avg-exp = average-exposure test; own-exp = own-exposure test; max-adj = maximum-adjusted test (see MODEL.md)
+A    avg-exp 0.79  own-exp 0.58  max-adj 0.024  | flag episodes/yr   6.2  distinct nurses/yr   6.2
+       NICU: avg-exp 1.00 own-exp 0.68 max-adj 0.035  | median deaths reviewed 30, median top-nurse attendance 13
+       LNU: avg-exp 0.71 own-exp 0.53 max-adj 0.013  | median deaths reviewed 8, median top-nurse attendance 4
+       SCU: avg-exp 0.31 own-exp 0.32 max-adj 0.018  | median deaths reviewed 4, median top-nurse attendance 2
+B    avg-exp 0.87  own-exp 0.60  max-adj 0.031  | flag episodes/yr   1.8  distinct nurses/yr   1.8
+       NICU: avg-exp 1.00 own-exp 0.69 max-adj 0.028  | median deaths reviewed 34, median top-nurse attendance 14
+       LNU: avg-exp 0.69 own-exp 0.46 max-adj 0.037  | median deaths reviewed 10, median top-nurse attendance 5
+       SCU: avg-exp 0.40 own-exp 0.32 max-adj 0.040  | median deaths reviewed 5, median top-nurse attendance 3
+C    avg-exp 0.76  own-exp 0.55  max-adj 0.023  | flag episodes/yr  16.7  distinct nurses/yr  16.4
+       NICU: avg-exp 1.00 own-exp 0.69 max-adj 0.031  | median deaths reviewed 28, median top-nurse attendance 12
+       LNU: avg-exp 0.68 own-exp 0.51 max-adj 0.018  | median deaths reviewed 8, median top-nurse attendance 4
+       SCU: avg-exp 0.26 own-exp 0.26 max-adj 0.014  | median deaths reviewed 3, median top-nurse attendance 2
+D    avg-exp 0.66  own-exp 0.49  max-adj 0.015  | flag episodes/yr  16.6  distinct nurses/yr  16.2
+       NICU: avg-exp 1.00 own-exp 0.69 max-adj 0.029  | median deaths reviewed 31, median top-nurse attendance 13
+       LNU: avg-exp 0.64 own-exp 0.49 max-adj 0.011  | median deaths reviewed 6, median top-nurse attendance 4
+       SCU: avg-exp 0.46 own-exp 0.32 max-adj 0.041  | median deaths reviewed 4, median top-nurse attendance 2
+E10  avg-exp 0.63  own-exp 0.50  max-adj 0.018  | flag episodes/yr   8.7  distinct nurses/yr   8.6
+       NICU: avg-exp 0.95 own-exp 0.73 max-adj 0.026  | median deaths reviewed 12, median top-nurse attendance 7
+       LNU: avg-exp 0.64 own-exp 0.49 max-adj 0.015  | median deaths reviewed 7, median top-nurse attendance 4
+       SCU: avg-exp 0.27 own-exp 0.28 max-adj 0.015  | median deaths reviewed 3, median top-nurse attendance 2
+E50  avg-exp 0.75  own-exp 0.52  max-adj 0.021  | flag episodes/yr   1.8  distinct nurses/yr   1.8
+       NICU: avg-exp 0.98 own-exp 0.70 max-adj 0.024  | median deaths reviewed 20, median top-nurse attendance 9
+       LNU: avg-exp 0.79 own-exp 0.53 max-adj 0.014  | median deaths reviewed 12, median top-nurse attendance 6
+       SCU: avg-exp 0.46 own-exp 0.33 max-adj 0.030  | median deaths reviewed 7, median top-nurse attendance 3
 
 === 3. Offender adds expected deaths for 12 months; caught within 12 months [bg = no offender]   [article: Step three, Table 3 and background result] ===
-+4 A    NICU: 0.24 [bg 0.12] (offender flagged 0.11)  LNU: 0.40 [bg 0.06] (offender flagged 0.59)  SCU: 0.66 [bg 0.03] (offender flagged 0.83)
-+4 B    NICU: 0.10 [bg 0.04] (offender flagged 0.12)  LNU: 0.17 [bg 0.01] (offender flagged 0.61)  SCU: 0.38 [bg 0.00] (offender flagged 0.89)
-+4 C    NICU: 0.40 [bg 0.27] (offender flagged 0.04)  LNU: 0.55 [bg 0.18] (offender flagged 0.29)  SCU: 0.73 [bg 0.08] (offender flagged 0.53)
-+4 D    NICU: 0.11 [bg 0.07] (offender flagged 0.07)  LNU: 0.67 [bg 0.33] (offender flagged 0.23)  SCU: 0.77 [bg 0.07] (offender flagged 0.54)
-+4 E10  NICU: 0.25 [bg 0.08] (offender flagged 0.07)  LNU: 0.55 [bg 0.07] (offender flagged 0.40)  SCU: 0.83 [bg 0.06] (offender flagged 0.56)
-+4 E50  NICU: 0.08 [bg 0.01] (offender flagged 0.13)  LNU: 0.23 [bg 0.01] (offender flagged 0.57)  SCU: 0.53 [bg 0.00] (offender flagged 0.78)
-+7 A    NICU: 0.36 [bg 0.12] (offender flagged 0.36)  LNU: 0.71 [bg 0.06] (offender flagged 0.86)  SCU: 0.92 [bg 0.03] (offender flagged 0.97)
-+7 B    NICU: 0.17 [bg 0.04] (offender flagged 0.34)  LNU: 0.44 [bg 0.01] (offender flagged 0.89)  SCU: 0.77 [bg 0.00] (offender flagged 0.98)
-+7 C    NICU: 0.52 [bg 0.27] (offender flagged 0.14)  LNU: 0.79 [bg 0.18] (offender flagged 0.48)  SCU: 0.94 [bg 0.09] (offender flagged 0.64)
-+7 D    NICU: 0.17 [bg 0.07] (offender flagged 0.17)  LNU: 0.86 [bg 0.33] (offender flagged 0.39)  SCU: 0.96 [bg 0.07] (offender flagged 0.65)
-+7 E10  NICU: 0.43 [bg 0.08] (offender flagged 0.21)  LNU: 0.84 [bg 0.07] (offender flagged 0.58)  SCU: 0.98 [bg 0.06] (offender flagged 0.69)
-+7 E50  NICU: 0.19 [bg 0.02] (offender flagged 0.30)  LNU: 0.60 [bg 0.01] (offender flagged 0.78)  SCU: 0.88 [bg 0.00] (offender flagged 0.87)
++4 A    NICU: 0.24 [bg 0.12] (offender identified 0.14)  LNU: 0.40 [bg 0.06] (offender identified 0.65)  SCU: 0.66 [bg 0.03] (offender identified 0.86)
++4 B    NICU: 0.10 [bg 0.04] (offender identified 0.14)  LNU: 0.17 [bg 0.01] (offender identified 0.67)  SCU: 0.38 [bg 0.00] (offender identified 0.91)
++4 C    NICU: 0.40 [bg 0.27] (offender identified 0.06)  LNU: 0.55 [bg 0.18] (offender identified 0.34)  SCU: 0.73 [bg 0.08] (offender identified 0.58)
++4 D    NICU: 0.11 [bg 0.07] (offender identified 0.09)  LNU: 0.67 [bg 0.33] (offender identified 0.27)  SCU: 0.77 [bg 0.07] (offender identified 0.61)
++4 E10  NICU: 0.25 [bg 0.08] (offender identified 0.10)  LNU: 0.55 [bg 0.07] (offender identified 0.46)  SCU: 0.83 [bg 0.06] (offender identified 0.61)
++4 E50  NICU: 0.08 [bg 0.01] (offender identified 0.16)  LNU: 0.23 [bg 0.01] (offender identified 0.63)  SCU: 0.53 [bg 0.00] (offender identified 0.82)
++7 A    NICU: 0.36 [bg 0.12] (offender identified 0.42)  LNU: 0.71 [bg 0.06] (offender identified 0.89)  SCU: 0.92 [bg 0.03] (offender identified 0.98)
++7 B    NICU: 0.17 [bg 0.04] (offender identified 0.39)  LNU: 0.44 [bg 0.01] (offender identified 0.92)  SCU: 0.77 [bg 0.00] (offender identified 0.98)
++7 C    NICU: 0.52 [bg 0.27] (offender identified 0.17)  LNU: 0.79 [bg 0.18] (offender identified 0.53)  SCU: 0.94 [bg 0.09] (offender identified 0.68)
++7 D    NICU: 0.17 [bg 0.07] (offender identified 0.21)  LNU: 0.86 [bg 0.33] (offender identified 0.44)  SCU: 0.96 [bg 0.07] (offender identified 0.71)
++7 E10  NICU: 0.43 [bg 0.08] (offender identified 0.26)  LNU: 0.84 [bg 0.07] (offender identified 0.65)  SCU: 0.98 [bg 0.06] (offender identified 0.74)
++7 E50  NICU: 0.19 [bg 0.02] (offender identified 0.35)  LNU: 0.60 [bg 0.01] (offender identified 0.83)  SCU: 0.88 [bg 0.00] (offender identified 0.90)
 
 === 4. Falsely flagged unit-years per detected offender-year (+4); national years per detection   [article: Step three, Table 4] ===
    base rates per 10,000 unit-years as rates per nurse-year: p=0.1: 1 in 5,028,571  p=1: 1 in 502,857  p=3: 1 in 167,619  p=10: 1 in 50,286  p=30: 1 in 16,762
@@ -73,21 +73,21 @@ D    p=0.1:  35255:1 ( 1036y)  p=1:   3525:1 (  104y)  p=3:   1175:1 (   35y)  p
 E10  p=0.1:  17941:1 ( 1050y)  p=1:   1794:1 (  105y)  p=3:    598:1 (   35y)  p=10:    179:1 (   10y)  p=30:     60:1 (    3y)
 E50  p=0.1:   7430:1 ( 2130y)  p=1:    743:1 (  213y)  p=3:    248:1 (   71y)  p=10:     74:1 (   21y)  p=30:     25:1 (    7y)
 
-=== 5. P(flagged nurse is the offender | alarm and naive flag), +4   [article: Step three, closing paragraph] ===
+=== 5. P(flagged nurse is the offender | alarm and own-exposure flag), +4   [article: Step three, closing paragraph] ===
    main case, risk in proportion to staff:
-A    p=0.1: 0.005%  p=1: 0.045%  p=3: 0.136%  p=10: 0.451%  p=30: 1.334%
-B    p=0.1: 0.008%  p=1: 0.078%  p=3: 0.233%  p=10: 0.771%  p=30: 2.264%
-C    p=0.1: 0.001%  p=1: 0.012%  p=3: 0.035%  p=10: 0.116%  p=30: 0.346%
-D    p=0.1: 0.001%  p=1: 0.011%  p=3: 0.034%  p=10: 0.112%  p=30: 0.335%
-E10  p=0.1: 0.003%  p=1: 0.029%  p=3: 0.086%  p=10: 0.285%  p=30: 0.845%
-E50  p=0.1: 0.009%  p=1: 0.095%  p=3: 0.284%  p=10: 0.936%  p=30: 2.735%
+A    p=0.1: 0.005%  p=1: 0.049%  p=3: 0.148%  p=10: 0.491%  p=30: 1.455%
+B    p=0.1: 0.008%  p=1: 0.084%  p=3: 0.250%  p=10: 0.827%  p=30: 2.428%
+C    p=0.1: 0.001%  p=1: 0.013%  p=3: 0.040%  p=10: 0.134%  p=30: 0.400%
+D    p=0.1: 0.001%  p=1: 0.013%  p=3: 0.039%  p=10: 0.130%  p=30: 0.388%
+E10  p=0.1: 0.003%  p=1: 0.033%  p=3: 0.099%  p=10: 0.327%  p=30: 0.972%
+E50  p=0.1: 0.010%  p=1: 0.103%  p=3: 0.308%  p=10: 1.017%  p=30: 2.968%
    sensitivity, equal risk per unit:
-A    p=0.1: 0.007%  p=1: 0.074%  p=3: 0.221%  p=10: 0.731%  p=30: 2.154%
-B    p=0.1: 0.014%  p=1: 0.135%  p=3: 0.405%  p=10: 1.334%  p=30: 3.876%
-C    p=0.1: 0.002%  p=1: 0.019%  p=3: 0.057%  p=10: 0.190%  p=30: 0.568%
-D    p=0.1: 0.002%  p=1: 0.019%  p=3: 0.058%  p=10: 0.194%  p=30: 0.579%
-E10  p=0.1: 0.005%  p=1: 0.047%  p=3: 0.140%  p=10: 0.463%  p=30: 1.370%
-E50  p=0.1: 0.017%  p=1: 0.167%  p=3: 0.499%  p=10: 1.639%  p=30: 4.721%
+A    p=0.1: 0.008%  p=1: 0.079%  p=3: 0.236%  p=10: 0.782%  p=30: 2.304%
+B    p=0.1: 0.014%  p=1: 0.143%  p=3: 0.426%  p=10: 1.404%  p=30: 4.078%
+C    p=0.1: 0.002%  p=1: 0.022%  p=3: 0.065%  p=10: 0.215%  p=30: 0.642%
+D    p=0.1: 0.002%  p=1: 0.022%  p=3: 0.067%  p=10: 0.222%  p=30: 0.663%
+E10  p=0.1: 0.005%  p=1: 0.052%  p=3: 0.157%  p=10: 0.521%  p=30: 1.542%
+E50  p=0.1: 0.018%  p=1: 0.179%  p=3: 0.533%  p=10: 1.752%  p=30: 5.044%
 
 === 6. Nurse-flagging episodes per year (distinct nurses) by q   [article: Step three, Table 5] ===
 A    q=1: 6.2 (6.2)  q=0.5: 3.1 (3.1)  q=0.25: 1.6 (1.6)  q=0.1: 0.6 (0.6)
@@ -118,4 +118,4 @@ D: 16.4 alarm unit-years per year
   1 in   5000 |   0.04 | 0.002 0.003 0.027 | 0.000 |    4003:1   114385 |     400:1    11438
   1 in  10000 |   0.02 | 0.001 0.002 0.014 | 0.000 |    4014:1   229385 |     401:1    22938
 
-Total elapsed wall time: 224.27 s (Numba)
+Total elapsed wall time: 200.90 s (Numba)
