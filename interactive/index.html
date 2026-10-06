@@ -4,86 +4,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101e31">
-  <title>Explore Figure 2 · The Arithmetic of Suspicion</title>
+  <title>Explore the tables · The Arithmetic of Suspicion</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <a class="skip-link" href="#figure">Skip to the charts</a>
-  <header class="site-header">
-    <div class="shell header-inner">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">A<span>·</span>S</span><span>The Arithmetic of Suspicion</span></div>
-      <a href="../The%20Arithmetic%20of%20Suspicion.pdf" class="paper-link">Read paper PDF <span aria-hidden="true">↗</span></a>
-    </div>
-  </header>
-
-  <main class="shell">
+  <a class="skip-link" href="#explorer">Skip to the explorer</a>
+  <header class="site-header"><div class="shell header-inner">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">A<span>·</span>S</span><span>The Arithmetic of Suspicion</span></div>
+    <a href="../The%20Arithmetic%20of%20Suspicion.pdf" class="paper-link">Read paper PDF <span aria-hidden="true">↗</span></a>
+  </div></header>
+  <main class="shell" id="explorer">
     <section class="intro" aria-labelledby="page-title">
-      <div class="eyebrow">Interactive model · Figure 2</div>
-      <h1 id="page-title">What does a stricter alarm buy?</h1>
-      <p class="lede">Move the threshold and watch false alarms and one-year detection sensitivity fall together. Change how rare offenders are and the detector stays the same—but the odds behind an alarm move sharply.</p>
-      <div class="scope-note"><span class="scope-icon" aria-hidden="true">i</span><p>This is the paper’s <strong>idealised CUSUM</strong> chart: it knows each month’s true expected deaths. An offender adds an expected <strong>four deaths in 12 months</strong>. Values at the 11 threshold settings come from the validated Python run.</p></div>
+      <div class="eyebrow">Interactive model · Tables 1–5</div>
+      <h1 id="page-title">Follow an alarm from chart to person</h1>
+      <p class="lede">Change the assumptions and follow their effects through chance alarms, rota searches, offender detection, false flags and the people taken off wards.</p>
+      <p class="scope-note">The live tables use the validated Python reference run and exact arithmetic. Counts for hypothetical settings are scenarios, not estimates of real offender prevalence.</p>
     </section>
-
-    <div class="workspace">
-      <aside class="controls" aria-labelledby="controls-title">
-        <div class="panel-heading"><div><div class="eyebrow">Set the scene</div><h2 id="controls-title">Controls</h2></div><button class="text-button" id="reset-button" type="button">Reset to paper</button></div>
-
-        <div class="control-group">
-          <label for="threshold-slider"><span class="control-number">01</span><span>Alarm strictness</span></label>
-          <p class="control-help">The target number of false chart crossings per unit-year.</p>
-          <div class="control-value" id="threshold-value">1 in 10 unit-years</div>
-          <input id="threshold-slider" type="range" min="0" max="10" step="1" value="1" aria-describedby="threshold-help">
-          <div class="range-ends" id="threshold-help"><span>More sensitive</span><span>Stricter</span></div>
-          <div class="quick-presets"><button type="button" data-threshold="1">Paper E10</button><button type="button" data-threshold="3">Paper E50</button></div>
-        </div>
-
-        <div class="control-group">
-          <label for="prevalence-slider"><span class="control-number">02</span><span>Offender base rate</span></label>
-          <p class="control-help">Assumed offender-years per 10,000 unit-years. This is a scenario, not an estimate.</p>
-          <div class="control-value" id="prevalence-value">1 per 10,000 unit-years</div>
-          <input id="prevalence-slider" type="range" min="0" max="100" step="1" value="40" aria-describedby="prevalence-help">
-          <div class="range-ends" id="prevalence-help"><span>0.1 national reference</span><span>30 stress test</span></div>
-          <div class="quick-presets"><button type="button" data-prevalence="0.1">National 0.1</button><button type="button" data-prevalence="1">Neonatal 1</button></div>
-        </div>
-
-        <fieldset class="control-group unit-group">
-          <legend><span class="control-number">03</span><span>Detection shown for</span></legend>
-          <p class="control-help">The horizontal axis shows one unit type. The false-to-true ratio still covers all 175 modelled units.</p>
-          <div class="segmented" aria-label="Unit type">
-            <label><input type="radio" name="unit-type" value="NICU"><span>Intensive care</span></label>
-            <label><input type="radio" name="unit-type" value="LNU" checked><span>Local</span></label>
-            <label><input type="radio" name="unit-type" value="SCU"><span>Special care</span></label>
-          </div>
-        </fieldset>
-        <p class="fixed-assumptions">Fixed here: staff-proportional offender risk · 45 intensive-care, 85 local, 45 special-care units · 25% year-to-year rate variation.</p>
-      </aside>
-
-      <section class="results" id="figure" aria-labelledby="figure-title">
-        <div class="figure-card">
-          <div class="figure-top"><div><div class="eyebrow">Threshold trade-off</div><h2 id="figure-title">False-alarm crossings per detected offender-year</h2></div><span class="live-badge"><span aria-hidden="true"></span>Linked to controls</span></div>
-          <p class="figure-subtitle">Each point is one calibrated CUSUM setting. Click a point or use the strictness slider to inspect it.</p>
-          <div class="chart-wrap"><svg id="tradeoff-chart" viewBox="0 0 760 440" role="img" aria-labelledby="tradeoff-title tradeoff-desc"><title id="tradeoff-title">Figure 2 threshold trade-off</title><desc id="tradeoff-desc">One-year unit-alarm sensitivity on a logarithmic horizontal axis and false chart crossings per detected offender-year on a logarithmic vertical axis.</desc></svg></div>
-          <div class="axis-note">Horizontal: one-year unit-alarm sensitivity in the selected unit type (log scale). Vertical: false-alarm crossings across all 175 units per detected offender-year (log scale). The paper uses a linear vertical scale.</div>
-          <div class="figure-foot"><span class="legend-line" aria-hidden="true"></span><span>Current base-rate scenario</span><span class="reference-legend neonatal-legend"><span class="legend-line reference neonatal" aria-hidden="true"></span><span>Neonatal reference (1 in 10,000)</span></span><span class="reference-legend national-legend"><span class="legend-line reference national" aria-hidden="true"></span><span>National reference (0.1 in 10,000)</span></span></div>
-        </div>
-
-        <div class="metric-grid" aria-live="polite">
-          <div class="metric-card primary"><span class="metric-label">False-alarm crossings : detected offender-years</span><strong id="ratio-value">—</strong><span class="metric-detail">Across all 175 units</span></div>
-          <div class="metric-card"><span class="metric-label">One-year unit-alarm sensitivity</span><strong id="detection-value">—</strong><span class="metric-detail" id="selected-unit-label">In a local unit with an offender</span></div>
-          <div class="metric-card"><span class="metric-label">Years between detected offender-years</span><strong id="wait-value">—</strong><span class="metric-detail">Across 175 units at this base rate</span></div>
-        </div>
-
-        <div class="companion-card">
-          <div><div class="eyebrow">Same threshold, different units</div><h2>One-year unit-alarm sensitivity</h2><p>The base-rate slider leaves these probabilities unchanged. It changes how often an offender is present, not how the chart behaves when one is present.</p></div>
-          <svg id="unit-chart" viewBox="0 0 500 240" role="img" aria-labelledby="unit-title unit-desc"><title id="unit-title">One-year unit-alarm sensitivity by unit type</title><desc id="unit-desc">Bars for intensive care, local, and special care units at the selected threshold.</desc></svg>
-        </div>
-
-        <div class="method-note"><strong>Read this as a scenario, not a case probability.</strong> “Detection” means the unit alarms in an offender-year, even if background deaths would have caused that alarm. It does not mean the offender is identified. The strictest points are noisier Monte Carlo estimates; the rarest target rests on roughly 50 calibrated crossings.</div>
-      </section>
+    <section class="scenario" aria-labelledby="scenario-title"><div class="scenario-head"><div><div class="eyebrow">Your scenario</div><h2 id="scenario-title">Current choices</h2></div><button id="reset-button" type="button">Reset to paper</button></div><div id="scenario-items" class="scenario-items"></div>
+      <details id="world-details" class="world-details"><summary>Units in the model <span id="world-summary"></span></summary><div id="world-controls" class="world-controls"></div><p>Changing unit counts scales system totals. The Python reference rates for each unit type stay the same.</p></details>
+    </section>
+    <div class="tabbar" role="tablist" aria-label="Explore the paper’s tables">
+      <button id="tab-1" role="tab" aria-controls="panel-1" data-tab="1" type="button">1 <span>Noise</span></button>
+      <button id="tab-2" role="tab" aria-controls="panel-2" data-tab="2" type="button">2 <span>Named nurse</span></button>
+      <button id="tab-3" role="tab" aria-controls="panel-3" data-tab="3" type="button">3 <span>Offender present</span></button>
+      <button id="tab-4" role="tab" aria-controls="panel-4" data-tab="4" type="button">4 <span>The ratio</span></button>
+      <button id="tab-5" role="tab" aria-controls="panel-5" data-tab="5" type="button">5 <span>Human cost</span></button>
     </div>
+    <section id="panel-1" role="tabpanel" aria-labelledby="tab-1" tabindex="0"></section>
+    <section id="panel-2" role="tabpanel" aria-labelledby="tab-2" tabindex="0" hidden></section>
+    <section id="panel-3" role="tabpanel" aria-labelledby="tab-3" tabindex="0" hidden></section>
+    <section id="panel-4" role="tabpanel" aria-labelledby="tab-4" tabindex="0" hidden></section>
+    <section id="panel-5" role="tabpanel" aria-labelledby="tab-5" tabindex="0" hidden></section>
   </main>
-
-  <footer class="site-footer"><div class="shell">Source: <a href="../thirlwall_statistical_model.py">Python reference model</a> · <a href="../example_output.txt">validated output, block 9</a> · <a href="../MODEL.md">model definitions</a></div></footer>
+  <footer class="site-footer"><div class="shell">Source: <a href="../thirlwall_statistical_model.py">Python reference model</a> · <a href="../example_output.txt">validated output</a> · <a href="../MODEL.md">model definitions</a></div></footer>
   <script defer src="./app.js"></script>
 </body>
 </html>

@@ -1,9 +1,18 @@
 export const PAPER_DEFAULT = Object.freeze({
+  activeTab: 1,
+  rule: 'C',
+  rotaTest: 'own',
   thresholdIndex: 1,              // E10, one of the paper's two tabulated settings
   prevalencePer10k: 1,            // neonatal reference scenario
   unitType: 'LNU',                 // Figure 2 uses local-unit detection on x-axis
   expectedExtraDeaths: 4,
-  riskAllocation: 'staff-proportional',
+  riskAllocation: 'staff',
+  q: 1,
+  investigationMonths: 18,
+  mechanismRoster: 40,
+  mechanismDeaths: 8,
+  figureOpen: false,
+  worldOpen: false,
   unitCounts: Object.freeze({ NICU: 45, LNU: 85, SCU: 45 }),
   annualBackgroundDeaths: Object.freeze({ NICU: 20, LNU: 4, SCU: 1 }),
   caseMixCV: .25

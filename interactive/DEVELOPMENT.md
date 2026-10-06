@@ -10,7 +10,7 @@ The paper ("The Arithmetic of Suspicion") and the Python model (`../thirlwall_st
 |---|---|---|---|
 | 1 | Figure 2 explorer: threshold, base rate, unit type | Codex, reviewed by Claude | **Done** (commits df26da2, 84ce638, 404c6d5) |
 | 2a | Python reference export: full-precision JSON of every per-unit-type result | Claude | **Done**: `reference/reference.json`, printed output verified identical |
-| 2b | Five tabs following Tables 1–5, shared state, live tables, all "Ready" controls | Codex, reviewed by Claude | Not started |
+| 2b | Five tabs following Tables 1–5, shared state, live tables, all "Ready" controls | Codex, review pending | **Done**: reference arithmetic, five linked views, file-open bundle, 1400/390 px screenshots and regression checks |
 | 3 | In-browser simulation: shortlisted "Sim" controls (D2) | To be decided | Not started |
 | 4 | Optional extensions (see section 8) | — | Not planned |
 
@@ -220,5 +220,6 @@ Use the paper's terms:
 
 ## 9. Change log
 
+- 2026-10-06: Stage 2b implemented. Added one URL-backed model state, the five Table 1–5 tabs, scenario bar, paper comparisons, fixed assumptions and calculation panels. The exact roster mechanism, maximum-adjusted flag count, posterior and all Table 4–5 arithmetic use the Stage 2a export. The original Figure 2 explorer sits in a collapsed Tab 4 section. All Ready controls are active; simulation-dependent assumptions remain fixed. The full regression suite, bundle check, file-open browser interaction check and ten desktop/phone screenshots passed.
 - 2026-10-06: Decisions D1–D4 agreed. Stage 2a done: `--export` added to the Python script; `reference/reference.json` generated; output verified identical; Tables 4, 5 and posteriors recreated exactly from the export.
 - 2026-10-06: Stage 1 complete and reviewed (log detection axis, paper terminology, follow-ups). Plan drafted for Stages 2–3: five tabs, live tables, assumption inventory, reference export proposal.

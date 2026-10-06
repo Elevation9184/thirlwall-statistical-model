@@ -7,11 +7,19 @@ const sources = [
   'presets.js',
   'model.js',
   'charts.js',
+  'derive.js',
+  'tabs/common.js',
+  'tabs/tab1.js',
+  'tabs/tab2.js',
+  'tabs/tab3.js',
+  'tabs/tab4.js',
+  'tabs/tab5.js',
   'ui.js'
 ];
 
 export async function makeBundle() {
-  const chunks = [];
+  const reference = JSON.parse(await readFile(new URL('reference/reference.json', import.meta.url), 'utf8'));
+  const chunks = [`// ---- reference/reference.json (inlined for file://) ----\nconst REFERENCE = ${JSON.stringify(reference)};\n`];
   for (const source of sources) {
     const contents = await readFile(new URL(source, import.meta.url), 'utf8');
     const transformed = contents
