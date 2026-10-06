@@ -324,13 +324,52 @@ const TEST_NAMES = Object.freeze({ avg: 'Average-exposure', own: 'Own-exposure',
 const printedRates = [.1, 1, 3, 10, 30];
 const printedQs = [1, .5, .25, .1];
 
+const roundingView = new DataView(new ArrayBuffer(8));
+
+// Python's fixed-point format rounds the exact binary float, with ties to even.
+// Intl.NumberFormat rounds decimal ties differently (0.0185 becomes 0.019).
+function pythonFixed(value, digits) {
+  roundingView.setFloat64(0, Math.abs(value));
+  const bits = roundingView.getBigUint64(0);
+  const exponent = Number((bits >> 52n) & 0x7ffn);
+  const fraction = bits & ((1n << 52n) - 1n);
+  const mantissa = exponent ? (1n << 52n) | fraction : fraction;
+  const binaryPower = exponent ? exponent - 1075 : -1074;
+  let numerator = mantissa * 10n ** BigInt(digits);
+  let denominator = 1n;
+  if (binaryPower >= 0) numerator <<= BigInt(binaryPower);
+  else denominator <<= BigInt(-binaryPower);
+  let rounded = numerator / denominator;
+  const remainder = numerator % denominator;
+  if (2n * remainder > denominator || (2n * remainder === denominator && rounded % 2n === 1n)) rounded++;
+  const fixed = rounded.toString().padStart(digits + 1, '0');
+  const integer = (digits ? fixed.slice(0, -digits) : fixed).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return `${value < 0 || Object.is(value, -0) ? '-' : ''}${integer}${digits ? `.${fixed.slice(-digits)}` : ''}`;
+}
+
 function formatNumber(value, digits = 1) {
-  return value === null || !Number.isFinite(value) ? 'not computed' : new Intl.NumberFormat('en', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+  return value === null || !Number.isFinite(value) ? 'not computed' : pythonFixed(value, digits);
 }
 function formatPercent(value, digits = 1) {
   return value === null || !Number.isFinite(value) ? 'not computed' : `${formatNumber(value * 100, digits)}%`;
 }
 function formatRatio(value) { return value === null || !Number.isFinite(value) ? 'not computed' : `${formatNumber(value, 0)}:1`; }
+
+function formatPosterior(value) {
+  if (value === null || !Number.isFinite(value) || value <= 0) return { odds: 'not computed', percentage: null };
+  const reciprocal = 1 / value;
+  const decimalPlaces = 1 - Math.floor(Math.log10(reciprocal));
+  const scale = 10 ** Math.max(0, -decimalPlaces);
+  const rounded = Number(pythonFixed(reciprocal / scale, Math.max(0, decimalPlaces)).replaceAll(',', '')) * scale;
+  return { odds: `1 in ${formatNumber(rounded, Math.max(0, decimalPlaces))}`, percentage: formatPercent(value, 3) };
+}
+
+function posteriorDisplay(value) {
+  const formatted = formatPosterior(value);
+  return formatted.percentage
+    ? `<span class="posterior-display"><strong>${formatted.odds}</strong><small>${formatted.percentage}</small></span>`
+    : '<span class="posterior-display unavailable">not computed</span>';
+}
 
 function compareCell(value, paper, formatter = value => formatNumber(value)) {
   const liveText = formatter(value);
@@ -352,7 +391,7 @@ function fixedList(items) {
 
 function renderLayout(id, view) {
   return `<div class="tab-intro"><div class="eyebrow">Step ${id} · ${view.kicker}</div><h2>${view.title}</h2><p>${view.question}</p></div>
-    <div class="tab-layout">
+    <div class="tab-layout tab-layout-${id}">
       <section class="tab-controls card" data-part="controls"><h3>Controls</h3>${view.controls}</section>
       <section class="tab-graph card" data-part="graph"><h3>${view.graphTitle}</h3>${view.graph}</section>
       <section class="tab-table card" data-part="table"><h3>${view.tableTitle}</h3>${view.table}</section>
@@ -384,10 +423,7 @@ function dotsFor(type, count, expected) {
 
 function renderTab1(state, live, paper, reference) {
   const current = live.chance[state.rule];
-  const target = SWEEP[state.thresholdIndex].interval;
   const controls = choiceControl('rule', 'Monitoring rule', live.rules.map(rule => [rule, RULE_NAMES[rule]]), state.rule)
-    + rangeControl('thresholdIndex', 'Idealised chart target', 0, SWEEP.length - 1, 1, state.thresholdIndex,
-      `1 crossing in ${formatNumber(target, 0)} unit-years`, 'The 11 swept targets feed Figure 2. Table 1 alarm-unit-year results exist only for E10 and E50.')
     + '<p class="control-note">Rule E assumes perfect knowledge of each month’s expected deaths.</p>';
   const graph = `<p class="graph-note">Expected count, a typical year · ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years among ${Object.values(state.unitCounts).reduce((a, b) => a + b, 0)} units</p>
     ${TYPES.map(type => dotsFor(type, state.unitCounts[type], state.unitCounts[type] * current.byType[type].alpha)).join('')}`;
@@ -398,11 +434,11 @@ function renderTab1(state, live, paper, reference) {
   });
   const liveTable = table(['Rule', 'Alarm condition', 'Alarming unit-years / yr', 'Episodes / yr', 'Intensive care', 'Local', 'Special care'], rows, 'Table 1 · chance alarms; per-type columns are shares of unit-years');
   const terms = TYPES.map(type => `${state.unitCounts[type]} × ${formatNumber(current.byType[type].alpha, 3)}`).join(' + ');
-  const working = `<p><strong>Alarming unit-years a year</strong> = Σ units of each type × chance that type alarms.</p><p class="formula">${terms} = <strong>${formatNumber(current.alarmUnitYears, 1)}</strong>.</p><p>Episodes use the separate per-unit episode rates. The target slider also tunes Figure 2’s false <em>crossings</em>; it does not invent intermediate Table 1 alarm-unit-year rates.</p>`;
+  const working = `<p><strong>Alarming unit-years a year</strong> = Σ units of each type × chance that type alarms.</p><p class="formula">${terms} = <strong>${formatNumber(current.alarmUnitYears, 1)}</strong>.</p><p>Episodes use the separate per-unit episode rates. Figure 2’s 11-point false-crossing target can be tuned in Tab 4; it does not supply intermediate Table 1 alarm-unit-year rates.</p>`;
   return { kicker: 'Noise', title: 'Chance alarms', question: 'How many alarms does chance alone produce?', controls,
     graphTitle: 'Where the expected alarms land', graph, tableTitle: 'Live Table 1', table: liveTable, working,
     fixed: fixedList(['Mortality means: 20 / 4 / 1 deaths per year in intensive care, local and special care units.', 'Year-to-year rate variation: 25%.', 'Rules A–D use the preceding three-year average, with a 0.5-death floor.', 'Four years of history and ten years of monitoring.', 'The idealised CUSUM is tuned to a doubling of deaths.']),
-    takeaway: `Under ${state.rule}, chance produces ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years and ${formatNumber(current.episodes, 1)} episodes a year across the selected unit mix.` };
+    takeaway: `Chance alone produces between 3 and 34 alarms a year in England and Wales, depending on the rule. Under ${state.rule}, chance produces ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years and ${formatNumber(current.episodes, 1)} episodes a year across the selected unit mix.` };
 }
 
 // ---- tabs/tab2.js ----
@@ -439,7 +475,7 @@ function renderTab2(state, live, paper) {
   return { kicker: 'Named nurse', title: 'The rota selection step', question: 'How often does a rota search after a chance alarm produce a “significant” nurse?', controls,
     graphTitle: 'From alarms to names', graph, tableTitle: 'Live Table 2', table: liveTable, working,
     fixed: fixedList(['Independent nurse attendance at each death in the synthetic rota.', 'Shift shares of 13%, 21% and 27%, held by 35%, 50% and 15% of nurses.', 'Nominal significance threshold: 5%.', 'At least two deaths are required for rota review.', 'Roster sizes in the simulated units: 100 / 40 / 20 nurses.']),
-    takeaway: `${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
+    takeaway: `About half of chance alarms produce a "significant" nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
 }
 
 // ---- tabs/tab3.js ----
@@ -452,7 +488,7 @@ function renderTab3(state, live, paper) {
   const controls = choiceControl('expectedExtraDeaths', 'Offender’s expected extra deaths', [[4, '+4 in 12 months'], [7, '+7 in 12 months']], state.expectedExtraDeaths)
     + choiceControl('unitType', 'Unit type highlighted', [['NICU', 'Intensive care'], ['LNU', 'Local'], ['SCU', 'Special care']], state.unitType);
   const graph = `<p class="graph-note">Rule ${state.rule} · expected +${state.expectedExtraDeaths} deaths</p>${TYPES.map(type => detectionRow(type, live.detection[state.rule][type], type === state.unitType)).join('')}
-    <div class="graph-key"><span class="key-swatch teal"></span>unit alarm <span class="key-swatch grey"></span>background alarm <span class="key-swatch orange"></span>offender identified among alarmed units</div><p class="graph-note">The orange identification marker has a different denominator from the alarm bar.</p>`;
+    <div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>unit alarm</span><span class="graph-key-item"><span class="key-swatch grey"></span>background alarm</span><span class="graph-key-item"><span class="key-swatch orange"></span>offender identified among alarmed units</span></div><p class="graph-note">The orange identification marker has a different denominator from the alarm bar.</p>`;
   const rows = live.rules.map(rule => {
     const cell = live.detection[rule];
     const baseline = paper.detection[rule];
@@ -463,7 +499,7 @@ function renderTab3(state, live, paper) {
   return { kicker: 'Offender present', title: 'Alarm is not identification', question: 'When an offender is present, how often does the unit alarm, and how often does the rota point to them?', controls,
     graphTitle: 'Three outcomes by unit type', graph, tableTitle: 'Live Table 3', table: liveTable, working,
     fixed: fixedList(['The offender is present at every extra death they cause.', 'The effect is a Poisson mean of +4 or +7 deaths over the first 12 months.', 'The offender has a 21% shift share.', 'Ties for top attendance are shared fairly among tied nurses.', 'Detection counts any unit alarm in the offender-year, even if background deaths caused it.']),
-    takeaway: `Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
+    takeaway: `No rule does both: rules that alarm often point to the wrong nurse, and rules that point correctly rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
 }
 
 // ---- tabs/tab4.js ----
@@ -478,7 +514,7 @@ function figure2Markup(state) {
     <summary>Tune the idealised chart (Figure 2)</summary>
     <div class="figure2-body"><p>The original Figure 2 explorer lives here. It uses +4 expected deaths, 175 units and staff-proportional risk throughout. Its false-alarm <em>crossings</em> must not be compared as Table 4’s falsely flagged unit-years.</p>
       <div class="figure2-controls">
-        <div><label for="threshold-slider">False-crossing target</label><output id="threshold-value" data-output="thresholdIndex">1 in ${formatNumber(figure.interval, 0)} unit-years</output><input id="threshold-slider" data-field="thresholdIndex" type="range" min="0" max="${SWEEP.length - 1}" step="1" value="${state.thresholdIndex}"></div>
+        <div><label for="threshold-slider">Idealised chart target</label><output id="threshold-value" data-output="thresholdIndex">1 crossing in ${formatNumber(figure.interval, 0)} unit-years</output><input id="threshold-slider" data-field="thresholdIndex" type="range" min="0" max="${SWEEP.length - 1}" step="1" value="${state.thresholdIndex}"></div>
         <div><label for="figure-prevalence-slider">Base-rate scenario</label><output id="prevalence-value" data-output="prevalencePer10k">${formatNumber(state.prevalencePer10k, 2)} per 10,000</output><input id="figure-prevalence-slider" data-field="prevalencePer10k" data-log="true" type="range" min="0" max="100" step="1" value="${prevalenceToSlider(state.prevalencePer10k)}"></div>
         <div class="choice-list"><button type="button" data-set-field="unitType" data-value="NICU" aria-pressed="${state.unitType === 'NICU'}">Intensive care</button><button type="button" data-set-field="unitType" data-value="LNU" aria-pressed="${state.unitType === 'LNU'}">Local</button><button type="button" data-set-field="unitType" data-value="SCU" aria-pressed="${state.unitType === 'SCU'}">Special care</button></div>
       </div>
@@ -506,7 +542,7 @@ function renderTab4(state, live, paper, reference) {
     graphTitle: 'Rule by rule', graph, tableTitle: 'Live Table 4', table: liveTable, working,
     fixed: fixedList(['A detected offender-year is any offender-year in which the unit alarms.', 'Table 4 counts falsely flagged unit-years; the Figure 2 sweep counts CUSUM crossings.', 'The main paper case allocates offender risk in proportion to staffing.', 'The base-rate slider is a scenario, not an estimate of actual prevalence.']),
     extra: figure2Markup(state),
-    takeaway: `At ${formatNumber(state.prevalencePer10k, 2)} offender-years per 10,000 unit-years, rule ${state.rule} gives ${formatRatio(selected.ratio)} falsely flagged unit-years per detected offender-year and ${selected.years === null ? 'no computable waiting time' : `one detected offender-year across this system about every ${formatNumber(selected.years, 0)} years`}.` };
+    takeaway: `The base rate dominates: changing the rule moves the ratio about fourfold, while the rarity of offenders moves it by hundreds. At ${formatNumber(state.prevalencePer10k, 2)} offender-years per 10,000 unit-years, rule ${state.rule} gives ${formatRatio(selected.ratio)} falsely flagged unit-years per detected offender-year and ${selected.years === null ? 'no computable waiting time' : `one detected offender-year across this system about every ${formatNumber(selected.years, 0)} years`}.` };
 }
 
 // ---- tabs/tab5.js ----
@@ -514,12 +550,15 @@ function costPlot(state, live) {
   const base = live.flags[state.rule].base;
   const months = state.investigationMonths;
   const upper = Math.max(base, base * months / 12, 1);
-  const x = q => 44 + q * 356;
-  const y = value => 180 - value / upper * 140;
+  const x = q => 58 + q * 307;
+  const y = value => 215 - value / upper * 183;
   const path = factor => `M${x(0)},${y(0)} L${x(1)},${y(base * factor)}`;
-  return `<svg class="cost-plot" viewBox="0 0 430 225" role="img" aria-label="Nurses flagged per year and off wards against share of alarms searched">
-    <line class="axis" x1="44" y1="180" x2="400" y2="180"/><line class="axis" x1="44" y1="40" x2="44" y2="180"/>
-    <text x="42" y="202">0</text><text x="366" y="202">q = 1</text><text x="3" y="43">${formatNumber(upper, 0)}</text>
+  return `<svg class="cost-plot" viewBox="0 0 390 290" role="img" aria-label="People flagged per year and off wards against share of alarms searched">
+    <line class="axis" x1="58" y1="215" x2="365" y2="215"/><line class="axis" x1="58" y1="32" x2="58" y2="215"/>
+    <line class="plot-grid" x1="58" y1="${y(upper / 2)}" x2="365" y2="${y(upper / 2)}"/><line class="plot-grid" x1="58" y1="32" x2="365" y2="32"/>
+    <text class="axis-tick" x="49" y="219" text-anchor="end">0</text><text class="axis-tick" x="49" y="${y(upper / 2) + 4}" text-anchor="end">${formatNumber(upper / 2, 0)}</text><text class="axis-tick" x="49" y="36" text-anchor="end">${formatNumber(upper, 0)}</text>
+    <text class="axis-tick" x="58" y="238" text-anchor="middle">0</text><text class="axis-tick" x="${x(.5)}" y="238" text-anchor="middle">0.5</text><text class="axis-tick" x="365" y="238" text-anchor="middle">1</text>
+    <text class="axis-title" x="211" y="276" text-anchor="middle">Share of alarms searched (q)</text><text class="axis-title" x="16" y="128" text-anchor="middle" transform="rotate(-90 16 128)">People</text>
     <path class="flag-line" d="${path(1)}"/><path class="wards-line" d="${path(months / 12)}"/>
     <circle class="flag-point" cx="${x(state.q)}" cy="${y(base * state.q)}" r="6"/>
     <circle class="wards-point" cx="${x(state.q)}" cy="${y(base * state.q * months / 12)}" r="6"/>
@@ -530,13 +569,14 @@ function renderTab5(state, live, paper) {
   const selected = live.flags[state.rule];
   const details = live.posteriorDetails[state.rule];
   const posteriorAvailable = state.rotaTest === 'own';
-  const posteriorText = posteriorAvailable ? formatPercent(live.posteriors[state.rule], 2) : 'not computed';
+  const posteriorValue = posteriorAvailable ? live.posteriors[state.rule] : null;
   const controls = rangeControl('q', 'Share of chance alarms searched (q)', 0, 1, .01, state.q, formatPercent(state.q, 0))
     + `<div class="preset-row">${[1, .5, .25, .1].map(q => `<button type="button" data-set-field="q" data-value="${q}" aria-pressed="${state.q === q}">q = ${q}</button>`).join('')}</div>`
     + rangeControl('investigationMonths', 'Investigation length', 1, 36, 1, state.investigationMonths, `${state.investigationMonths} months`);
   const graph = `<p class="graph-note">Rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} · ${formatNumber(selected.current, 1)} nurse-flagging episodes a year at your q</p>
-    ${costPlot(state, live)}<div class="graph-key"><span class="key-swatch teal"></span>flagging episodes per year <span class="key-swatch orange"></span>nurses off wards at one time</div>
-    <p class="graph-note">At q = ${formatNumber(state.q, 2)}, ${formatNumber(selected.offWards, 1)} nurses are off wards at any one time if each investigation lasts ${state.investigationMonths} months.</p>`;
+    ${costPlot(state, live)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>flagging episodes per year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
+    <p class="graph-note">At q = ${formatNumber(state.q, 2)}, ${formatNumber(selected.offWards, 1)} nurses are off wards at any one time if each investigation lasts ${state.investigationMonths} months.</p>
+    <div class="chart-posterior"><span>Chance a flagged nurse is the offender</span>${posteriorDisplay(posteriorValue)}</div>`;
   const rows = live.rules.map(rule => {
     const now = live.flags[rule];
     const baseline = paper.flags[rule];
@@ -547,17 +587,22 @@ function renderTab5(state, live, paper) {
       const same = posteriorAvailable && `${liveText} (${liveDistinct})` === paperText;
       return `<td><span class="live-value">${liveText}</span><small class="distinct-value">${liveDistinct}</small>${same ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
     }).join('');
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1))}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1))}${posteriorAvailable ? compareCell(live.posteriors[rule], paper.posteriors[rule], value => formatPercent(value, 2)) : '<td>not computed</td>'}</tr>`;
+    const currentPosterior = posteriorAvailable ? live.posteriors[rule] : null;
+    const livePosterior = formatPosterior(currentPosterior);
+    const paperPosterior = formatPosterior(paper.posteriors[rule]);
+    const paperComparison = posteriorAvailable && (livePosterior.odds !== paperPosterior.odds || livePosterior.percentage !== paperPosterior.percentage)
+      ? `<small class="paper-value">paper ${paperPosterior.odds}<br>${paperPosterior.percentage}</small>` : '';
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1))}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1))}<td class="posterior-cell">${posteriorDisplay(currentPosterior)}${paperComparison}</td></tr>`;
   });
   const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Off wards', 'Posterior'], rows,
     'Table 5 · nurse-flagging episodes per year with distinct nurses underneath; posterior for own-exposure test only');
   const working = `<p><strong>Flagging episodes / yr</strong> = ${formatNumber(selected.base, 3)} × ${formatNumber(state.q, 2)} = <strong>${formatNumber(selected.current, 3)}</strong>.</p>
     <p><strong>Off wards at one time</strong> = ${formatNumber(selected.current, 3)} × ${state.investigationMonths} ÷ 12 = <strong>${formatNumber(selected.offWards, 3)}</strong>.</p>
-    ${posteriorAvailable ? `<p><strong>Chance a flagged nurse is the offender</strong> = offender correctly identified ÷ all flags = ${formatNumber(details.offenderFlagged, 6)} ÷ (${formatNumber(details.anyFlaggedWithOffender, 6)} + ${formatNumber(details.backgroundFlags, 6)}) = <strong>${posteriorText}</strong>. The factor q cancels from numerator and denominator.</p>` : `<p><strong>Chance a flagged nurse is the offender: not computed.</strong> The reference run exported offender-identification and any-flag rates for the own-exposure test only; a ${TEST_NAMES[state.rotaTest].toLowerCase()} posterior is unavailable.</p>`}`;
+    ${posteriorAvailable ? `<p><strong>Chance a flagged nurse is the offender</strong> = offender correctly identified ÷ all flags = ${formatNumber(details.offenderFlagged, 6)} ÷ (${formatNumber(details.anyFlaggedWithOffender, 6)} + ${formatNumber(details.backgroundFlags, 6)}) = ${posteriorDisplay(posteriorValue)}. The factor q cancels from numerator and denominator.</p>` : `<p><strong>Chance a flagged nurse is the offender: not computed.</strong> The reference run exported offender-identification and any-flag rates for the own-exposure test only; a ${TEST_NAMES[state.rotaTest].toLowerCase()} posterior is unavailable.</p>`}`;
   return { kicker: 'Human cost', title: 'What happens after an alarm', question: 'How many people are flagged, and how likely is a flagged nurse to be the offender?', controls,
     graphTitle: 'People affected as searches change', graph, tableTitle: 'Live Table 5', table: liveTable, working,
     fixed: fixedList(['The chance-alarm and rota-test rates come from the Python reference run.', 'The model assumes every searched alarm receives the selected rota test.', 'Posterior estimates use the own-exposure test and count both background and offender-year flags.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
-    takeaway: `With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior is ${posteriorText}${posteriorAvailable ? ' and does not depend on q' : ''}.` };
+    takeaway: `q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
 }
 
 // ---- ui.js ----

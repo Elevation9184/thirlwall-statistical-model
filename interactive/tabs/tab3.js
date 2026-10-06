@@ -10,7 +10,7 @@ export function renderTab3(state, live, paper) {
   const controls = choiceControl('expectedExtraDeaths', 'Offender’s expected extra deaths', [[4, '+4 in 12 months'], [7, '+7 in 12 months']], state.expectedExtraDeaths)
     + choiceControl('unitType', 'Unit type highlighted', [['NICU', 'Intensive care'], ['LNU', 'Local'], ['SCU', 'Special care']], state.unitType);
   const graph = `<p class="graph-note">Rule ${state.rule} · expected +${state.expectedExtraDeaths} deaths</p>${TYPES.map(type => detectionRow(type, live.detection[state.rule][type], type === state.unitType)).join('')}
-    <div class="graph-key"><span class="key-swatch teal"></span>unit alarm <span class="key-swatch grey"></span>background alarm <span class="key-swatch orange"></span>offender identified among alarmed units</div><p class="graph-note">The orange identification marker has a different denominator from the alarm bar.</p>`;
+    <div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>unit alarm</span><span class="graph-key-item"><span class="key-swatch grey"></span>background alarm</span><span class="graph-key-item"><span class="key-swatch orange"></span>offender identified among alarmed units</span></div><p class="graph-note">The orange identification marker has a different denominator from the alarm bar.</p>`;
   const rows = live.rules.map(rule => {
     const cell = live.detection[rule];
     const baseline = paper.detection[rule];
@@ -21,5 +21,5 @@ export function renderTab3(state, live, paper) {
   return { kicker: 'Offender present', title: 'Alarm is not identification', question: 'When an offender is present, how often does the unit alarm, and how often does the rota point to them?', controls,
     graphTitle: 'Three outcomes by unit type', graph, tableTitle: 'Live Table 3', table: liveTable, working,
     fixed: fixedList(['The offender is present at every extra death they cause.', 'The effect is a Poisson mean of +4 or +7 deaths over the first 12 months.', 'The offender has a 21% shift share.', 'Ties for top attendance are shared fairly among tied nurses.', 'Detection counts any unit alarm in the offender-year, even if background deaths caused it.']),
-    takeaway: `Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
+    takeaway: `No rule does both: rules that alarm often point to the wrong nurse, and rules that point correctly rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
 }

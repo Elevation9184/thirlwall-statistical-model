@@ -10,7 +10,7 @@ The paper ("The Arithmetic of Suspicion") and the Python model (`../thirlwall_st
 |---|---|---|---|
 | 1 | Figure 2 explorer: threshold, base rate, unit type | Codex, reviewed by Claude | **Done** (commits df26da2, 84ce638, 404c6d5) |
 | 2a | Python reference export: full-precision JSON of every per-unit-type result | Claude | **Done**: `reference/reference.json`, printed output verified identical |
-| 2b | Five tabs following Tables 1–5, shared state, live tables, all "Ready" controls | Codex, review pending | **Done**: reference arithmetic, five linked views, file-open bundle, 1400/390 px screenshots and regression checks |
+| 2b | Five tabs following Tables 1–5, shared state, live tables, all "Ready" controls | Codex, reviewed | **Done**: reference arithmetic, five linked views, file-open bundle, 1400/390 px review screenshots and regression checks |
 | 3 | In-browser simulation: shortlisted "Sim" controls (D2) | To be decided | Not started |
 | 4 | Optional extensions (see section 8) | — | Not planned |
 
@@ -68,7 +68,7 @@ Key for "Needs":
 | Alarm line, rules A–C | 2 SD (97.7%); B uses 3 SD | Slider, 1.5–3.5 SD | Sim |
 | How often checked | Yearly (A, B), monthly (C, D) | Switch | Sim |
 | Rule D trigger | Deaths doubled, at least 4 | Sliders: factor 1.5–3, minimum 2–8 | Sim |
-| Rule E false-alarm target | 1 in 10 / 1 in 50 unit-years | Slider over the 11 swept settings | Ready at the 11 points; otherwise Sim + calib |
+| Rule E false-alarm target | 1 in 10 / 1 in 50 unit-years | Slider over the 11 swept settings inside Tab 4's Figure 2 section | Ready at the 11 points; otherwise Sim + calib |
 | Rule E tuned to detect | A doubling | — | Fixed |
 
 **Graph:** 175 dots grouped 45 / 85 / 45, with the expected number of alarming units in a typical year lit by type. Deterministic, labelled "expected count, a typical year".
@@ -220,6 +220,7 @@ Use the paper's terms:
 
 ## 9. Change log
 
+- 2026-10-06: Stage 2b review follow-ups. Posterior displays now lead with reciprocal odds and retain the three-decimal percentage beneath. All numeric display rounding follows Python's fixed-point formatting of the binary value, checked against rendered Tables 1–5 at paper defaults. The Figure 2 target slider lives only in Tab 4, takeaway panels lead with the paper's finding, and Tab 3/5 chart labels were improved. Screenshots remain a review artifact in a Git-ignored directory.
 - 2026-10-06: Stage 2b implemented. Added one URL-backed model state, the five Table 1–5 tabs, scenario bar, paper comparisons, fixed assumptions and calculation panels. The exact roster mechanism, maximum-adjusted flag count, posterior and all Table 4–5 arithmetic use the Stage 2a export. The original Figure 2 explorer sits in a collapsed Tab 4 section. All Ready controls are active; simulation-dependent assumptions remain fixed. The full regression suite, bundle check, file-open browser interaction check and ten desktop/phone screenshots passed.
 - 2026-10-06: Decisions D1–D4 agreed. Stage 2a done: `--export` added to the Python script; `reference/reference.json` generated; output verified identical; Tables 4, 5 and posteriors recreated exactly from the export.
 - 2026-10-06: Stage 1 complete and reviewed (log detection axis, paper terminology, follow-ups). Plan drafted for Stages 2–3: five tabs, live tables, assumption inventory, reference export proposal.

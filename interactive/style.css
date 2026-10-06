@@ -148,6 +148,7 @@ button:focus-visible,a:focus-visible,input[type="range"]:focus-visible { outline
 .tab-working { grid-column:2 / 4; }
 .tab-fixed { grid-column:1 / 4; }
 .tab-extra { grid-column:1 / 4; }
+@media (min-width:1101px) { .tab-layout-5 .tab-controls { grid-row:1 / span 2; } .tab-layout-5 .tab-graph { grid-column:2 / 4; grid-row:1; } .tab-layout-5 .tab-table { grid-column:2 / 4; grid-row:2; } .tab-layout-5 .tab-working { grid-row:3; } }
 .tab-fixed ul { margin:0; padding-left:20px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 24px; color:#5b6a7b; line-height:1.5; font-size:13px; }
 .control-field { padding:0 0 18px; margin-bottom:19px; border-bottom:1px solid var(--border); }
 .control-field:last-child { margin-bottom:0; border:0; padding-bottom:0; }
@@ -179,6 +180,14 @@ tbody th { font-weight:750; }
 .live-value { font-weight:680; }
 .paper-value { display:block; color:#7d8995; font-size:10px; font-weight:500; }
 .distinct-value { display:block; color:#6f7e8b; font-size:10px; font-weight:500; }
+.posterior-display { display:inline-flex; flex-direction:column; align-items:flex-start; vertical-align:middle; line-height:1.2; white-space:nowrap; }
+.posterior-display strong { font-weight:760; }
+.posterior-display small { display:block; margin-top:3px; color:#647384; font-size:11px; font-weight:500; }
+.posterior-cell { text-align:right; }
+.posterior-cell .posterior-display { align-items:flex-end; }
+.chart-posterior { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px 20px; margin-top:15px; padding-top:14px; border-top:1px solid var(--border); color:#506174; font-size:13px; }
+.chart-posterior .posterior-display strong { font-size:19px; color:var(--ink); }
+.takeaway .posterior-display strong { font-size:18px; }
 .tab-working p { margin:0 0 11px; color:#43556a; line-height:1.6; font-size:13px; }
 .tab-working .formula { padding:12px 15px; background:#eef5f4; border-radius:7px; overflow-wrap:anywhere; }
 .takeaway { margin:16px 0 0; padding:17px 21px; border-left:4px solid var(--teal); border-radius:0 8px 8px 0; background:#e8f2f1; line-height:1.55; font-size:16px; }
@@ -202,6 +211,7 @@ tbody th { font-weight:750; }
 .background-mark { background:#7d8d98; }
 .identification-mark { background:var(--orange); }
 .graph-key { display:flex; flex-wrap:wrap; gap:7px 12px; color:#617080; font-size:11px; line-height:1.4; }
+.graph-key-item { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
 .key-swatch { display:inline-block; width:10px; height:10px; margin-right:3px; border-radius:2px; vertical-align:middle; }
 .key-swatch.teal { background:var(--teal); }.key-swatch.grey { background:#7d8d98; }.key-swatch.orange { background:var(--orange); }
 .ratio-row { display:grid; grid-template-columns:34px minmax(0,1fr) 75px; gap:7px; align-items:center; padding:7px; font-size:12px; }
@@ -227,5 +237,10 @@ tbody th { font-weight:750; }
 .cost-plot .flag-line { fill:none; stroke:var(--teal); stroke-width:3; }
 .cost-plot .wards-line { fill:none; stroke:var(--orange); stroke-width:3; }
 .cost-plot .flag-point { fill:var(--teal); }.cost-plot .wards-point { fill:var(--orange); }
+.cost-plot { max-width:560px; margin:8px auto 13px; }
+.cost-plot .plot-grid { stroke:#e2eaec; stroke-width:1; }
+.cost-plot .axis-tick { font-size:10px; }
+.cost-plot .axis-title { font-size:11px; fill:#45576b; font-weight:700; }
 @media (max-width:1100px) { .tab-layout { grid-template-columns:minmax(200px,250px) minmax(0,1fr); } .tab-controls { grid-row:1 / span 2; } .tab-graph,.tab-table { grid-column:2; } .tab-working,.tab-fixed,.tab-extra { grid-column:1 / 3; } }
 @media (max-width:700px) { .shell { width:calc(100% - 28px); } .intro { padding:28px 0 18px; } .intro h1 { font-size:37px; } .scenario { padding:16px; } .scenario-items>span { display:none; } .scenario-items button { font-size:11px; } .tab-layout { display:flex; flex-direction:column; } .tab-layout>* { width:100%; } .tab-controls { order:1; }.tab-graph { order:2; }.tab-table { order:3; }.tab-working { order:4; }.tab-fixed { order:5; }.tab-extra { order:6; } .tab-fixed ul { grid-template-columns:1fr; } .world-controls,.figure2-controls,.figure2-metrics { grid-template-columns:1fr; } .card { padding:17px; } .tabbar button { padding:11px 12px; } .tab-intro h2 { font-size:28px; } .table-hint { display:block; } }
+@media (max-width:700px) { .cost-plot .axis-tick { font-size:14px; } .cost-plot .axis-title { font-size:15px; } }

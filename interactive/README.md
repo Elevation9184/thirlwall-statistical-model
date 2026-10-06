@@ -21,6 +21,6 @@ Tabs 1–5 show chance alarms, rota searches, offender-year detection, falsely f
 
 Only controls marked “Ready” in `DEVELOPMENT.md` are enabled. Changes that require a fresh simulation remain fixed until the browser model is validated against the Python run. A posterior is available only for the own-exposure test because that is the test for which offender-identification outcomes were exported. Base rates are scenarios, not estimates of actual offender prevalence.
 
-`derive.js` contains pure arithmetic; `tabs/` renders the five views; `ui.js` owns the single explicit state and URL hash; `presets.js` defines paper defaults; `charts.js` and `reference/figure2-data.js` preserve the Figure 2 explorer. The ten images in `screenshots/` record all five tabs at 1400 and 390 pixels at paper defaults.
+`derive.js` contains pure arithmetic; `tabs/` renders the five views; `ui.js` owns the single explicit state and URL hash; `presets.js` defines paper defaults; `charts.js` and `reference/figure2-data.js` preserve the Figure 2 explorer. Review screenshots can be generated in `screenshots/` at 1400 and 390 pixels; that directory is ignored by Git.
 
 The PDF link is relative to the parent repository and works where that file exists. The local PDF is newer than the one currently in the GitHub repository; synchronize the paper before publishing the site.

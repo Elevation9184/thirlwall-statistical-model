@@ -7,13 +7,52 @@ export const TEST_NAMES = Object.freeze({ avg: 'Average-exposure', own: 'Own-exp
 export const printedRates = [.1, 1, 3, 10, 30];
 export const printedQs = [1, .5, .25, .1];
 
+const roundingView = new DataView(new ArrayBuffer(8));
+
+// Python's fixed-point format rounds the exact binary float, with ties to even.
+// Intl.NumberFormat rounds decimal ties differently (0.0185 becomes 0.019).
+function pythonFixed(value, digits) {
+  roundingView.setFloat64(0, Math.abs(value));
+  const bits = roundingView.getBigUint64(0);
+  const exponent = Number((bits >> 52n) & 0x7ffn);
+  const fraction = bits & ((1n << 52n) - 1n);
+  const mantissa = exponent ? (1n << 52n) | fraction : fraction;
+  const binaryPower = exponent ? exponent - 1075 : -1074;
+  let numerator = mantissa * 10n ** BigInt(digits);
+  let denominator = 1n;
+  if (binaryPower >= 0) numerator <<= BigInt(binaryPower);
+  else denominator <<= BigInt(-binaryPower);
+  let rounded = numerator / denominator;
+  const remainder = numerator % denominator;
+  if (2n * remainder > denominator || (2n * remainder === denominator && rounded % 2n === 1n)) rounded++;
+  const fixed = rounded.toString().padStart(digits + 1, '0');
+  const integer = (digits ? fixed.slice(0, -digits) : fixed).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return `${value < 0 || Object.is(value, -0) ? '-' : ''}${integer}${digits ? `.${fixed.slice(-digits)}` : ''}`;
+}
+
 export function formatNumber(value, digits = 1) {
-  return value === null || !Number.isFinite(value) ? 'not computed' : new Intl.NumberFormat('en', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+  return value === null || !Number.isFinite(value) ? 'not computed' : pythonFixed(value, digits);
 }
 export function formatPercent(value, digits = 1) {
   return value === null || !Number.isFinite(value) ? 'not computed' : `${formatNumber(value * 100, digits)}%`;
 }
 export function formatRatio(value) { return value === null || !Number.isFinite(value) ? 'not computed' : `${formatNumber(value, 0)}:1`; }
+
+export function formatPosterior(value) {
+  if (value === null || !Number.isFinite(value) || value <= 0) return { odds: 'not computed', percentage: null };
+  const reciprocal = 1 / value;
+  const decimalPlaces = 1 - Math.floor(Math.log10(reciprocal));
+  const scale = 10 ** Math.max(0, -decimalPlaces);
+  const rounded = Number(pythonFixed(reciprocal / scale, Math.max(0, decimalPlaces)).replaceAll(',', '')) * scale;
+  return { odds: `1 in ${formatNumber(rounded, Math.max(0, decimalPlaces))}`, percentage: formatPercent(value, 3) };
+}
+
+export function posteriorDisplay(value) {
+  const formatted = formatPosterior(value);
+  return formatted.percentage
+    ? `<span class="posterior-display"><strong>${formatted.odds}</strong><small>${formatted.percentage}</small></span>`
+    : '<span class="posterior-display unavailable">not computed</span>';
+}
 
 export function compareCell(value, paper, formatter = value => formatNumber(value)) {
   const liveText = formatter(value);
@@ -35,7 +74,7 @@ export function fixedList(items) {
 
 export function renderLayout(id, view) {
   return `<div class="tab-intro"><div class="eyebrow">Step ${id} · ${view.kicker}</div><h2>${view.title}</h2><p>${view.question}</p></div>
-    <div class="tab-layout">
+    <div class="tab-layout tab-layout-${id}">
       <section class="tab-controls card" data-part="controls"><h3>Controls</h3>${view.controls}</section>
       <section class="tab-graph card" data-part="graph"><h3>${view.graphTitle}</h3>${view.graph}</section>
       <section class="tab-table card" data-part="table"><h3>${view.tableTitle}</h3>${view.table}</section>

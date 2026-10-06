@@ -34,5 +34,5 @@ export function renderTab2(state, live, paper) {
   return { kicker: 'Named nurse', title: 'The rota selection step', question: 'How often does a rota search after a chance alarm produce a “significant” nurse?', controls,
     graphTitle: 'From alarms to names', graph, tableTitle: 'Live Table 2', table: liveTable, working,
     fixed: fixedList(['Independent nurse attendance at each death in the synthetic rota.', 'Shift shares of 13%, 21% and 27%, held by 35%, 50% and 15% of nurses.', 'Nominal significance threshold: 5%.', 'At least two deaths are required for rota review.', 'Roster sizes in the simulated units: 100 / 40 / 20 nurses.']),
-    takeaway: `${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
+    takeaway: `About half of chance alarms produce a "significant" nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
 }
