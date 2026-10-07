@@ -643,6 +643,7 @@ const TYPE_NAMES = Object.freeze({ NICU: 'Intensive care', LNU: 'Local', SCU: 'S
 const TEST_NAMES = Object.freeze({ avg: 'Average-exposure', own: 'Own-exposure', adj: 'Maximum-adjusted' });
 const printedRates = [.1, 1, 3, 10, 30];
 const printedQs = [1, .5, .25, .1];
+const RECALIBRATION_LABEL = 'Needs recalibration (Stage 3c)';
 
 const roundingView = new DataView(new ArrayBuffer(8));
 
@@ -693,13 +694,13 @@ function posteriorDisplay(value) {
 }
 
 function compareCell(value, paper, formatter = value => formatNumber(value), options = {}) {
-  const liveText = formatter(value);
+  const liveText = options.source === 'unavailable' && value === null ? RECALIBRATION_LABEL : formatter(value);
   const paperText = formatter(paper);
   const source = options.source || (liveText === paperText ? 'paper' : 'derived');
   const interval = options.interval && source !== 'paper'
-    ? ` <span class="interval-value">(${formatter(options.interval[0])}–${formatter(options.interval[1])})</span>` : '';
+    ? `${options.intervalBelow ? '' : ' '}<span class="interval-value${options.intervalBelow ? ' interval-below' : ''}">(${formatter(options.interval[0])}–${formatter(options.interval[1])})</span>` : '';
   const paperComparison = source === 'simulated' || source === 'pending' || (source === 'derived' && options.interval) || liveText !== paperText;
-  return `<td data-source="${source}"><span class="live-value">${liveText}${interval}</span>${source === 'simulated' || source === 'pending' || interval ? `<small class="source-value">${source === 'pending' ? 'updating' : source === 'derived' ? 'derived · 95% interval' : 'simulated · 95% interval'}</small>` : ''}${paperComparison ? `<small class="paper-value">paper ${paperText}</small>` : ''}</td>`;
+  return `<td data-source="${source}"><span class="live-value">${liveText}${options.intervalBelow ? '' : interval}</span>${options.intervalBelow ? interval : ''}${source === 'simulated' || source === 'pending' || interval ? `<small class="source-value">${source === 'pending' ? 'updating' : source === 'derived' ? 'derived · 95% interval' : 'simulated · 95% interval'}</small>` : ''}${paperComparison ? `<small class="paper-value">paper ${paperText}</small>` : ''}</td>`;
 }
 
 function cellSource(cell, key) { return cell?._source?.[key] || 'paper'; }
@@ -745,7 +746,7 @@ function table(headers, rows, caption) {
 
 // ---- tabs/tab1.js ----
 function dotsFor(type, count, expected, interval) {
-  if (expected === null) return `<div class="dot-group unavailable-rule"><div class="dot-label"><strong>${TYPE_NAMES[type]}</strong><span>needs recalibration; coming in 3c</span></div></div>`;
+  if (expected === null) return `<div class="dot-group unavailable-rule"><div class="dot-label"><strong>${TYPE_NAMES[type]}</strong><span>${RECALIBRATION_LABEL}</span></div></div>`;
   const full = Math.floor(expected);
   const remainder = expected - full;
   const dots = Array.from({ length: count }, (_, index) => {
@@ -771,7 +772,7 @@ function renderTab1(state, live, paper, reference, context = {}) {
     const cell = live.chance[rule];
     const baseline = paper.chance[rule];
     const unavailable = TYPES.some(type => cell.byType[type].alpha === null && state.unitCounts[type]);
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${unavailable ? 'unavailable-row' : ''}"><th scope="row">${rule}</th><td class="trigger-cell">${reference.inputs.labels[rule]}${unavailable ? '<small>needs recalibration; coming in 3c</small>' : ''}</td>${compareCell(cell.alarmUnitYears, baseline.alarmUnitYears, value => formatNumber(value, 1), { source: context.simMode && cell.alarmUnitYears !== baseline.alarmUnitYears ? 'derived' : undefined, interval: context.intervals?.[`alarmUnitYears|${rule}`] })}${compareCell(cell.episodes, baseline.episodes, value => formatNumber(value, 1), { interval: context.intervals?.[`episodes|${rule}`] })}${TYPES.map(type => compareCell(cell.byType[type].alpha, baseline.byType[type].alpha, value => formatNumber(value, 3), { source: cellSource(cell.byType[type], 'alpha'), interval: directInterval(cell.byType[type], 'alpha') })).join('')}</tr>`;
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${unavailable ? 'unavailable-row' : ''}"><th scope="row">${rule}</th><td class="trigger-cell">${reference.inputs.labels[rule]}${unavailable ? `<small>${RECALIBRATION_LABEL}</small>` : ''}</td>${compareCell(cell.alarmUnitYears, baseline.alarmUnitYears, value => formatNumber(value, 1), { source: unavailable ? 'unavailable' : context.simMode && cell.alarmUnitYears !== baseline.alarmUnitYears ? 'derived' : undefined, interval: context.intervals?.[`alarmUnitYears|${rule}`] })}${compareCell(cell.episodes, baseline.episodes, value => formatNumber(value, 1), { source: unavailable ? 'unavailable' : undefined, interval: context.intervals?.[`episodes|${rule}`] })}${TYPES.map(type => compareCell(cell.byType[type].alpha, baseline.byType[type].alpha, value => formatNumber(value, 3), { source: cellSource(cell.byType[type], 'alpha'), interval: directInterval(cell.byType[type], 'alpha') })).join('')}</tr>`;
   });
   const liveTable = table(['Rule', 'Alarm condition', 'Alarming unit-years / yr', 'Episodes / yr', 'Intensive care', 'Local', 'Special care'], rows, 'Table 1 · chance alarms; per-type columns are shares of unit-years');
   const terms = TYPES.map(type => `${state.unitCounts[type]} × ${formatNumber(current.byType[type].alpha, 3)}`).join(' + ');
@@ -779,7 +780,7 @@ function renderTab1(state, live, paper, reference, context = {}) {
   return { kicker: 'Noise', title: 'Chance alarms', question: 'How many alarms does chance alone produce?', controls,
     graphTitle: 'Where the expected alarms land', graph, tableTitle: 'Live Table 1', table: liveTable, working,
     fixed: fixedList(['Year-to-year rate variation: 25%.', 'Rules A–D use the preceding three-year average, with a 0.5-death floor.', 'Four years of history and ten years of monitoring.', 'The idealised CUSUM is tuned to a doubling of deaths.']),
-    takeaway: `Chance alone produces between 3 and 34 alarms a year in England and Wales, depending on the rule. Under ${state.rule}, chance produces ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years and ${formatNumber(current.episodes, 1)} episodes a year across the selected unit mix.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}Chance alone produces between 3 and 34 alarms a year in England and Wales, depending on the rule. Under ${state.rule}, chance produces ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years and ${formatNumber(current.episodes, 1)} episodes a year across the selected unit mix.` };
 }
 
 // ---- tabs/tab2.js ----
@@ -811,20 +812,20 @@ function renderTab2(state, live, paper, reference, context = {}) {
       { source: cellSource(cell, key), interval: directInterval(cell, key) });
     return `<tr><th scope="row">${TYPE_NAMES[type]}</th>${display('med_k', value => formatNumber(value, 0))}${display('med_top', value => formatNumber(value, 0))}${display('s_avg', value => formatPercent(value, 0))}${display('s_own', value => formatPercent(value, 0))}${display('s_adj', value => formatPercent(value, 1))}</tr>`;
   });
-  rows.push(`<tr class="selected-row"><th scope="row">All reviewed alarms</th><td>—</td><td>—</td>${compareCell(current.shares.avg, baseline.shares.avg, value => formatPercent(value, 0), { interval: context.intervals?.[`share|${state.rule}|avg`] })}${compareCell(current.shares.own, baseline.shares.own, value => formatPercent(value, 0), { interval: context.intervals?.[`share|${state.rule}|own`] })}${compareCell(current.shares.adj, baseline.shares.adj, value => formatPercent(value, 1), { interval: context.intervals?.[`share|${state.rule}|adj`] })}</tr>`);
-  rows.push(`<tr class="footer-row"><th scope="row" colspan="5">Nurse-flagging episodes a year · selected test</th>${compareCell(selectedFlags, baseline.flags.own, value => formatNumber(value, 1), { interval: context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`] })}</tr>`);
+  rows.push(`<tr class="selected-row"><th scope="row">All reviewed alarms</th><td>—</td><td>—</td>${compareCell(current.shares.avg, baseline.shares.avg, value => formatPercent(value, 0), { source: current.shares.avg === null && context.simMode ? 'unavailable' : undefined, interval: context.intervals?.[`share|${state.rule}|avg`] })}${compareCell(current.shares.own, baseline.shares.own, value => formatPercent(value, 0), { source: current.shares.own === null && context.simMode ? 'unavailable' : undefined, interval: context.intervals?.[`share|${state.rule}|own`] })}${compareCell(current.shares.adj, baseline.shares.adj, value => formatPercent(value, 1), { source: current.shares.adj === null && context.simMode ? 'unavailable' : undefined, interval: context.intervals?.[`share|${state.rule}|adj`] })}</tr>`);
+  rows.push(`<tr class="footer-row"><th scope="row" colspan="5">Nurse-flagging episodes a year · selected test</th>${compareCell(selectedFlags, baseline.flags.own, value => formatNumber(value, 1), { source: selectedFlags === null && context.simMode ? 'unavailable' : undefined, interval: context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`] })}</tr>`);
   const liveTable = table(['Unit type', 'Deaths reviewed, median', 'Top nurse present, median', 'Average-exposure', 'Own-exposure', 'Maximum-adjusted'], rows, `Table 2 · rule ${state.rule}; paper values are rule C; shares among reviewed chance alarms`);
   const formula = state.rotaTest === 'own' ? 'Σ units × own-exposure flag episodes per unit-year' : `Σ units × reviewed alarms per unit-year × ${TEST_NAMES[state.rotaTest].toLowerCase()} share`;
   const working = `<p><strong>Nurse-flagging episodes a year</strong> = ${formula}.</p><p class="formula">${TYPES.map(type => `${state.unitCounts[type]} × ${formatNumber(current.byType[type].rev, 3)} × ${formatNumber(current.byType[type][`s_${state.rotaTest}`], 3)}`).join(' + ')} ≈ <strong>${formatNumber(selectedFlags, 1)}</strong>.</p><p>The mechanism curve instead tests every nurse on a hypothetical roster independently; it is an exact calculation under the model’s shift mix, not the simulated Table 2 result.</p>`;
   return { kicker: 'Named nurse', title: 'The rota selection step', question: 'How often does a rota search after a chance alarm produce a “significant” nurse?', controls,
     graphTitle: 'From alarms to names', graph, tableTitle: 'Live Table 2', table: liveTable, working,
     fixed: fixedList(['Independent nurse attendance at each death in the synthetic rota.', 'Shift shares of 13%, 21% and 27%, held by 35%, 50% and 15% of nurses.', 'At least two deaths are required for rota review.']),
-    takeaway: `About half of chance alarms produce a "significant" nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}About half of chance alarms produce a "significant" nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
 }
 
 // ---- tabs/tab3.js ----
 function detectionRow(type, cell, selected) {
-  if (cell.d === null) return `<div class="detection-row unavailable-rule"><strong>${TYPE_NAMES[type]}</strong><p>Rule E needs recalibration; coming in 3c.</p></div>`;
+  if (cell.d === null) return `<div class="detection-row unavailable-rule"><strong>${TYPE_NAMES[type]}</strong><p>${RECALIBRATION_LABEL}</p></div>`;
   const interval = directInterval(cell, 'd');
   return `<div class="detection-row ${selected ? 'highlighted' : ''}"><div class="detection-heading"><strong>${TYPE_NAMES[type]}</strong><span>${formatPercent(cell.d, 1)} unit alarms${interval ? ` · 95% ${formatPercent(interval[0], 1)}–${formatPercent(interval[1], 1)}` : ''}</span></div><div class="detection-track"><span class="detection-fill" style="width:${(cell.d * 100).toFixed(2)}%"></span>${interval ? `<i class="detection-error" style="left:${(interval[0] * 100).toFixed(2)}%;width:${((interval[1] - interval[0]) * 100).toFixed(2)}%"></i>` : ''}<span class="background-mark" style="left:${(cell.bg * 100).toFixed(2)}%" title="Background alarm rate ${formatPercent(cell.bg, 1)}"></span><span class="identification-mark" style="left:${(cell.flag_off * 100).toFixed(2)}%" title="Identification among alarms ${formatPercent(cell.flag_off, 1)}"></span></div></div>`;
 }
@@ -846,11 +847,12 @@ function renderTab3(state, live, paper, reference, context = {}) {
   return { kicker: 'Offender present', title: 'Alarm is not identification', question: 'When an offender is present, how often does the unit alarm, and how often does the rota point to them?', controls,
     graphTitle: 'Three outcomes by unit type', graph, tableTitle: 'Live Table 3', table: liveTable, working,
     fixed: fixedList(['The offender is present at every extra death they cause.', 'The effect is a Poisson mean over the first 12 months.', 'The offender has a 21% shift share.', 'Ties for top attendance are shared fairly among tied nurses.', 'Detection counts any unit alarm in the offender-year, even if background deaths caused it.']),
-    takeaway: `No rule does both: rules that alarm often point to the wrong nurse, and rules that point correctly rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}No rule does both: rules that alarm often point to the wrong nurse, and rules that point correctly rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
 }
 
 // ---- tabs/tab4.js ----
 function ratioBar(rule, value, years, selected, interval, yearsInterval) {
+  if (value === null && rule.startsWith('E')) return `<div class="ratio-row unavailable-rule"><span>${rule}</span><span class="recalibration-chart-label">${RECALIBRATION_LABEL}</span></div>`;
   const position = number => number ? Math.max(0, Math.min(100, (Math.log10(number) - 1) / 4 * 100)) : 0;
   const width = position(value);
   return `<div class="ratio-row ${selected ? 'highlighted' : ''}"><span>${rule}</span><div class="ratio-track"><i style="width:${width.toFixed(2)}%"></i>${interval ? `<b class="ratio-error" style="left:${position(interval[0]).toFixed(2)}%;width:${(position(interval[1]) - position(interval[0])).toFixed(2)}%"></b>` : ''}</div><strong>${formatRatio(value)}</strong><small>${years === null ? 'not computed' : `${formatNumber(years, 0)} years`}${yearsInterval ? ` (95% ${formatNumber(yearsInterval[0], 0)}–${formatNumber(yearsInterval[1], 0)})` : ''}${interval ? ` · ratio 95% ${formatRatio(interval[0])}–${formatRatio(interval[1])}` : ''}</small></div>`;
@@ -882,7 +884,10 @@ function renderTab4(state, live, paper, reference, context = {}) {
     + `<div class="preset-row">${printedRates.map(rate => `<button type="button" data-set-field="prevalencePer10k" data-value="${rate}" aria-pressed="${state.prevalencePer10k === rate}">${rate}</button>`).join('')}</div>`
     + choiceControl('riskAllocation', 'Risk allocation', [['staff', 'In proportion to staff'], ['equal', 'Equal per unit']], state.riskAllocation);
   const graph = `<p class="graph-note">Falsely flagged unit-years per detected offender-year · log scale · current base rate ${formatNumber(state.prevalencePer10k, 2)} in 10,000</p>${live.rules.map(rule => ratioBar(rule, live.ratio[rule].current.ratio, live.ratio[rule].current.years, rule === state.rule, context.intervals?.[`ratio|${rule}|${state.prevalencePer10k}`], context.intervals?.[`years|${rule}|${state.prevalencePer10k}`])).join('')}`;
-  const rows = live.rules.map(rule => `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${printedRates.map(rate => compareCell(live.ratio[rule].printedRates[rate].ratio, paper.ratio[rule].printedRates[rate].ratio, formatRatio, { interval: context.intervals?.[`ratio|${rule}|${rate}`] })).join('')}${compareCell(live.ratio[rule].current.ratio, paper.ratio[rule].current.ratio, formatRatio, { interval: context.intervals?.[`ratio|${rule}|${state.prevalencePer10k}`] })}</tr>`);
+  const ratioCell = (rule, rate, current) => compareCell(current.ratio, rate === 'current' ? paper.ratio[rule].current.ratio : paper.ratio[rule].printedRates[rate].ratio, formatRatio, {
+    source: context.simMode && rule.startsWith('E') && current.ratio === null ? 'unavailable' : undefined,
+    interval: context.intervals?.[`ratio|${rule}|${rate === 'current' ? state.prevalencePer10k : rate}`], intervalBelow: true });
+  const rows = live.rules.map(rule => `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${printedRates.map(rate => ratioCell(rule, rate, live.ratio[rule].printedRates[rate])).join('')}${ratioCell(rule, 'current', live.ratio[rule].current)}</tr>`);
   const liveTable = table(['Rule', ...printedRates.map(rate => `${rate} / 10k`), 'Your rate'], rows, 'Table 4 · falsely flagged unit-years per detected offender-year; paper baseline is staff-proportional, +4');
   const weights = selected.weights;
   const working = `<p><strong>False flagged / yr</strong> = Σ n<sub>t</sub> × (1 − p × w<sub>t</sub>) × alarm share<sub>t</sub> = <strong>${formatNumber(selected.falseFlagged, 3)}</strong>.</p><p><strong>Detected offender-years / yr</strong> = Σ n<sub>t</sub> × p × w<sub>t</sub> × detection sensitivity<sub>t</sub> = <strong>${formatNumber(selected.detected, 5)}</strong>.</p><p class="formula">${formatNumber(selected.falseFlagged, 3)} ÷ ${formatNumber(selected.detected, 5)} = <strong>${formatRatio(selected.ratio)}</strong>; 1 ÷ ${formatNumber(selected.detected, 5)} = <strong>${selected.years === null ? 'not computed' : `${formatNumber(selected.years, 0)} years`}</strong>.</p><p>For this unit mix, the ${state.riskAllocation === 'staff' ? 'staff-proportional' : 'equal'} risk weights are ${Object.entries(weights).map(([type, weight]) => `${type} ${formatNumber(weight, 3)}`).join(' · ')}.</p>`;
@@ -890,13 +895,13 @@ function renderTab4(state, live, paper, reference, context = {}) {
     graphTitle: 'Rule by rule', graph, tableTitle: 'Live Table 4', table: liveTable, working,
     fixed: fixedList(['A detected offender-year is any offender-year in which the unit alarms.', 'Table 4 counts falsely flagged unit-years; the Figure 2 sweep counts CUSUM crossings.', 'The main paper case allocates offender risk in proportion to staffing.', 'The base-rate slider is a scenario, not an estimate of actual prevalence.']),
     extra: figure2Markup(state),
-    takeaway: `The base rate dominates: changing the rule moves the ratio about fourfold, while the rarity of offenders moves it by hundreds. At ${formatNumber(state.prevalencePer10k, 2)} offender-years per 10,000 unit-years, rule ${state.rule} gives ${formatRatio(selected.ratio)} falsely flagged unit-years per detected offender-year and ${selected.years === null ? 'no computable waiting time' : `one detected offender-year across this system about every ${formatNumber(selected.years, 0)} years`}.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}The base rate dominates: changing the rule moves the ratio about fourfold, while the rarity of offenders moves it by hundreds. At ${formatNumber(state.prevalencePer10k, 2)} offender-years per 10,000 unit-years, rule ${state.rule} gives ${formatRatio(selected.ratio)} falsely flagged unit-years per detected offender-year and ${selected.years === null ? 'no computable waiting time' : `one detected offender-year across this system about every ${formatNumber(selected.years, 0)} years`}.` };
 }
 
 // ---- tabs/tab5.js ----
 function costPlot(state, live, intervals) {
   const base = live.flags[state.rule].base;
-  if (base === null) return '<p class="unavailable-rule">Rule E needs recalibration; coming in 3c.</p>';
+  if (base === null) return `<p class="unavailable-rule">${RECALIBRATION_LABEL}</p>`;
   const months = state.investigationMonths;
   const upper = Math.max(base || 0, (base || 0) * months / 12, 1);
   const x = q => 58 + q * 307;
@@ -929,17 +934,18 @@ function renderTab5(state, live, paper, reference, context = {}) {
   const graph = `<p class="graph-note">Rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} · ${formatNumber(selected.current, 1)} nurse-flagging episodes a year at your q</p>
     ${costPlot(state, live, context.intervals)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>flagging episodes per year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
     <p class="graph-note">At q = ${formatNumber(state.q, 2)}, ${formatNumber(selected.offWards, 1)} nurses are off wards at any one time if each investigation lasts ${state.investigationMonths} months.</p>
-    <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${posteriorDisplay(posteriorValue)}${context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
+    <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${context.simMode && state.rule.startsWith('E') && selected.base === null ? RECALIBRATION_LABEL : posteriorDisplay(posteriorValue)}${context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
   const rows = live.rules.map(rule => {
     const now = live.flags[rule];
     const baseline = paper.flags[rule];
+    const unavailable = context.simMode && rule.startsWith('E') && now.base === null;
     const qCells = printedQs.map(q => {
-      const liveText = formatNumber(now.byQ[q], 1);
-      const liveDistinct = state.rotaTest === 'own' ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
+      const liveText = unavailable ? RECALIBRATION_LABEL : formatNumber(now.byQ[q], 1);
+      const liveDistinct = unavailable ? '' : state.rotaTest === 'own' ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
       const paperText = `${formatNumber(baseline.byQ[q], 1)} (${formatNumber(paper.chance[rule].distinctOwn * q, 1)} distinct)`;
       const same = posteriorAvailable && `${liveText} (${liveDistinct})` === paperText;
       const interval = context.intervals?.[`flags|${rule}|${q}`];
-      return `<td data-source="${interval ? 'derived' : same ? 'paper' : 'derived'}"><span class="live-value">${liveText}${interval ? ` (${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)})` : ''}</span><small class="distinct-value">${liveDistinct}</small>${same && !interval ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
+      return `<td data-source="${unavailable ? 'unavailable' : interval ? 'derived' : same ? 'paper' : 'derived'}"><span class="live-value">${liveText}${interval ? ` (${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)})` : ''}</span>${liveDistinct ? `<small class="distinct-value">${liveDistinct}</small>` : ''}${same && !interval ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
     }).join('');
     const currentPosterior = posteriorAvailable ? live.posteriors[rule] : null;
     const livePosterior = formatPosterior(currentPosterior);
@@ -947,7 +953,7 @@ function renderTab5(state, live, paper, reference, context = {}) {
     const posteriorInterval = context.intervals?.[`posterior|${rule}`];
     const paperComparison = posteriorAvailable && (context.simMode || livePosterior.odds !== paperPosterior.odds || livePosterior.percentage !== paperPosterior.percentage)
       ? `<small class="paper-value">paper ${context.adjustedPosterior ? 'not computed' : `${paperPosterior.odds}<br>${paperPosterior.percentage}`}</small>` : '';
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${posteriorDisplay(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { source: unavailable ? 'unavailable' : undefined, interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { source: unavailable ? 'unavailable' : undefined, interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${unavailable ? 'unavailable' : posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${unavailable ? RECALIBRATION_LABEL : posteriorDisplay(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
   });
   const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Off wards', 'Posterior'], rows,
     `Table 5 · nurse-flagging episodes per year with distinct nurses underneath; posterior for ${context.adjustedPosterior ? 'maximum-adjusted test, simulated' : 'own-exposure test'}`);
@@ -957,7 +963,7 @@ function renderTab5(state, live, paper, reference, context = {}) {
   return { kicker: 'Human cost', title: 'What happens after an alarm', question: 'How many people are flagged, and how likely is a flagged nurse to be the offender?', controls,
     graphTitle: 'People affected as searches change', graph, tableTitle: 'Live Table 5', table: liveTable, working,
     fixed: fixedList(['The model assumes every searched alarm receives the selected rota test.', 'Posterior estimates count both background and offender-year flags.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
-    takeaway: `q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
 }
 
 // ---- ui.js ----

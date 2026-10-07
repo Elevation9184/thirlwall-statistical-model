@@ -259,6 +259,14 @@ tbody th { font-weight:750; }
 .world-type .control-field output { font-size:14px; margin:6px 0 0; }
 .source-value { display:block; color:#177578; font-size:10px; font-weight:650; }
 .interval-value { font-size:10px; font-weight:500; color:#486575; }
+.interval-below { display:block; font-size:9px; line-height:1.25; white-space:nowrap; }
+.tab-layout-4 .tab-table table { table-layout:fixed; min-width:0; }
+.tab-layout-4 .tab-table th:first-child { width:42px; }
+.tab-layout-4 .tab-table th,.tab-layout-4 .tab-table td { padding-left:3px; padding-right:3px; }
+.tab-layout-4 .tab-table .source-value { font-size:9px; }
+.tab-table td[data-source="unavailable"] { white-space:normal; overflow-wrap:anywhere; }
+.ratio-row .recalibration-chart-label { grid-column:2 / 4; font-size:11px; }
+@media (max-width:700px) { .tab-layout-4 .tab-table table { min-width:610px; } }
 .sim-updating td[data-source="pending"],.sim-updating .tab-graph,.sim-updating .tab-working { opacity:.58; }
 .unavailable-row,.unavailable-rule { color:#84919b; background:#f3f5f5; }
 .unavailable-row .trigger-cell small { display:block; color:#8b6870; margin-top:4px; }

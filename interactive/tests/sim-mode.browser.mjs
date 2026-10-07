@@ -70,6 +70,23 @@ try {
   assert.equal(await page.locator('#panel-1 .unavailable-row').count(), 2);
   await page.locator('#world-details summary').click();
   await screenshot('deaths-local-8');
+  await page.locator('#tab-4').click();
+  const tableFit = await page.locator('#panel-4 .tab-table').evaluate(card => {
+    const scroller = card.querySelector('.table-scroll');
+    const edge = scroller.getBoundingClientRect().right;
+    const clippedCells = [...scroller.querySelectorAll('th,td')].filter(cell =>
+      cell.getBoundingClientRect().right > edge + 1 ||
+      [...cell.querySelectorAll('.live-value,.interval-value,.source-value,.paper-value')]
+        .some(value => value.scrollWidth > value.clientWidth + 1));
+    return { overflow: scroller.scrollWidth - scroller.clientWidth, clippedCells: clippedCells.length };
+  });
+  assert.ok(tableFit.overflow <= 1 && tableFit.clippedCells === 0,
+    `Tab 4 Live Table clipped at 1400 px: ${JSON.stringify(tableFit)}`);
+  await page.setViewportSize({ width: 390, height: 900 });
+  assert.equal(await page.locator('#panel-4 .table-hint').isVisible(), true);
+  assert.ok(await page.locator('#panel-4 .table-scroll').evaluate(scroller => scroller.scrollWidth > scroller.clientWidth));
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await page.locator('#tab-1').click();
   await page.locator('#world-details summary').click();
   await restore('#control-mean-LNU', 4, baseline);
   timings.roster = await change('#control-staff-LNU', 80);

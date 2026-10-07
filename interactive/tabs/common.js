@@ -6,6 +6,7 @@ export const TYPE_NAMES = Object.freeze({ NICU: 'Intensive care', LNU: 'Local', 
 export const TEST_NAMES = Object.freeze({ avg: 'Average-exposure', own: 'Own-exposure', adj: 'Maximum-adjusted' });
 export const printedRates = [.1, 1, 3, 10, 30];
 export const printedQs = [1, .5, .25, .1];
+export const RECALIBRATION_LABEL = 'Needs recalibration (Stage 3c)';
 
 const roundingView = new DataView(new ArrayBuffer(8));
 
@@ -56,13 +57,13 @@ export function posteriorDisplay(value) {
 }
 
 export function compareCell(value, paper, formatter = value => formatNumber(value), options = {}) {
-  const liveText = formatter(value);
+  const liveText = options.source === 'unavailable' && value === null ? RECALIBRATION_LABEL : formatter(value);
   const paperText = formatter(paper);
   const source = options.source || (liveText === paperText ? 'paper' : 'derived');
   const interval = options.interval && source !== 'paper'
-    ? ` <span class="interval-value">(${formatter(options.interval[0])}–${formatter(options.interval[1])})</span>` : '';
+    ? `${options.intervalBelow ? '' : ' '}<span class="interval-value${options.intervalBelow ? ' interval-below' : ''}">(${formatter(options.interval[0])}–${formatter(options.interval[1])})</span>` : '';
   const paperComparison = source === 'simulated' || source === 'pending' || (source === 'derived' && options.interval) || liveText !== paperText;
-  return `<td data-source="${source}"><span class="live-value">${liveText}${interval}</span>${source === 'simulated' || source === 'pending' || interval ? `<small class="source-value">${source === 'pending' ? 'updating' : source === 'derived' ? 'derived · 95% interval' : 'simulated · 95% interval'}</small>` : ''}${paperComparison ? `<small class="paper-value">paper ${paperText}</small>` : ''}</td>`;
+  return `<td data-source="${source}"><span class="live-value">${liveText}${options.intervalBelow ? '' : interval}</span>${options.intervalBelow ? interval : ''}${source === 'simulated' || source === 'pending' || interval ? `<small class="source-value">${source === 'pending' ? 'updating' : source === 'derived' ? 'derived · 95% interval' : 'simulated · 95% interval'}</small>` : ''}${paperComparison ? `<small class="paper-value">paper ${paperText}</small>` : ''}</td>`;
 }
 
 export function cellSource(cell, key) { return cell?._source?.[key] || 'paper'; }

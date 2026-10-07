@@ -1,8 +1,8 @@
-import { TEST_NAMES, compareCell, fixedList, formatNumber, formatPercent, formatPosterior, posteriorDisplay, printedQs, rangeControl, table } from './common.js';
+import { RECALIBRATION_LABEL, TEST_NAMES, compareCell, fixedList, formatNumber, formatPercent, formatPosterior, posteriorDisplay, printedQs, rangeControl, table } from './common.js';
 
 function costPlot(state, live, intervals) {
   const base = live.flags[state.rule].base;
-  if (base === null) return '<p class="unavailable-rule">Rule E needs recalibration; coming in 3c.</p>';
+  if (base === null) return `<p class="unavailable-rule">${RECALIBRATION_LABEL}</p>`;
   const months = state.investigationMonths;
   const upper = Math.max(base || 0, (base || 0) * months / 12, 1);
   const x = q => 58 + q * 307;
@@ -35,17 +35,18 @@ export function renderTab5(state, live, paper, reference, context = {}) {
   const graph = `<p class="graph-note">Rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} · ${formatNumber(selected.current, 1)} nurse-flagging episodes a year at your q</p>
     ${costPlot(state, live, context.intervals)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>flagging episodes per year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
     <p class="graph-note">At q = ${formatNumber(state.q, 2)}, ${formatNumber(selected.offWards, 1)} nurses are off wards at any one time if each investigation lasts ${state.investigationMonths} months.</p>
-    <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${posteriorDisplay(posteriorValue)}${context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
+    <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${context.simMode && state.rule.startsWith('E') && selected.base === null ? RECALIBRATION_LABEL : posteriorDisplay(posteriorValue)}${context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
   const rows = live.rules.map(rule => {
     const now = live.flags[rule];
     const baseline = paper.flags[rule];
+    const unavailable = context.simMode && rule.startsWith('E') && now.base === null;
     const qCells = printedQs.map(q => {
-      const liveText = formatNumber(now.byQ[q], 1);
-      const liveDistinct = state.rotaTest === 'own' ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
+      const liveText = unavailable ? RECALIBRATION_LABEL : formatNumber(now.byQ[q], 1);
+      const liveDistinct = unavailable ? '' : state.rotaTest === 'own' ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
       const paperText = `${formatNumber(baseline.byQ[q], 1)} (${formatNumber(paper.chance[rule].distinctOwn * q, 1)} distinct)`;
       const same = posteriorAvailable && `${liveText} (${liveDistinct})` === paperText;
       const interval = context.intervals?.[`flags|${rule}|${q}`];
-      return `<td data-source="${interval ? 'derived' : same ? 'paper' : 'derived'}"><span class="live-value">${liveText}${interval ? ` (${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)})` : ''}</span><small class="distinct-value">${liveDistinct}</small>${same && !interval ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
+      return `<td data-source="${unavailable ? 'unavailable' : interval ? 'derived' : same ? 'paper' : 'derived'}"><span class="live-value">${liveText}${interval ? ` (${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)})` : ''}</span>${liveDistinct ? `<small class="distinct-value">${liveDistinct}</small>` : ''}${same && !interval ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
     }).join('');
     const currentPosterior = posteriorAvailable ? live.posteriors[rule] : null;
     const livePosterior = formatPosterior(currentPosterior);
@@ -53,7 +54,7 @@ export function renderTab5(state, live, paper, reference, context = {}) {
     const posteriorInterval = context.intervals?.[`posterior|${rule}`];
     const paperComparison = posteriorAvailable && (context.simMode || livePosterior.odds !== paperPosterior.odds || livePosterior.percentage !== paperPosterior.percentage)
       ? `<small class="paper-value">paper ${context.adjustedPosterior ? 'not computed' : `${paperPosterior.odds}<br>${paperPosterior.percentage}`}</small>` : '';
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${posteriorDisplay(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { source: unavailable ? 'unavailable' : undefined, interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { source: unavailable ? 'unavailable' : undefined, interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${unavailable ? 'unavailable' : posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${unavailable ? RECALIBRATION_LABEL : posteriorDisplay(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
   });
   const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Off wards', 'Posterior'], rows,
     `Table 5 · nurse-flagging episodes per year with distinct nurses underneath; posterior for ${context.adjustedPosterior ? 'maximum-adjusted test, simulated' : 'own-exposure test'}`);
@@ -63,5 +64,5 @@ export function renderTab5(state, live, paper, reference, context = {}) {
   return { kicker: 'Human cost', title: 'What happens after an alarm', question: 'How many people are flagged, and how likely is a flagged nurse to be the offender?', controls,
     graphTitle: 'People affected as searches change', graph, tableTitle: 'Live Table 5', table: liveTable, working,
     fixed: fixedList(['The model assumes every searched alarm receives the selected rota test.', 'Posterior estimates count both background and offender-year flags.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
-    takeaway: `q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
 }

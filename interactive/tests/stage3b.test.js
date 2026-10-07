@@ -6,6 +6,12 @@ import { simulationPlan, simulationOptions, effectiveReference, isPaperMode, ala
 import { directInterval, derivedIntervals } from '../sim/intervals.js';
 import { runSimulation } from '../sim/model.js';
 import { deriveAll } from '../derive.js';
+import { RECALIBRATION_LABEL } from '../tabs/common.js';
+import { renderTab1 } from '../tabs/tab1.js';
+import { renderTab2 } from '../tabs/tab2.js';
+import { renderTab3 } from '../tabs/tab3.js';
+import { renderTab4 } from '../tabs/tab4.js';
+import { renderTab5 } from '../tabs/tab5.js';
 
 const reference = JSON.parse(readFileSync(new URL('../reference/reference.json', import.meta.url)));
 const world = patch => ({ ...PAPER_DEFAULT, deathsPerYear: { ...PAPER_DEFAULT.deathsPerYear },
@@ -71,6 +77,21 @@ test('rule E is unavailable exactly for unit types with changed deaths', () => {
         assert.equal(plan.chanceFields[`${rule}|${other}`], undefined);
     }
   }
+});
+
+test('unavailable rule E cells and Tab 4 chart request recalibration while paper posterior stays not computed', () => {
+  const state = world({ rule: 'E10', deathsPerYear: { NICU: 20, LNU: 8, SCU: 1 } });
+  const live = deriveAll(state, source(state));
+  const paper = deriveAll(state, reference);
+  const views = [renderTab1, renderTab2, renderTab3, renderTab4, renderTab5]
+    .map(render => render(state, live, paper, reference, { simMode: true }));
+  for (const [index, view] of views.entries())
+    assert.ok(view.table.includes(RECALIBRATION_LABEL), `Table ${index + 1} unavailable cell`);
+  assert.ok(views[3].graph.includes(RECALIBRATION_LABEL), 'Tab 4 chart label');
+  for (const view of views) assert.ok(view.takeaway.startsWith('In the paper’s setting: '));
+  const paperView = renderTab5({ ...PAPER_DEFAULT, rotaTest: 'adj' }, deriveAll({ ...PAPER_DEFAULT, rotaTest: 'adj' }, reference), paper, reference);
+  assert.ok(paperView.table.includes('not computed'));
+  assert.ok(!paperView.takeaway.startsWith('In the paper’s setting: '));
 });
 
 test('direction checks exceed Monte Carlo noise with reduced repetitions', () => {
