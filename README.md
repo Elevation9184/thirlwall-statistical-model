@@ -4,6 +4,8 @@ This repository contains [*The Arithmetic of Suspicion*](The%20Arithmetic%20of%2
 
 A mortality chart can tell you where to look. It cannot tell you whom to blame. This model quantifies that distinction under explicit assumptions. Its outputs are not evidence about any particular person or unit, or a forecast of how a trust will act. The code is provided so that others can test different assumptions and interpretations.
 
+**[Open the interactive explorer](https://elevation9184.github.io/thirlwall-statistical-model/interactive/).** It reproduces every table in the article exactly, then lets you change the assumptions behind them and follow the effect through to the nurses flagged.
+
 ## What the model asks
 
 The Thirlwall Inquiry's final report (15 September 2026) asks every trust to monitor deaths of babies and children and to escalate concerning trends (Recommendation 6), and to act at once on any good-faith concern that a member of staff has deliberately harmed a patient (Recommendation 9). The model asks what happens if a statistical alarm from the first is followed by a look at the rota, which can then feed the second:
@@ -17,6 +19,8 @@ It does not forecast how often trusts will make that step. The share of alarms f
 ## Files
 
 - [`The Arithmetic of Suspicion.pdf`](The%20Arithmetic%20of%20Suspicion.pdf) — reader-facing article, including the model results and a separate policy discussion.
+- [`Revision History.pdf`](Revision%20History.pdf) — how the article and model changed in each round of review.
+- [`interactive/`](interactive/) — the interactive explorer ([live version](https://elevation9184.github.io/thirlwall-statistical-model/interactive/)); its development plan is [`interactive/DEVELOPMENT.md`](interactive/DEVELOPMENT.md).
 - [`thirlwall_statistical_model.py`](thirlwall_statistical_model.py) — the complete simulation.
 - [`MODEL.md`](MODEL.md) — technical specification, outcome definitions, and limits.
 - [`requirements.txt`](requirements.txt) — exact package versions for the reference environment.
