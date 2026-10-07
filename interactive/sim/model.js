@@ -1,5 +1,6 @@
 import { createRng } from './random.js';
 import { gamma, poisson, binomial, poissonQuantile, binomialTail, binomialCDF } from './distributions.js';
+import { calibrateUnit } from './calibration.js';
 
 const LN2 = Math.log(2);
 const cutoffCache = new Map();
@@ -120,7 +121,7 @@ function chanceCell(rng, rule, type, reference, reps, settings) {
   for (let unitIndex = 0; unitIndex < reps; unitIndex++) {
     const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months);
     const roster = drawRoster(rng, unit.staff, inputs.exposure, inputs.exposure_mix);
-    const checks = alarmChecks(path, rule, type, inputs.monitor_months, inputs, reference.cusum_h, settings.quantiles);
+    const checks = alarmChecks(path, rule, type, inputs.monitor_months, inputs, settings.cusumH, settings.quantiles);
     let lastAlarmingYear = -1;
     for (let index = 0; index < checks.alarm.length; index++) {
       if (!checks.alarm[index]) continue;
@@ -163,7 +164,7 @@ function detectionCell(rng, effect, rule, type, reference, reps, settings) {
   for (let unitIndex = 0; unitIndex < reps; unitIndex++) {
     const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months, effect);
     const roster = drawRoster(rng, unit.staff, inputs.exposure, inputs.exposure_mix, true, inputs.offender_f);
-    const checks = alarmChecks(path, rule, type, 12, inputs, reference.cusum_h, settings.quantiles);
+    const checks = alarmChecks(path, rule, type, 12, inputs, settings.cusumH, settings.quantiles);
     let first = -1;
     for (let index = 0; index < checks.alarm.length; index++) if (checks.alarm[index]) { first = index; break; }
     if (first >= 0 && checks.month[first] < 12) {
@@ -203,7 +204,7 @@ function detectionCell(rng, effect, rule, type, reference, reps, settings) {
   }
   for (let unitIndex = 0; unitIndex < reps; unitIndex++) {
     const path = simulateUnit(rng, unit.mean, settings.cv, inputs.pre_months, inputs.monitor_months);
-    const checks = alarmChecks(path, rule, type, 12, inputs, reference.cusum_h, settings.quantiles);
+    const checks = alarmChecks(path, rule, type, 12, inputs, settings.cusumH, settings.quantiles);
     backgroundHits += Number(checks.alarm.includes(1));
   }
   return { d: hits / reps, bg: backgroundHits / reps,
@@ -219,7 +220,8 @@ export function runSimulation(reference, options = {}, onProgress = () => {}) {
   const settings = {
     inputs, unitTypes: options.unitTypes || inputs.types, cv: options.cv ?? inputs.cv,
     significance: options.significance ?? .05,
-    quantiles: options.quantiles || { A: .977, B: .9987, C: .977 }
+    quantiles: options.quantiles || { A: .977, B: .9987, C: .977 },
+    cusumH: { ...reference.cusum_h }
   };
   const seed = options.seed ?? reference.seed;
   const rng = createRng(seed);
@@ -237,9 +239,20 @@ export function runSimulation(reference, options = {}, onProgress = () => {}) {
     jobs.sort((a, b) => Number(b.rule === rule && b.type === type && (b.kind === 'chance' || b.effect === effect))
       - Number(a.rule === rule && a.type === type && (a.kind === 'chance' || a.effect === effect)));
   }
-  const chance = {}, detection = {};
+  const chance = {}, detection = {}, calibration = {};
   let completed = 0;
   for (const job of jobs) {
+    if (job.rule.startsWith('E') && settings.unitTypes[job.type].mean !== inputs.types[job.type].mean
+        && !calibration[job.type]) {
+      onProgress({ kind: 'calibration', stage: 'start', type: job.type, completed, total: jobs.length });
+      const result = calibrateUnit(seed, job.type, settings.unitTypes[job.type].mean, settings.cv,
+        { cachedThresholds: options.cachedThresholds });
+      calibration[job.type] = result;
+      settings.cusumH[`E10|${job.type}`] = result.thresholds.E10;
+      settings.cusumH[`E50|${job.type}`] = result.thresholds.E50;
+      onProgress({ kind: 'calibration', stage: 'done', type: job.type, completed,
+        total: jobs.length, value: result });
+    }
     let value;
     if (job.kind === 'chance') {
       value = chanceCell(rng, job.rule, job.type, reference, chanceReps, settings);
@@ -250,5 +263,6 @@ export function runSimulation(reference, options = {}, onProgress = () => {}) {
     }
     onProgress({ ...job, completed: ++completed, total: jobs.length, value });
   }
-  return { chance, detection, metadata: { seed, chanceReps, detectionReps, rules, types, effects } };
+  return { chance, detection, calibration,
+    metadata: { seed, chanceReps, detectionReps, rules, types, effects } };
 }

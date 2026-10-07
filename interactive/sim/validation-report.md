@@ -1,4 +1,4 @@
-# Stage 3a simulation validation
+# Simulation validation: Stages 3a and 3c
 
 Seed: 20261007. Chance units per cell: 2,000; detection units per cell: 10,000.
 Node simulation run time: 7.14 seconds.
@@ -530,3 +530,25 @@ Each interval is JS ± 1.96 × the combined delta-method standard error of the J
 - Node run time 7.14 seconds.
 - Browser worker run time 11.17 seconds.
 - Gate: **PASS**.
+
+## Stage 3c: CUSUM recalibration
+
+Calibration uses 50,000 fixed null paths × 120 months per type; each threshold uses the same increments for 30 log-bisection steps. Independent rates use a different seeded path set. Node calibration checks took 7.55 seconds.
+
+| Type | Rule | JS h | Python h | Relative difference | Independent crossing rate | Target | z | Pass |
+|---|---|---:|---:|---:|---:|---:|---:|:---:|
+| NICU | E10 | 2.9300823 | 2.9242588 | 0.199% | 0.099678000 | 0.10 | -0.720 | yes |
+| NICU | E50 | 4.4687767 | 4.4478902 | 0.470% | 0.019770000 | 0.02 | -1.150 | yes |
+| LNU | E10 | 2.1961041 | 2.1924405 | 0.167% | 0.099786000 | 0.10 | -0.479 | yes |
+| LNU | E50 | 3.5585537 | 3.5665321 | -0.224% | 0.020336000 | 0.02 | 1.680 | yes |
+| SCU | E10 | 1.3930660 | 1.3929940 | 0.005% | 0.099778000 | 0.10 | -0.496 | yes |
+| SCU | E50 | 2.5026363 | 2.5137348 | -0.442% | 0.020112000 | 0.02 | 0.560 | yes |
+
+LNU 4 → 8 deaths/year: E10 2.1961041 → 2.5315120; E50 3.5585537 → 3.9815558. Direction: **PASS**.
+
+| Changed-mortality chance cell | Episodes per unit-year | Target | z | Pass |
+|---|---:|---:|---:|:---:|
+| LNU 8 / E10 | 0.10040000 | 0.10 | 0.179 | yes |
+| LNU 8 / E50 | 0.021200000 | 0.02 | 1.200 | yes |
+
+Stage 3c calibration gate: **PASS** (0 failures).

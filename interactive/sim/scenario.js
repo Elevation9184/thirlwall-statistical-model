@@ -40,18 +40,21 @@ export function simulationPlan(state, reference) {
     const meanChanged = ruleEUnavailable(state, reference, type);
     const rosterChanged = state.staffPerRoster[type] !== reference.inputs.types[type].staff;
     const lineChanged = alarmChanged && RULES_ALARM_LINE.has(rule);
-    const unavailable = rule.startsWith('E') && meanChanged;
-    const chance = unavailable ? CHANCE_ALL : meanChanged || lineChanged ? CHANCE_ALL
+    const chance = meanChanged || lineChanged ? CHANCE_ALL
       : rosterChanged ? CHANCE_ROTA : sigChanged ? CHANCE_SIGNIFICANCE : [];
-    const detection = unavailable ? DET_ALL : meanChanged || lineChanged ? DET_ALL
+    const detection = meanChanged || lineChanged ? DET_ALL
       : effectChanged ? ['d', ...DET_ROTA] : rosterChanged || sigChanged ? DET_ROTA
         : state.rotaTest === 'adj' ? ['flag_off_adj', 'flag_any_adj'] : [];
-    if (chance.length) chanceFields[`${rule}|${type}`] = { fields: chance, unavailable };
-    if (detection.length) detectionFields[`${state.expectedExtraDeaths}|${rule}|${type}`] = { fields: detection, unavailable };
-    if (!unavailable && chance.length) jobs.push({ kind: 'chance', rule, type });
-    if (!unavailable && detection.length) jobs.push({ kind: 'detection', effect: state.expectedExtraDeaths, rule, type });
+    if (chance.length) chanceFields[`${rule}|${type}`] = { fields: chance };
+    if (detection.length) detectionFields[`${state.expectedExtraDeaths}|${rule}|${type}`] = { fields: detection };
+    if (chance.length) jobs.push({ kind: 'chance', rule, type });
+    if (detection.length) jobs.push({ kind: 'detection', effect: state.expectedExtraDeaths, rule, type });
   }
   jobs.sort((a, b) => {
+    // Publish every ordinary rule before the worker's expensive E calibration.
+    const needsCalibration = job => Number(job.rule.startsWith('E') && ruleEUnavailable(state, reference, job.type));
+    const deferred = needsCalibration(a) - needsCalibration(b);
+    if (deferred) return deferred;
     const score = job => (job.rule === state.rule ? 4 : 0) + (job.type === state.unitType ? 2 : 0)
       + (job.kind === (state.activeTab === 3 || state.activeTab === 4 || state.activeTab === 5 ? 'detection' : 'chance') ? 1 : 0);
     return score(b) - score(a);
@@ -59,7 +62,7 @@ export function simulationPlan(state, reference) {
   return { paperMode, chanceFields, detectionFields, jobs };
 }
 
-export function simulationOptions(state, reference, plan) {
+export function simulationOptions(state, reference, plan, cachedThresholds = {}) {
   return {
     seed: state.seed,
     unitTypes: Object.fromEntries(TYPES.map(type => [type, { ...reference.inputs.types[type], mean: state.deathsPerYear[type], staff: state.staffPerRoster[type] }])),
@@ -67,7 +70,8 @@ export function simulationOptions(state, reference, plan) {
     quantiles: alarmQuantiles(state.alarmSD),
     jobs: plan.jobs,
     chanceReps: reference.inputs.reps,
-    detectionReps: reference.inputs.det_reps
+    detectionReps: reference.inputs.det_reps,
+    cachedThresholds
   };
 }
 
@@ -81,11 +85,10 @@ export function effectiveReference(state, reference, plan, results = { chance: {
       const spec = plan.chanceFields[`${rule}|${type}`];
       const sim = results.chance?.[rule]?.[type];
       const stale = previous?.chance?.[rule]?.[type];
-      const cell = { ...base, _source: {}, _pending: Boolean(spec && !spec.unavailable && !sim) };
+      const cell = { ...base, _source: {}, _pending: Boolean(spec && !sim) };
       for (const key of CHANCE_ALL) {
-        cell._source[key] = spec?.unavailable ? 'unavailable' : spec?.fields.includes(key) ? sim ? 'simulated' : 'pending' : 'paper';
-        if (spec?.unavailable) cell[key] = null;
-        else if (sim && spec?.fields.includes(key)) cell[key] = sim[key];
+        cell._source[key] = spec?.fields.includes(key) ? sim ? 'simulated' : 'pending' : 'paper';
+        if (sim && spec?.fields.includes(key)) cell[key] = sim[key];
         else if (stale && spec?.fields.includes(key)) cell[key] = stale[key];
       }
       if (sim) cell.counts = sim.counts;
@@ -100,18 +103,20 @@ export function effectiveReference(state, reference, plan, results = { chance: {
       const spec = plan.detectionFields[`${effect}|${rule}|${type}`];
       const sim = results.detection?.[effect]?.[rule]?.[type];
       const stale = previous?.detection?.[effect]?.[rule]?.[type];
-      const cell = { ...base, _source: {}, _pending: Boolean(spec && !spec.unavailable && !sim) };
+      const cell = { ...base, _source: {}, _pending: Boolean(spec && !sim) };
       for (const key of DET_ALL) {
-        cell._source[key] = spec?.unavailable ? 'unavailable' : spec?.fields.includes(key) ? sim ? 'simulated' : 'pending' : 'paper';
-        if (spec?.unavailable) cell[key] = null;
-        else if (sim && spec?.fields.includes(key)) cell[key] = sim[key];
+        cell._source[key] = spec?.fields.includes(key) ? sim ? 'simulated' : 'pending' : 'paper';
+        if (sim && spec?.fields.includes(key)) cell[key] = sim[key];
         else if (stale && spec?.fields.includes(key)) cell[key] = stale[key];
       }
       if (sim) cell.counts = sim.counts;
       detection[effect][rule][type] = cell;
     }
   }
-  return { ...reference,
+  const cusumH = { ...reference.cusum_h };
+  for (const [type, result] of Object.entries(results.calibration || {}))
+    for (const [rule, threshold] of Object.entries(result.thresholds)) cusumH[`${rule}|${type}`] = threshold;
+  return { ...reference, cusum_h: cusumH, calibration: results.calibration || {},
     inputs: { ...reference.inputs,
       types: Object.fromEntries(TYPES.map(type => [type, { ...reference.inputs.types[type], staff: state.staffPerRoster[type], mean: state.deathsPerYear[type] }])) },
     chance, detection };

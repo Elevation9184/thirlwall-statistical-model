@@ -1,9 +1,9 @@
 import { TYPES } from '../derive.js';
 import { directInterval } from '../sim/intervals.js';
-import { RECALIBRATION_LABEL, TYPE_NAMES, cellSource, choiceControl, compareCell, fixedList, formatNumber, formatPercent, rangeControl, table } from './common.js';
+import { TYPE_NAMES, cellSource, choiceControl, compareCell, fixedList, formatNumber, formatPercent, rangeControl, table } from './common.js';
 
 function detectionRow(type, cell, selected) {
-  if (cell.d === null) return `<div class="detection-row unavailable-rule"><strong>${TYPE_NAMES[type]}</strong><p>${RECALIBRATION_LABEL}</p></div>`;
+  if (cell.d === null) return `<div class="detection-row unavailable-rule"><strong>${TYPE_NAMES[type]}</strong><p>not computed</p></div>`;
   const interval = directInterval(cell, 'd');
   return `<div class="detection-row ${selected ? 'highlighted' : ''}"><div class="detection-heading"><strong>${TYPE_NAMES[type]}</strong><span>${formatPercent(cell.d, 1)} unit alarms${interval ? ` · 95% ${formatPercent(interval[0], 1)}–${formatPercent(interval[1], 1)}` : ''}</span></div><div class="detection-track"><span class="detection-fill" style="width:${(cell.d * 100).toFixed(2)}%"></span>${interval ? `<i class="detection-error" style="left:${(interval[0] * 100).toFixed(2)}%;width:${((interval[1] - interval[0]) * 100).toFixed(2)}%"></i>` : ''}<span class="background-mark" style="left:${(cell.bg * 100).toFixed(2)}%" title="Background alarm rate ${formatPercent(cell.bg, 1)}"></span><span class="identification-mark" style="left:${(cell.flag_off * 100).toFixed(2)}%" title="Identification among alarms ${formatPercent(cell.flag_off, 1)}"></span></div></div>`;
 }
@@ -18,7 +18,7 @@ export function renderTab3(state, live, paper, reference, context = {}) {
   const rows = live.rules.map(rule => {
     const cell = live.detection[rule];
     const baseline = paper.detection[rule];
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''}"><th scope="row">${rule}</th>${TYPES.map(type => compareCell(cell[type].d, baseline[type].d, value => formatPercent(value, 0), { source: cellSource(cell[type], 'd'), interval: directInterval(cell[type], 'd') })).join('')}${compareCell(cell.LNU.flag_off, baseline.LNU.flag_off, value => formatPercent(value, 0), { source: cellSource(cell.LNU, 'flag_off'), interval: directInterval(cell.LNU, 'flag_off') })}${compareCell(cell.LNU.bg, baseline.LNU.bg, value => formatPercent(value, 0), { source: cellSource(cell.LNU, 'bg'), interval: directInterval(cell.LNU, 'bg') })}</tr>`;
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${rule.startsWith('E') && TYPES.some(type => cell[type]._pending) ? 'pending-rule' : ''}"><th scope="row">${rule}</th>${TYPES.map(type => compareCell(cell[type].d, baseline[type].d, value => formatPercent(value, 0), { source: cellSource(cell[type], 'd'), interval: directInterval(cell[type], 'd') })).join('')}${compareCell(cell.LNU.flag_off, baseline.LNU.flag_off, value => formatPercent(value, 0), { source: cellSource(cell.LNU, 'flag_off'), interval: directInterval(cell.LNU, 'flag_off') })}${compareCell(cell.LNU.bg, baseline.LNU.bg, value => formatPercent(value, 0), { source: cellSource(cell.LNU, 'bg'), interval: directInterval(cell.LNU, 'bg') })}</tr>`;
   });
   const liveTable = table(['Rule', 'Intensive care alarm', 'Local alarm', 'Special care alarm', 'Local identification if alarmed', 'Local background alarm'], rows, `Table 3 · +${state.expectedExtraDeaths} expected deaths in one year`);
   const working = `<p><strong>One-year detection sensitivity</strong> means the unit alarms at least once while an offender is present. For ${TYPE_NAMES[state.unitType].toLowerCase()} under rule ${state.rule}, this is <strong>${formatPercent(selected.d, 1)}</strong>.</p><p>With no offender, the same unit type alarms <strong>${formatPercent(selected.bg, 1)}</strong> of the time. If the offender unit alarms, the rota review identifies the offender <strong>${formatPercent(selected.flag_off, 1)}</strong> of the time. Alarm and identification are separate outcomes.</p>`;

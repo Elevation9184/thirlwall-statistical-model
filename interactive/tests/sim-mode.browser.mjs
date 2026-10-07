@@ -67,7 +67,9 @@ try {
   await page.locator('#world-details summary').click();
   const timings = {};
   timings.deaths = await change('#control-mean-LNU', 8);
-  assert.equal(await page.locator('#panel-1 .unavailable-row').count(), 2);
+  assert.equal(await page.locator('#panel-1 .unavailable-row').count(), 0);
+  for (const rule of ['E10', 'E50'])
+    assert.equal(await page.locator('#panel-1 .tab-table tbody tr').filter({ has: page.locator(`th:text-is("${rule}")`) }).locator('td[data-source="simulated"]').count(), 1);
   await page.locator('#world-details summary').click();
   await screenshot('deaths-local-8');
   await page.locator('#tab-4').click();

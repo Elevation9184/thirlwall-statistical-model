@@ -6,7 +6,6 @@ import { simulationPlan, simulationOptions, effectiveReference, isPaperMode, ala
 import { directInterval, derivedIntervals } from '../sim/intervals.js';
 import { runSimulation } from '../sim/model.js';
 import { deriveAll } from '../derive.js';
-import { RECALIBRATION_LABEL } from '../tabs/common.js';
 import { renderTab1 } from '../tabs/tab1.js';
 import { renderTab2 } from '../tabs/tab2.js';
 import { renderTab3 } from '../tabs/tab3.js';
@@ -14,6 +13,7 @@ import { renderTab4 } from '../tabs/tab4.js';
 import { renderTab5 } from '../tabs/tab5.js';
 
 const reference = JSON.parse(readFileSync(new URL('../reference/reference.json', import.meta.url)));
+const obsoleteLabel = 'Needs recalibration (Stage 3c)';
 const world = patch => ({ ...PAPER_DEFAULT, deathsPerYear: { ...PAPER_DEFAULT.deathsPerYear },
   staffPerRoster: { ...PAPER_DEFAULT.staffPerRoster }, ...patch });
 const source = (state, result = {}) => effectiveReference(state, reference, simulationPlan(state, reference), result);
@@ -42,7 +42,7 @@ test('source masks re-simulate only dependent cells', () => {
   assert.equal(result.chance.A.LNU._source.alpha, 'pending');
   assert.equal(result.detection[4].A.LNU._source.d, 'pending');
   assert.equal(result.chance.A.NICU._source.alpha, 'paper');
-  assert.equal(result.chance.E10.LNU._source.alpha, 'unavailable');
+  assert.equal(result.chance.E10.LNU._source.alpha, 'pending');
   assert.equal(result.chance.E10.NICU._source.alpha, 'paper');
   result = source(world({ staffPerRoster: { NICU: 100, LNU: 80, SCU: 20 } }));
   assert.equal(result.chance.C.LNU._source.alpha, 'paper');
@@ -66,28 +66,34 @@ test('source masks re-simulate only dependent cells', () => {
   assert.equal(result.detection[5].C.LNU._source.bg, 'paper');
 });
 
-test('rule E is unavailable exactly for unit types with changed deaths', () => {
+test('rule E is scheduled for recalibration exactly where deaths change', () => {
   for (const type of ['NICU', 'LNU', 'SCU']) {
     const deathsPerYear = { ...PAPER_DEFAULT.deathsPerYear, [type]: PAPER_DEFAULT.deathsPerYear[type] + 1 };
     const plan = simulationPlan(world({ deathsPerYear }), reference);
     for (const rule of ['E10', 'E50']) {
-      assert.equal(plan.chanceFields[`${rule}|${type}`].unavailable, true);
-      assert.equal(plan.jobs.some(item => item.rule === rule && item.type === type), false);
+      assert.equal(plan.chanceFields[`${rule}|${type}`].fields.includes('alpha'), true);
+      assert.equal(plan.jobs.some(item => item.rule === rule && item.type === type && item.kind === 'chance'), true);
+      assert.equal(plan.jobs.some(item => item.rule === rule && item.type === type && item.kind === 'detection'), true);
       for (const other of ['NICU', 'LNU', 'SCU'].filter(item => item !== type))
         assert.equal(plan.chanceFields[`${rule}|${other}`], undefined);
     }
   }
 });
 
-test('unavailable rule E cells and Tab 4 chart request recalibration while paper posterior stays not computed', () => {
+test('recalibrated rule E cells propagate through every table and Figure 2 retains paper scope', () => {
   const state = world({ rule: 'E10', deathsPerYear: { NICU: 20, LNU: 8, SCU: 1 } });
-  const live = deriveAll(state, source(state));
+  const result = { chance: { E10: { LNU: { ...reference.chance.E10.LNU, alpha: .2 } } },
+    detection: {}, calibration: { LNU: { thresholds: { E10: 4.21, E50: 5.9 } } } };
+  const effective = source(state, result);
+  const live = deriveAll(state, effective);
   const paper = deriveAll(state, reference);
   const views = [renderTab1, renderTab2, renderTab3, renderTab4, renderTab5]
-    .map(render => render(state, live, paper, reference, { simMode: true }));
+    .map(render => render(state, live, paper, reference, { simMode: true, reference: effective }));
   for (const [index, view] of views.entries())
-    assert.ok(view.table.includes(RECALIBRATION_LABEL), `Table ${index + 1} unavailable cell`);
-  assert.ok(views[3].graph.includes(RECALIBRATION_LABEL), 'Tab 4 chart label');
+    assert.ok(!view.table.includes(obsoleteLabel), `Table ${index + 1} has no unavailable cell`);
+  assert.ok(!views[3].graph.includes(obsoleteLabel), 'Tab 4 chart has no unavailable label');
+  assert.ok(views[0].working.includes('4.21 (recalibrated)'));
+  assert.ok(views[3].extra.includes("Figure 2 shows the paper's settings; it is not recalculated in simulation mode."));
   for (const view of views) assert.ok(view.takeaway.startsWith('In the paper’s setting: '));
   const paperView = renderTab5({ ...PAPER_DEFAULT, rotaTest: 'adj' }, deriveAll({ ...PAPER_DEFAULT, rotaTest: 'adj' }, reference), paper, reference);
   assert.ok(paperView.table.includes('not computed'));

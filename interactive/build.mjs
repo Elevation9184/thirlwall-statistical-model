@@ -24,6 +24,7 @@ const sources = [
 const workerSources = [
   'sim/random.js',
   'sim/distributions.js',
+  'sim/calibration.js',
   'sim/model.js',
   'sim/worker.js'
 ];

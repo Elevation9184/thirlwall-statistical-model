@@ -32,9 +32,11 @@ const ranges = {
 };
 let state = cloneDefaults();
 let plan = simulationPlan(state, REFERENCE);
-let simulation = { chance: {}, detection: {} };
+let simulation = { chance: {}, detection: {}, calibration: {} };
 let previousSimulation = null;
 let worker = null, debounce = null, runId = 0, completed = 0, loading = false, simulationError = '';
+let recalibratingType = null;
+const calibrationCache = {};
 let intervalCache = null, intervalCacheKey = '';
 
 function cloneDefaults() {
@@ -113,7 +115,7 @@ function updateSimulationBanner() {
   banner.hidden = plan.paperMode;
   if (plan.paperMode) return;
   const status = simulationError ? `Simulation error: ${simulationError}` : loading
-    ? `Updating · ${completed} of ${plan.jobs.length} cells` : 'Estimates ready';
+    ? `${recalibratingType ? `Recalibrating rule E for ${TYPE_NAMES[recalibratingType].toLowerCase()} units… · ` : 'Updating · '}${completed} of ${plan.jobs.length} cells` : 'Estimates ready';
   banner.innerHTML = `<strong>Simulation mode</strong> · estimates from ${REFERENCE.inputs.reps.toLocaleString()} chance / ${REFERENCE.inputs.det_reps.toLocaleString()} detection simulated units per cell · seed ${state.seed}
     <span class="simulation-progress">${status}</span><button type="button" data-sim-action="baseline">Return to paper baseline</button><button type="button" data-sim-action="seed">Re-run with a new seed</button>`;
 }
@@ -159,6 +161,7 @@ function render(preserveField = null) {
     tab.tabIndex = active ? 0 : -1;
     panel.hidden = !active;
     const view = viewFunction(state, live, paper, REFERENCE, context);
+    if (!plan.paperMode) view.takeaway = view.takeaway.replace(/^(In the paper’s setting: )([A-Z])/, (_, prefix, first) => prefix + first.toLowerCase());
     if (!plan.paperMode) view.working = `<p class="source-explainer"><strong>Sources.</strong> “Simulated” cells use the current worker run; “derived” values combine those estimates with the shown scenario. Other cells retain the Python paper baseline. Pending values are dimmed until their new estimates arrive.</p>${view.working}`;
     const markup = renderLayout(tabNumber, view);
     if (preserveField && active) {
@@ -194,7 +197,8 @@ function stopSimulation() {
   loading = false;
   completed = 0;
   simulationError = '';
-  if (plan.paperMode) simulation = { chance: {}, detection: {} };
+  recalibratingType = null;
+  if (plan.paperMode) simulation = { chance: {}, detection: {}, calibration: {} };
   if (plan.paperMode) previousSimulation = null;
   intervalCache = null;
   intervalCacheKey = '';
@@ -203,7 +207,7 @@ function stopSimulation() {
 function scheduleSimulation() {
   previousSimulation = simulation;
   stopSimulation();
-  simulation = { chance: {}, detection: {} };
+  simulation = { chance: {}, detection: {}, calibration: {} };
   loading = true;
   const id = runId;
   debounce = setTimeout(() => {
@@ -216,18 +220,27 @@ function scheduleSimulation() {
         const message = event.data;
         if (id !== runId) return;
         if (message.type === 'ready') {
-          worker.postMessage({ type: 'run', id, options: simulationOptions(state, REFERENCE, plan) });
+          worker.postMessage({ type: 'run', id, options: simulationOptions(state, REFERENCE, plan, calibrationCache) });
         } else if (message.id === id && message.type === 'progress') {
           const job = message.progress;
-          if (job.kind === 'chance') (simulation.chance[job.rule] ||= {})[job.type] = job.value;
-          else ((simulation.detection[job.effect] ||= {})[job.rule] ||= {})[job.type] = job.value;
-          completed = job.completed;
+          if (job.kind === 'calibration') {
+            recalibratingType = job.stage === 'start' ? job.type : null;
+            if (job.stage === 'done') {
+              simulation.calibration[job.type] = job.value;
+              for (const [rule, key] of Object.entries(job.value.keys)) calibrationCache[key] = job.value.thresholds[rule];
+            }
+          } else {
+            if (job.kind === 'chance') (simulation.chance[job.rule] ||= {})[job.type] = job.value;
+            else ((simulation.detection[job.effect] ||= {})[job.rule] ||= {})[job.type] = job.value;
+            completed = job.completed;
+          }
           render();
         } else if (message.id === id && message.type === 'result') {
           simulation = message.result;
           previousSimulation = null;
           completed = plan.jobs.length;
           loading = false;
+          recalibratingType = null;
           worker.terminate();
           worker = null;
           render();

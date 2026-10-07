@@ -264,12 +264,13 @@ tbody th { font-weight:750; }
 .tab-layout-4 .tab-table th:first-child { width:42px; }
 .tab-layout-4 .tab-table th,.tab-layout-4 .tab-table td { padding-left:3px; padding-right:3px; }
 .tab-layout-4 .tab-table .source-value { font-size:9px; }
-.tab-table td[data-source="unavailable"] { white-space:normal; overflow-wrap:anywhere; }
-.ratio-row .recalibration-chart-label { grid-column:2 / 4; font-size:11px; }
 @media (max-width:700px) { .tab-layout-4 .tab-table table { min-width:610px; } }
+.sim-updating .pending-rule { opacity:.58; }
+.threshold-list { margin:0 0 12px; padding-left:21px; color:#43556a; font-size:13px; line-height:1.6; }
+.figure2-body .figure2-scope { padding:10px 12px; border-left:3px solid var(--teal); background:#eef6f5; color:#314d58; font-weight:650; }
+.figure2-summary-note { display:block; margin:5px 0 0 20px; color:#657586; font-size:11px; font-weight:500; }
 .sim-updating td[data-source="pending"],.sim-updating .tab-graph,.sim-updating .tab-working { opacity:.58; }
-.unavailable-row,.unavailable-rule { color:#84919b; background:#f3f5f5; }
-.unavailable-row .trigger-cell small { display:block; color:#8b6870; margin-top:4px; }
+.unavailable-rule { color:#84919b; background:#f3f5f5; }
 .dot-uncertainty,.chart-interval { display:flex; align-items:center; gap:7px; margin-top:5px; color:#5e7581; font-size:11px; }
 .chart-interval i { width:28px; border-top:3px solid #e49448; }
 .bar-row .bar-track { position:relative; }

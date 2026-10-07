@@ -1,6 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { performance } from 'node:perf_hooks';
 import { runSimulation } from './model.js';
+import { calibrateUnit, makeNullIncrements, crossingRate, CUSUM_TARGETS,
+  CALIBRATION_PATHS, CALIBRATION_MONTHS } from './calibration.js';
 import { falseTrue, chanceForRule, TYPES } from '../derive.js';
 
 const reference = JSON.parse(await readFile(new URL('../reference/reference.json', import.meta.url), 'utf8'));
@@ -12,7 +14,7 @@ let browserTiming = null;
 try { browserTiming = JSON.parse(await readFile(new URL('browser-runtime.json', import.meta.url), 'utf8')); }
 catch (error) { if (error.code !== 'ENOENT') throw error; }
 const lines = [
-  '# Stage 3a simulation validation', '',
+  '# Simulation validation: Stages 3a and 3c', '',
   `Seed: ${simulated.metadata.seed}. Chance units per cell: ${simulated.metadata.chanceReps.toLocaleString()}; detection units per cell: ${simulated.metadata.detectionReps.toLocaleString()}.`,
   `Node simulation run time: ${(runtimeMs / 1000).toFixed(2)} seconds.`,
   `Browser worker run time: ${browserTiming ? `${(browserTiming.elapsedMs / 1000).toFixed(2)} seconds (${browserTiming.browser}, full paper settings)` : 'not measured yet'}.`, '',
@@ -124,8 +126,44 @@ const over4 = observations.filter(item => Math.abs(item.z) > 4);
 const largest = Math.max(...observations.map(item => Math.abs(item.z)));
 const medianFailures = medianChecks.filter(item => item.diff > 1);
 const tableFailures = tableChecks.filter(item => !item.inside);
+const calibrationChecks = [];
+let calibrationFailures = 0;
+const calibrationSeed = 20261007;
+const calibrationStarted = performance.now();
+for (const type of TYPES) {
+  const mean = reference.inputs.types[type].mean;
+  const calibrated = calibrateUnit(calibrationSeed, type, mean, reference.inputs.cv);
+  const independent = makeNullIncrements(mean, reference.inputs.cv, calibrationSeed, type,
+    CALIBRATION_PATHS, CALIBRATION_MONTHS, 'validation');
+  for (const [rule, target] of Object.entries(CUSUM_TARGETS)) {
+    const threshold = calibrated.thresholds[rule];
+    const paperThreshold = reference.cusum_h[`${rule}|${type}`];
+    const relativeError = threshold / paperThreshold - 1;
+    const rate = crossingRate(independent, threshold);
+    const z = (rate - target) / Math.sqrt(target / (CALIBRATION_PATHS * CALIBRATION_MONTHS / 12));
+    const okay = Math.abs(relativeError) <= .02 && Math.abs(z) <= 3;
+    calibrationFailures += Number(!okay);
+    calibrationChecks.push({ type, rule, threshold, paperThreshold, relativeError, rate, target, z, okay });
+  }
+}
+const localEight = calibrateUnit(calibrationSeed, 'LNU', 8, reference.inputs.cv);
+const localFour = calibrationChecks.filter(item => item.type === 'LNU');
+const directionPass = localFour.every(item => localEight.thresholds[item.rule] > item.threshold);
+calibrationFailures += Number(!directionPass);
+const changedReference = { ...reference.inputs.types,
+  LNU: { ...reference.inputs.types.LNU, mean: 8 } };
+const changedChance = runSimulation(reference, { seed: calibrationSeed, unitTypes: changedReference,
+  jobs: ['E10', 'E50'].map(rule => ({ kind: 'chance', rule, type: 'LNU' })) });
+const chanceChecks = Object.entries(CUSUM_TARGETS).map(([rule, target]) => {
+  const cell = changedChance.chance[rule].LNU;
+  const z = (cell.ep - target) / Math.sqrt(target / cell.counts.unitYears);
+  const okay = Math.abs(z) <= 3;
+  calibrationFailures += Number(!okay);
+  return { rule, rate: cell.ep, target, z, okay };
+});
+const calibrationSeconds = (performance.now() - calibrationStarted) / 1000;
 const passed = !over4.length && over3.length <= Math.floor(.01 * observations.length)
-  && !medianFailures.length && !tableFailures.length;
+  && !medianFailures.length && !tableFailures.length && !calibrationFailures;
 lines.splice(8, 0, `Validation: **${passed ? 'PASS' : 'FAIL'}**. ${observations.length} cells checked; largest |z| ${largest.toFixed(3)}; ${over3.length} cells over 3; ${over4.length} cells over 4; ${medianFailures.length} median failures; ${tableFailures.length} Table 4/5 interval failures.`, '');
 lines.push('## Summary', '',
   `- ${observations.length} proportion/rate cells; largest |z| ${largest.toFixed(3)}; ${over3.length} over 3 (${(100 * over3.length / observations.length).toFixed(2)}%); ${over4.length} over 4.`,
@@ -137,6 +175,15 @@ lines.push('## Summary', '',
 if (over3.length) lines.push(`Cells over 3: ${over3.map(x => `${x.key} (${x.z.toFixed(3)})`).join(', ')}.`, '');
 if (medianFailures.length) lines.push(`Median failures: ${medianFailures.map(x => x.key).join(', ')}.`, '');
 if (tableFailures.length) lines.push(`Table failures: ${tableFailures.map(x => x.key).join(', ')}.`, '');
+lines.push('## Stage 3c: CUSUM recalibration', '',
+  `Calibration uses ${CALIBRATION_PATHS.toLocaleString()} fixed null paths × ${CALIBRATION_MONTHS} months per type; each threshold uses the same increments for 30 log-bisection steps. Independent rates use a different seeded path set. Node calibration checks took ${calibrationSeconds.toFixed(2)} seconds.`, '',
+  '| Type | Rule | JS h | Python h | Relative difference | Independent crossing rate | Target | z | Pass |',
+  '|---|---|---:|---:|---:|---:|---:|---:|:---:|');
+for (const check of calibrationChecks) lines.push(`| ${check.type} | ${check.rule} | ${decimals(check.threshold)} | ${decimals(check.paperThreshold)} | ${(100 * check.relativeError).toFixed(3)}% | ${decimals(check.rate)} | ${check.target.toFixed(2)} | ${check.z.toFixed(3)} | ${check.okay ? 'yes' : 'NO'} |`);
+lines.push('', `LNU 4 → 8 deaths/year: E10 ${decimals(localFour.find(item => item.rule === 'E10').threshold)} → ${decimals(localEight.thresholds.E10)}; E50 ${decimals(localFour.find(item => item.rule === 'E50').threshold)} → ${decimals(localEight.thresholds.E50)}. Direction: **${directionPass ? 'PASS' : 'FAIL'}**.`, '',
+  '| Changed-mortality chance cell | Episodes per unit-year | Target | z | Pass |', '|---|---:|---:|---:|:---:|');
+for (const check of chanceChecks) lines.push(`| LNU 8 / ${check.rule} | ${decimals(check.rate)} | ${check.target.toFixed(2)} | ${check.z.toFixed(3)} | ${check.okay ? 'yes' : 'NO'} |`);
+lines.push('', `Stage 3c calibration gate: **${calibrationFailures ? 'FAIL' : 'PASS'}** (${calibrationFailures} failures).`, '');
 await writeFile(new URL('validation-report.md', import.meta.url), `${lines.join('\n').trimEnd()}\n`);
-console.log(`Validation ${passed ? 'PASS' : 'FAIL'}: ${observations.length} cells, max |z| ${largest.toFixed(3)}, ${over3.length} >3, ${over4.length} >4, ${medianFailures.length} medians, ${tableFailures.length} table intervals; Node ${(runtimeMs / 1000).toFixed(2)}s`);
+console.log(`Validation ${passed ? 'PASS' : 'FAIL'}: ${observations.length} cells, max |z| ${largest.toFixed(3)}, ${over3.length} >3, ${over4.length} >4, ${medianFailures.length} medians, ${tableFailures.length} table intervals, ${calibrationFailures} calibration failures; Node ${(runtimeMs / 1000).toFixed(2)}s + calibration ${calibrationSeconds.toFixed(2)}s`);
 if (!passed) process.exitCode = 1;
