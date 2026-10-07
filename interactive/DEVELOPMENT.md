@@ -8,7 +8,7 @@ The paper ("The Arithmetic of Suspicion") and the Python model (`../thirlwall_st
 
 | Stage | Scope | Owner | Status |
 |---|---|---|---|
-| 1 | Figure 2 explorer: threshold, base rate, unit type | Codex, reviewed by Claude | **Done** (commits df26da2, 84ce638, 404c6d5) |
+| 1 | Figure 2 explorer: threshold, base rate, unit type | Codex, reviewed by Claude | **Done** (commits be0d1be, 8fb9b70, 7c11a99) |
 | 2a | Python reference export: full-precision JSON of every per-unit-type result | Claude | **Done**: `reference/reference.json`, printed output verified identical |
 | 2b | Five tabs following Tables 1–5, shared state, live tables, all "Ready" controls | Codex, reviewed | **Done**: reference arithmetic, five linked views, file-open bundle, 1400/390 px review screenshots and regression checks |
 | 3a | Simulation layer: JavaScript port of the model, validated against the Python baseline; no new reader controls | Codex, reviewed | **Done**: 288/288 cells within gate, all medians and Tables 4–5 pass; file-open worker smoke passed |
