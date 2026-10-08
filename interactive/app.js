@@ -857,7 +857,7 @@ function renderTab3(state, live, paper, reference, context = {}) {
   return { kicker: 'Offender present', title: 'Alarm is not identification', question: 'When an offender is present, how often does the unit alarm, and how often does the rota point to them?', controls,
     graphTitle: 'Three outcomes by unit type', graph, tableTitle: 'Live Table 3', table: liveTable, working,
     fixed: fixedList(['The offender is present at every extra death they cause.', 'The effect is a Poisson mean over the first 12 months.', 'The offender has a 21% shift share.', 'Ties for top attendance are shared fairly among tied nurses.', 'Detection counts any unit alarm in the offender-year, even if background deaths caused it.']),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}No rule does both: rules that alarm often point to the wrong nurse, and rules that point correctly rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}No rule does both: rules that alarm often are worse at identifying the offender, and rules that identify better rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
 }
 
 // ---- tabs/tab4.js ----
@@ -939,7 +939,7 @@ function renderTab5(state, live, paper, reference, context = {}) {
   const details = live.posteriorDetails[state.rule];
   const posteriorAvailable = state.rotaTest === 'own' || (context.simMode && state.rotaTest === 'adj');
   const posteriorValue = posteriorAvailable ? live.posteriors[state.rule] : null;
-  const controls = rangeControl('q', 'Share of chance alarms searched (q)', 0, 1, .01, state.q, formatPercent(state.q, 0))
+  const controls = rangeControl('q', 'Share of all alarms followed by a rota search (q)', 0, 1, .01, state.q, formatPercent(state.q, 0))
     + `<div class="preset-row">${[1, .5, .25, .1].map(q => `<button type="button" data-set-field="q" data-value="${q}" aria-pressed="${state.q === q}">q = ${q}</button>`).join('')}</div>`
     + rangeControl('investigationMonths', 'Investigation length', 1, 36, 1, state.investigationMonths, `${state.investigationMonths} months`);
   const graph = `<p class="graph-note">Rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} · ${formatNumber(selected.current, 1)} nurse-flagging episodes a year at your q</p>
@@ -967,7 +967,7 @@ function renderTab5(state, live, paper, reference, context = {}) {
       ? `<small class="paper-value">paper ${context.adjustedPosterior ? 'not computed' : `${paperPosterior.odds}<br>${paperPosterior.percentage}`}</small>` : '';
     return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${pending ? 'pending-rule' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${posteriorDisplay(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
   });
-  const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Off wards', 'Posterior'], rows,
+  const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Off wards', 'Chance flagged nurse is offender'], rows,
     `Table 5 · nurse-flagging episodes per year with distinct nurses underneath; posterior for ${context.adjustedPosterior ? 'maximum-adjusted test, simulated' : 'own-exposure test'}`);
   const working = `<p><strong>Flagging episodes / yr</strong> = ${formatNumber(selected.base, 3)} × ${formatNumber(state.q, 2)} = <strong>${formatNumber(selected.current, 3)}</strong>.</p>
     <p><strong>Off wards at one time</strong> = ${formatNumber(selected.current, 3)} × ${state.investigationMonths} ÷ 12 = <strong>${formatNumber(selected.offWards, 3)}</strong>.</p>
@@ -975,7 +975,7 @@ function renderTab5(state, live, paper, reference, context = {}) {
   return { kicker: 'Human cost', title: 'What happens after an alarm', question: 'How many people are flagged, and how likely is a flagged nurse to be the offender?', controls,
     graphTitle: 'People affected as searches change', graph, tableTitle: 'Live Table 5', table: liveTable, working,
     fixed: fixedList(['The model assumes every searched alarm receives the selected rota test.', 'Posterior estimates count both background and offender-year flags.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}When the same share of every kind of alarm is searched, q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
 }
 
 // ---- ui.js ----
