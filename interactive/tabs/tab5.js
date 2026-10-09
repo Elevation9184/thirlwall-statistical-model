@@ -1,3 +1,4 @@
+import { PAPER_DEFAULT } from '../presets.js';
 import { TEST_NAMES, compareCell, fixedList, formatNumber, formatPercent, formatPosterior, posteriorDisplay, printedQs, rangeControl, table } from './common.js';
 
 function costPlot(state, live, intervals) {
@@ -33,19 +34,25 @@ export function renderTab5(state, live, paper, reference, context = {}) {
     + `<div class="preset-row">${[1, .5, .25, .1].map(q => `<button type="button" data-set-field="q" data-value="${q}" aria-pressed="${state.q === q}">q = ${q}</button>`).join('')}</div>`
     + rangeControl('investigationMonths', 'Investigation length', 1, 36, 1, state.investigationMonths, `${state.investigationMonths} months`);
   const graph = `<p class="graph-note">Rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} · ${formatNumber(selected.current, 1)} nurse-flagging episodes a year at your q</p>
-    ${costPlot(state, live, context.intervals)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>flagging episodes per year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
+    ${costPlot(state, live, context.intervals)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>nurse-flagging episodes a year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
     <p class="graph-note">At q = ${formatNumber(state.q, 2)}, ${formatNumber(selected.offWards, 1)} nurses are off wards at any one time if each investigation lasts ${state.investigationMonths} months.</p>
     <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${posteriorDisplay(posteriorValue)}${context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
   const rows = live.rules.map(rule => {
     const now = live.flags[rule];
-    const baseline = paper.flags[rule];
+    // Paper values for the selected rota test, at the paper's q and investigation length.
+    const paperBase = paper.chance[rule].flags[state.rotaTest];
+    const scaled = factor => paperBase === null ? null : paperBase * factor;
+    const baseline = { current: scaled(PAPER_DEFAULT.q), offWards: scaled(PAPER_DEFAULT.q * PAPER_DEFAULT.investigationMonths / 12) };
+    const own = state.rotaTest === 'own';
     const pending = rule.startsWith('E') && (Object.values(live.chance[rule].byType).some(cell => cell._pending)
       || Object.values(live.detection[rule]).some(cell => cell._pending));
     const qCells = printedQs.map(q => {
       const liveText = formatNumber(now.byQ[q], 1);
-      const liveDistinct = state.rotaTest === 'own' ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
-      const paperText = `${formatNumber(baseline.byQ[q], 1)} (${formatNumber(paper.chance[rule].distinctOwn * q, 1)} distinct)`;
-      const same = posteriorAvailable && `${liveText} (${liveDistinct})` === paperText;
+      const liveDistinct = own ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
+      const paperValue = formatNumber(scaled(q), 1);
+      const paperDistinct = `${formatNumber(paper.chance[rule].distinctOwn * q, 1)} distinct`;
+      const paperText = own ? `${paperValue} (${paperDistinct})` : paperValue;
+      const same = liveText === paperValue && (!own || liveDistinct === paperDistinct);
       const interval = context.intervals?.[`flags|${rule}|${q}`];
       return `<td data-source="${interval ? 'derived' : same ? 'paper' : 'derived'}"><span class="live-value">${liveText}${interval ? ` (${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)})` : ''}</span><small class="distinct-value">${liveDistinct}</small>${same && !interval ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
     }).join('');
@@ -57,13 +64,13 @@ export function renderTab5(state, live, paper, reference, context = {}) {
       ? `<small class="paper-value">paper ${context.adjustedPosterior ? 'not computed' : `${paperPosterior.odds}<br>${paperPosterior.percentage}`}</small>` : '';
     return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${pending ? 'pending-rule' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${posteriorDisplay(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
   });
-  const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Off wards', 'Chance flagged nurse is offender'], rows,
-    `Table 5 · nurse-flagging episodes per year with distinct nurses underneath; posterior for ${context.adjustedPosterior ? 'maximum-adjusted test, simulated' : 'own-exposure test'}`);
-  const working = `<p><strong>Flagging episodes / yr</strong> = ${formatNumber(selected.base, 3)} × ${formatNumber(state.q, 2)} = <strong>${formatNumber(selected.current, 3)}</strong>.</p>
+  const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Nurses off wards at one time', 'Chance flagged nurse is offender'], rows,
+    `Table 5 · nurse-flagging episodes per year with distinct nurses underneath; chance a flagged nurse is the offender, ${context.adjustedPosterior ? 'maximum-adjusted test, simulated' : 'own-exposure test'}`);
+  const working = `<p><strong>Nurse-flagging episodes a year</strong> = ${formatNumber(selected.base, 3)} × ${formatNumber(state.q, 2)} = <strong>${formatNumber(selected.current, 3)}</strong>.</p>
     <p><strong>Off wards at one time</strong> = ${formatNumber(selected.current, 3)} × ${state.investigationMonths} ÷ 12 = <strong>${formatNumber(selected.offWards, 3)}</strong>.</p>
-    ${posteriorAvailable ? `<p><strong>Chance a flagged nurse is the offender</strong> = offender correctly identified ÷ all flags = ${formatNumber(details.offenderFlagged, 6)} ÷ (${formatNumber(details.anyFlaggedWithOffender, 6)} + ${formatNumber(details.backgroundFlags, 6)}) = ${posteriorDisplay(posteriorValue)}. The factor q cancels from numerator and denominator.${context.adjustedPosterior ? ' This maximum-adjusted result is simulated.' : ''}</p>` : `<p><strong>Chance a flagged nurse is the offender: not computed.</strong> The reference run exported offender-identification and any-flag rates for the own-exposure test only; a ${TEST_NAMES[state.rotaTest].toLowerCase()} posterior is unavailable.</p>`}`;
+    ${posteriorAvailable ? `<p><strong>Chance a flagged nurse is the offender</strong> = offender correctly identified ÷ all flags = ${formatNumber(details.offenderFlagged, 6)} ÷ (${formatNumber(details.anyFlaggedWithOffender, 6)} + ${formatNumber(details.backgroundFlags, 6)}) = ${posteriorDisplay(posteriorValue)}. The factor q cancels from numerator and denominator.${context.adjustedPosterior ? ' This maximum-adjusted result is simulated.' : ''}</p>` : `<p><strong>Chance a flagged nurse is the offender: not computed.</strong> The paper’s simulation recorded the rates needed for the own-exposure test only.${state.rotaTest === 'adj' ? ' Change any simulation setting to estimate it for the maximum-adjusted test.' : ''}</p>`}`;
   return { kicker: 'Human cost', title: 'What happens after an alarm', question: 'How many people are flagged, and how likely is a flagged nurse to be the offender?', controls,
     graphTitle: 'People affected as searches change', graph, tableTitle: 'Live Table 5', table: liveTable, working,
-    fixed: fixedList(['The model assumes every searched alarm receives the selected rota test.', 'Posterior estimates count both background and offender-year flags.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}When the same share of every kind of alarm is searched, q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
+    fixed: fixedList(['The model assumes every searched alarm receives the selected rota test.', 'This chance counts flags from years with and without an offender.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}When the same share of every kind of alarm is searched, q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The chance that a flagged nurse is the offender ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
 }

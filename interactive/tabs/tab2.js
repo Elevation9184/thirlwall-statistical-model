@@ -11,13 +11,13 @@ function mechanismPlot(mechanism, roster) {
 
 export function renderTab2(state, live, paper, reference, context = {}) {
   const current = live.chance[state.rule];
-  // The published Table 2 is rule C; other rules are live generalisations.
-  const baseline = paper.chance.C;
+  // The published Table 2 is rule C; other rules compare with the same reference run.
+  const baseline = paper.chance[state.rule];
   const selectedFlags = current.flags[state.rotaTest];
   const pendingRule = state.rule.startsWith('E') && TYPES.some(type => current.byType[type]._pending);
   const controls = choiceControl('rotaTest', 'Rota test', [['avg', TEST_NAMES.avg], ['own', TEST_NAMES.own], ['adj', TEST_NAMES.adj]], state.rotaTest)
     + rangeControl('significance', 'Significance level', .01, .1, .005, state.significance, `${formatPercent(state.significance, 1)}`)
-    + '<h4>The mechanism</h4><p class="control-note">These sliders explain the selection effect. They do not change Table 2’s simulated rates.</p>'
+    + '<h4>The mechanism</h4><p class="control-note">Test enough nurses and one will look “significant” by chance. These sliders show how often; they do not change Table 2.</p>'
     + rangeControl('mechanismRoster', 'Nurses on a hypothetical roster', 20, 200, 1, state.mechanismRoster, `${state.mechanismRoster} nurses`)
     + rangeControl('mechanismDeaths', 'Deaths reviewed', 2, 40, 1, state.mechanismDeaths, `${state.mechanismDeaths} deaths`);
   const graph = `<p class="graph-note">Selected rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} test</p>
@@ -32,12 +32,12 @@ export function renderTab2(state, live, paper, reference, context = {}) {
     return `<tr class="${state.rule.startsWith('E') && cell._pending ? 'pending-rule' : ''}"><th scope="row">${TYPE_NAMES[type]}</th>${display('med_k', value => formatNumber(value, 0))}${display('med_top', value => formatNumber(value, 0))}${display('s_avg', value => formatPercent(value, 0))}${display('s_own', value => formatPercent(value, 0))}${display('s_adj', value => formatPercent(value, 1))}</tr>`;
   });
   rows.push(`<tr class="selected-row ${pendingRule ? 'pending-rule' : ''}"><th scope="row">All reviewed alarms</th><td>—</td><td>—</td>${compareCell(current.shares.avg, baseline.shares.avg, value => formatPercent(value, 0), { interval: context.intervals?.[`share|${state.rule}|avg`] })}${compareCell(current.shares.own, baseline.shares.own, value => formatPercent(value, 0), { interval: context.intervals?.[`share|${state.rule}|own`] })}${compareCell(current.shares.adj, baseline.shares.adj, value => formatPercent(value, 1), { interval: context.intervals?.[`share|${state.rule}|adj`] })}</tr>`);
-  rows.push(`<tr class="footer-row ${pendingRule ? 'pending-rule' : ''}"><th scope="row" colspan="5">Nurse-flagging episodes a year · selected test</th>${compareCell(selectedFlags, baseline.flags.own, value => formatNumber(value, 1), { interval: context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`] })}</tr>`);
-  const liveTable = table(['Unit type', 'Deaths reviewed, median', 'Top nurse present, median', 'Average-exposure', 'Own-exposure', 'Maximum-adjusted'], rows, `Table 2 · rule ${state.rule}; paper values are rule C; shares among reviewed chance alarms`);
+  rows.push(`<tr class="footer-row ${pendingRule ? 'pending-rule' : ''}"><th scope="row" colspan="5">Nurse-flagging episodes a year · selected test</th>${compareCell(selectedFlags, baseline.flags[state.rotaTest], value => formatNumber(value, 1), { interval: context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`] })}</tr>`);
+  const liveTable = table(['Unit type', 'Deaths reviewed, median', 'Deaths attended by top nurse, median', 'Average-exposure', 'Own-exposure', 'Maximum-adjusted'], rows, `Table 2 · rule ${state.rule}${state.rule === 'C' ? '' : ' (the paper prints rule C)'}; shares among reviewed chance alarms`);
   const formula = state.rotaTest === 'own' ? 'Σ units × own-exposure flag episodes per unit-year' : `Σ units × reviewed alarms per unit-year × ${TEST_NAMES[state.rotaTest].toLowerCase()} share`;
   const working = `<p><strong>Nurse-flagging episodes a year</strong> = ${formula}.</p><p class="formula">${TYPES.map(type => `${state.unitCounts[type]} × ${formatNumber(current.byType[type].rev, 3)} × ${formatNumber(current.byType[type][`s_${state.rotaTest}`], 3)}`).join(' + ')} ≈ <strong>${formatNumber(selectedFlags, 1)}</strong>.</p><p>The mechanism curve instead tests every nurse on a hypothetical roster independently; it is an exact calculation under the model’s shift mix, not the simulated Table 2 result.</p>`;
   return { kicker: 'Named nurse', title: 'The rota selection step', question: 'How often does a rota search after a chance alarm produce a “significant” nurse?', controls,
     graphTitle: 'From alarms to names', graph, tableTitle: 'Live Table 2', table: liveTable, working,
-    fixed: fixedList(['Independent nurse attendance at each death in the synthetic rota.', 'Shift shares of 13%, 21% and 27%, held by 35%, 50% and 15% of nurses.', 'At least two deaths are required for rota review.']),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}About half of chance alarms produce a "significant" nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
+    fixed: fixedList(['Each nurse’s presence at each death is independent of everyone else’s.', 'Nurses work 13%, 21% or 27% of shifts (35%, 50% and 15% of nurses respectively).', 'At least two deaths are required for rota review.']),
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}About half of chance alarms produce a “significant” nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
 }

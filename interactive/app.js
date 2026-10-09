@@ -641,8 +641,8 @@ function derivedIntervals(state, reference, derived, adjustedPosterior, draws = 
 
 // ---- tabs/common.js ----
 const RULE_NAMES = Object.freeze({
-  A: 'A · annual 2σ', B: 'B · annual 3σ', C: 'C · monthly 2σ',
-  D: 'D · doubling', E10: 'E10 · idealised', E50: 'E50 · idealised'
+  A: 'A · annual', B: 'B · annual, stricter', C: 'C · monthly, rolling',
+  D: 'D · doubling', E10: 'E10 · idealised, 1 in 10', E50: 'E50 · idealised, 1 in 50'
 });
 const TYPE_NAMES = Object.freeze({ NICU: 'Intensive care', LNU: 'Local', SCU: 'Special care' });
 const TEST_NAMES = Object.freeze({ avg: 'Average-exposure', own: 'Own-exposure', adj: 'Maximum-adjusted' });
@@ -760,10 +760,19 @@ function dotsFor(type, count, expected, interval) {
   return `<div class="dot-group" aria-label="${TYPE_NAMES[type]}: ${formatNumber(expected, 1)} of ${count} expected to alarm"><div class="dot-label"><strong>${TYPE_NAMES[type]}</strong><span>${formatNumber(expected, 1)} of ${count}</span></div><div class="dot-field">${dots || '<span class="muted">No units selected</span>'}</div>${interval ? `<div class="chart-interval" role="img" aria-label="95% interval ${formatNumber(interval[0], 1)} to ${formatNumber(interval[1], 1)} expected alarms"><i></i><span>95% ${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)}</span></div>` : ''}</div>`;
 }
 
+function conditionLabel(rule, sd, reference) {
+  const line = value => `${formatNumber(value, 1)} SD`;
+  if (rule === 'A') return `Annual check, ${line(sd)}`;
+  if (rule === 'B') return `Annual check, ${line(sd + 1)}`;
+  if (rule === 'C') return `Rolling 12 months, checked monthly, ${line(sd)}`;
+  if (rule === 'D') return 'Rolling 12 months, checked monthly, deaths doubled (at least 4)';
+  return reference.inputs.labels[rule];
+}
+
 function renderTab1(state, live, paper, reference, context = {}) {
   const current = live.chance[state.rule];
   const controls = choiceControl('rule', 'Monitoring rule', live.rules.map(rule => [rule, RULE_NAMES[rule]]), state.rule)
-    + rangeControl('alarmSD', 'Alarm line for A and C', 1.5, 3.5, .1, state.alarmSD, `${formatNumber(state.alarmSD, 1)} SD`, 'B stays one SD stricter. Rules D and E do not use this line.')
+    + rangeControl('alarmSD', 'Alarm line for rules A and C, in standard deviations (SD) above expected deaths', 1.5, 3.5, .1, state.alarmSD, `${formatNumber(state.alarmSD, 1)} SD`, 'Rule B sits one SD higher. Rules D and E do not use this line.')
     + '<p class="control-note">Rule E assumes perfect knowledge of each month’s expected deaths.</p>';
   const graph = `<p class="graph-note">Expected count, a typical year · ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years among ${Object.values(state.unitCounts).reduce((a, b) => a + b, 0)} units</p>
     ${TYPES.map(type => {
@@ -776,20 +785,20 @@ function renderTab1(state, live, paper, reference, context = {}) {
     const cell = live.chance[rule];
     const baseline = paper.chance[rule];
     const pending = rule.startsWith('E') && TYPES.some(type => cell.byType[type]._pending);
-    return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${pending ? 'pending-rule' : ''}"><th scope="row">${rule}</th><td class="trigger-cell">${reference.inputs.labels[rule]}</td>${compareCell(cell.alarmUnitYears, baseline.alarmUnitYears, value => formatNumber(value, 1), { source: context.simMode && cell.alarmUnitYears !== baseline.alarmUnitYears ? 'derived' : undefined, interval: context.intervals?.[`alarmUnitYears|${rule}`] })}${compareCell(cell.episodes, baseline.episodes, value => formatNumber(value, 1), { interval: context.intervals?.[`episodes|${rule}`] })}${TYPES.map(type => compareCell(cell.byType[type].alpha, baseline.byType[type].alpha, value => formatNumber(value, 3), { source: cellSource(cell.byType[type], 'alpha'), interval: directInterval(cell.byType[type], 'alpha') })).join('')}</tr>`;
+    return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${pending ? 'pending-rule' : ''}"><th scope="row">${rule}</th><td class="trigger-cell">${conditionLabel(rule, state.alarmSD, reference)}</td>${compareCell(cell.alarmUnitYears, baseline.alarmUnitYears, value => formatNumber(value, 1), { source: context.simMode && cell.alarmUnitYears !== baseline.alarmUnitYears ? 'derived' : undefined, interval: context.intervals?.[`alarmUnitYears|${rule}`] })}${compareCell(cell.episodes, baseline.episodes, value => formatNumber(value, 1), { interval: context.intervals?.[`episodes|${rule}`] })}${TYPES.map(type => compareCell(cell.byType[type].alpha, baseline.byType[type].alpha, value => formatNumber(value, 3), { source: cellSource(cell.byType[type], 'alpha'), interval: directInterval(cell.byType[type], 'alpha') })).join('')}</tr>`;
   });
-  const liveTable = table(['Rule', 'Alarm condition', 'Alarming unit-years / yr', 'Episodes / yr', 'Intensive care', 'Local', 'Special care'], rows, 'Table 1 · chance alarms; per-type columns are shares of unit-years');
+  const liveTable = table(['Rule', 'Alarm condition', 'Alarming unit-years a year', 'Alarm episodes a year', 'Intensive care', 'Local', 'Special care'], rows, 'Table 1 · chance alarms; per-type columns are shares of unit-years');
   const terms = TYPES.map(type => `${state.unitCounts[type]} × ${formatNumber(current.byType[type].alpha, 3)}`).join(' + ');
   const thresholdRows = context.simMode ? TYPES.filter(type => state.deathsPerYear[type] !== reference.inputs.types[type].mean)
     .flatMap(type => ['E10', 'E50'].map(rule => {
       const recalibrated = context.reference?.calibration?.[type]?.thresholds?.[rule];
       return `<li>${rule} threshold, ${TYPE_NAMES[type].toLowerCase()} units: ${formatNumber(reference.cusum_h[`${rule}|${type}`], 2)} (paper) → ${recalibrated ? `${formatNumber(recalibrated, 2)} (recalibrated)` : 'recalibrating…'}</li>`;
     })) : [];
-  const working = `<p><strong>Alarming unit-years a year</strong> = Σ units of each type × chance that type alarms.</p><p class="formula">${terms} = <strong>${formatNumber(current.alarmUnitYears, 1)}</strong>.</p><p>Episodes use the separate per-unit episode rates. Figure 2’s 11-point false-crossing target can be tuned in Tab 4; it does not supply intermediate Table 1 alarm-unit-year rates.</p>${thresholdRows.length ? `<p><strong>Rule E calibration</strong> uses 50,000 null paths over ten years per affected type.</p><ul class="threshold-list">${thresholdRows.join('')}</ul>` : ''}`;
+  const working = `<p><strong>Alarming unit-years a year</strong> = Σ units of each type × chance that type alarms.</p><p class="formula">${terms} = <strong>${formatNumber(current.alarmUnitYears, 1)}</strong>.</p><p>An alarm episode is a run of back-to-back alarmed checks. The Figure 2 slider in Tab 4 does not change this table.</p>${thresholdRows.length ? `<p><strong>Rule E’s threshold is reset</strong> for each unit type whose deaths you changed, using 50,000 simulated ten-year histories with no offender.</p><ul class="threshold-list">${thresholdRows.join('')}</ul>` : ''}`;
   return { kicker: 'Noise', title: 'Chance alarms', question: 'How many alarms does chance alone produce?', controls,
     graphTitle: 'Where the expected alarms land', graph, tableTitle: 'Live Table 1', table: liveTable, working,
-    fixed: fixedList(['Year-to-year rate variation: 25%.', 'Rules A–D use the preceding three-year average, with a 0.5-death floor.', 'Four years of history and ten years of monitoring.', 'The idealised CUSUM is tuned to a doubling of deaths.']),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}Chance alone produces between 3 and 34 alarms a year in England and Wales, depending on the rule. Under ${state.rule}, chance produces ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years and ${formatNumber(current.episodes, 1)} episodes a year across the selected unit mix.` };
+    fixed: fixedList(['Each unit’s death rate varies by about 25% from year to year.', 'Rules A–D compare with the preceding three-year average, never below half a death a year.', 'Four years of history and ten years of monitoring.', 'Rule E is an idealised cumulative-sum (CUSUM) chart: it keeps a running total of deaths above expected and alarms when that total crosses a threshold. It is tuned to catch a doubling of deaths.']),
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}Chance alone produces between 3 and 34 alarms a year in England and Wales, depending on the rule. Under rule ${state.rule}, chance produces ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years and ${formatNumber(current.episodes, 1)} episodes a year across the selected unit mix.` };
 }
 
 // ---- tabs/tab2.js ----
@@ -802,13 +811,13 @@ function mechanismPlot(mechanism, roster) {
 
 function renderTab2(state, live, paper, reference, context = {}) {
   const current = live.chance[state.rule];
-  // The published Table 2 is rule C; other rules are live generalisations.
-  const baseline = paper.chance.C;
+  // The published Table 2 is rule C; other rules compare with the same reference run.
+  const baseline = paper.chance[state.rule];
   const selectedFlags = current.flags[state.rotaTest];
   const pendingRule = state.rule.startsWith('E') && TYPES.some(type => current.byType[type]._pending);
   const controls = choiceControl('rotaTest', 'Rota test', [['avg', TEST_NAMES.avg], ['own', TEST_NAMES.own], ['adj', TEST_NAMES.adj]], state.rotaTest)
     + rangeControl('significance', 'Significance level', .01, .1, .005, state.significance, `${formatPercent(state.significance, 1)}`)
-    + '<h4>The mechanism</h4><p class="control-note">These sliders explain the selection effect. They do not change Table 2’s simulated rates.</p>'
+    + '<h4>The mechanism</h4><p class="control-note">Test enough nurses and one will look “significant” by chance. These sliders show how often; they do not change Table 2.</p>'
     + rangeControl('mechanismRoster', 'Nurses on a hypothetical roster', 20, 200, 1, state.mechanismRoster, `${state.mechanismRoster} nurses`)
     + rangeControl('mechanismDeaths', 'Deaths reviewed', 2, 40, 1, state.mechanismDeaths, `${state.mechanismDeaths} deaths`);
   const graph = `<p class="graph-note">Selected rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} test</p>
@@ -823,14 +832,14 @@ function renderTab2(state, live, paper, reference, context = {}) {
     return `<tr class="${state.rule.startsWith('E') && cell._pending ? 'pending-rule' : ''}"><th scope="row">${TYPE_NAMES[type]}</th>${display('med_k', value => formatNumber(value, 0))}${display('med_top', value => formatNumber(value, 0))}${display('s_avg', value => formatPercent(value, 0))}${display('s_own', value => formatPercent(value, 0))}${display('s_adj', value => formatPercent(value, 1))}</tr>`;
   });
   rows.push(`<tr class="selected-row ${pendingRule ? 'pending-rule' : ''}"><th scope="row">All reviewed alarms</th><td>—</td><td>—</td>${compareCell(current.shares.avg, baseline.shares.avg, value => formatPercent(value, 0), { interval: context.intervals?.[`share|${state.rule}|avg`] })}${compareCell(current.shares.own, baseline.shares.own, value => formatPercent(value, 0), { interval: context.intervals?.[`share|${state.rule}|own`] })}${compareCell(current.shares.adj, baseline.shares.adj, value => formatPercent(value, 1), { interval: context.intervals?.[`share|${state.rule}|adj`] })}</tr>`);
-  rows.push(`<tr class="footer-row ${pendingRule ? 'pending-rule' : ''}"><th scope="row" colspan="5">Nurse-flagging episodes a year · selected test</th>${compareCell(selectedFlags, baseline.flags.own, value => formatNumber(value, 1), { interval: context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`] })}</tr>`);
-  const liveTable = table(['Unit type', 'Deaths reviewed, median', 'Top nurse present, median', 'Average-exposure', 'Own-exposure', 'Maximum-adjusted'], rows, `Table 2 · rule ${state.rule}; paper values are rule C; shares among reviewed chance alarms`);
+  rows.push(`<tr class="footer-row ${pendingRule ? 'pending-rule' : ''}"><th scope="row" colspan="5">Nurse-flagging episodes a year · selected test</th>${compareCell(selectedFlags, baseline.flags[state.rotaTest], value => formatNumber(value, 1), { interval: context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`] })}</tr>`);
+  const liveTable = table(['Unit type', 'Deaths reviewed, median', 'Deaths attended by top nurse, median', 'Average-exposure', 'Own-exposure', 'Maximum-adjusted'], rows, `Table 2 · rule ${state.rule}${state.rule === 'C' ? '' : ' (the paper prints rule C)'}; shares among reviewed chance alarms`);
   const formula = state.rotaTest === 'own' ? 'Σ units × own-exposure flag episodes per unit-year' : `Σ units × reviewed alarms per unit-year × ${TEST_NAMES[state.rotaTest].toLowerCase()} share`;
   const working = `<p><strong>Nurse-flagging episodes a year</strong> = ${formula}.</p><p class="formula">${TYPES.map(type => `${state.unitCounts[type]} × ${formatNumber(current.byType[type].rev, 3)} × ${formatNumber(current.byType[type][`s_${state.rotaTest}`], 3)}`).join(' + ')} ≈ <strong>${formatNumber(selectedFlags, 1)}</strong>.</p><p>The mechanism curve instead tests every nurse on a hypothetical roster independently; it is an exact calculation under the model’s shift mix, not the simulated Table 2 result.</p>`;
   return { kicker: 'Named nurse', title: 'The rota selection step', question: 'How often does a rota search after a chance alarm produce a “significant” nurse?', controls,
     graphTitle: 'From alarms to names', graph, tableTitle: 'Live Table 2', table: liveTable, working,
-    fixed: fixedList(['Independent nurse attendance at each death in the synthetic rota.', 'Shift shares of 13%, 21% and 27%, held by 35%, 50% and 15% of nurses.', 'At least two deaths are required for rota review.']),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}About half of chance alarms produce a "significant" nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
+    fixed: fixedList(['Each nurse’s presence at each death is independent of everyone else’s.', 'Nurses work 13%, 21% or 27% of shifts (35%, 50% and 15% of nurses respectively).', 'At least two deaths are required for rota review.']),
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}About half of chance alarms produce a “significant” nurse under the own-exposure test, and about one in forty under the maximum-adjusted test. ${formatPercent(current.shares[state.rotaTest], 0)} of reviewed chance alarms pass the ${TEST_NAMES[state.rotaTest].toLowerCase()} test under rule ${state.rule}, giving ${formatNumber(selectedFlags, 1)} nurse-flagging episodes a year.` };
 }
 
 // ---- tabs/tab3.js ----
@@ -846,18 +855,18 @@ function renderTab3(state, live, paper, reference, context = {}) {
     + choiceControl('expectedExtraDeaths', 'Paper presets', [[4, '+4'], [7, '+7']], state.expectedExtraDeaths)
     + choiceControl('unitType', 'Unit type highlighted', [['NICU', 'Intensive care'], ['LNU', 'Local'], ['SCU', 'Special care']], state.unitType);
   const graph = `<p class="graph-note">Rule ${state.rule} · expected +${state.expectedExtraDeaths} deaths</p>${TYPES.map(type => detectionRow(type, live.detection[state.rule][type], type === state.unitType)).join('')}
-    <div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>unit alarm</span><span class="graph-key-item"><span class="key-swatch grey"></span>background alarm</span><span class="graph-key-item"><span class="key-swatch orange"></span>offender identified among alarmed units</span></div><p class="graph-note">The orange identification marker has a different denominator from the alarm bar.</p>`;
+    <div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>unit alarm</span><span class="graph-key-item"><span class="key-swatch grey"></span>alarm with no offender</span><span class="graph-key-item"><span class="key-swatch orange"></span>offender identified among alarmed units</span></div><p class="graph-note">The orange mark is a share of alarmed units only, not of all units.</p>`;
   const rows = live.rules.map(rule => {
     const cell = live.detection[rule];
     const baseline = paper.detection[rule];
     return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${rule.startsWith('E') && TYPES.some(type => cell[type]._pending) ? 'pending-rule' : ''}"><th scope="row">${rule}</th>${TYPES.map(type => compareCell(cell[type].d, baseline[type].d, value => formatPercent(value, 0), { source: cellSource(cell[type], 'd'), interval: directInterval(cell[type], 'd') })).join('')}${compareCell(cell.LNU.flag_off, baseline.LNU.flag_off, value => formatPercent(value, 0), { source: cellSource(cell.LNU, 'flag_off'), interval: directInterval(cell.LNU, 'flag_off') })}${compareCell(cell.LNU.bg, baseline.LNU.bg, value => formatPercent(value, 0), { source: cellSource(cell.LNU, 'bg'), interval: directInterval(cell.LNU, 'bg') })}</tr>`;
   });
-  const liveTable = table(['Rule', 'Intensive care alarm', 'Local alarm', 'Special care alarm', 'Local identification if alarmed', 'Local background alarm'], rows, `Table 3 · +${state.expectedExtraDeaths} expected deaths in one year`);
-  const working = `<p><strong>One-year detection sensitivity</strong> means the unit alarms at least once while an offender is present. For ${TYPE_NAMES[state.unitType].toLowerCase()} under rule ${state.rule}, this is <strong>${formatPercent(selected.d, 1)}</strong>.</p><p>With no offender, the same unit type alarms <strong>${formatPercent(selected.bg, 1)}</strong> of the time. If the offender unit alarms, the rota review identifies the offender <strong>${formatPercent(selected.flag_off, 1)}</strong> of the time. Alarm and identification are separate outcomes.</p>`;
+  const liveTable = table(['Rule', 'Intensive care alarm', 'Local alarm', 'Special care alarm', 'Local: offender identified, if unit alarmed', 'Local: alarm with no offender'], rows, `Table 3 · +${state.expectedExtraDeaths} expected deaths in one year`);
+  const working = `<p><strong>One-year detection sensitivity</strong> means the unit alarms at least once while an offender is present. For ${TYPE_NAMES[state.unitType].toLowerCase()} under rule ${state.rule}, this is <strong>${formatPercent(selected.d, 1)}</strong>.</p><p>With no offender, the same unit type alarms <strong>${formatPercent(selected.bg, 1)}</strong> of the time. If the offender’s unit alarms, the rota review identifies the offender <strong>${formatPercent(selected.flag_off, 1)}</strong> of the time. Alarm and identification are separate outcomes.</p>`;
   return { kicker: 'Offender present', title: 'Alarm is not identification', question: 'When an offender is present, how often does the unit alarm, and how often does the rota point to them?', controls,
     graphTitle: 'Three outcomes by unit type', graph, tableTitle: 'Live Table 3', table: liveTable, working,
-    fixed: fixedList(['The offender is present at every extra death they cause.', 'The effect is a Poisson mean over the first 12 months.', 'The offender has a 21% shift share.', 'Ties for top attendance are shared fairly among tied nurses.', 'Detection counts any unit alarm in the offender-year, even if background deaths caused it.']),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}No rule does both: rules that alarm often are worse at identifying the offender, and rules that identify better rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
+    fixed: fixedList(['The offender is present at every extra death they cause.', 'The offender’s extra deaths vary at random around the chosen average, over 12 months.', 'The offender works 21% of shifts.', 'When nurses tie for most deaths attended, credit is split equally.', 'Detection counts any unit alarm in the offender-year, even if background deaths caused it.']),
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}No rule both alarms often and identifies the offender reliably: rules that alarm often are worse at identifying the offender, and rules that identify better rarely alarm. Under rule ${state.rule}, ${TYPE_NAMES[state.unitType].toLowerCase()} units with an offender alarm ${formatPercent(selected.d, 0)} of the time; conditional on an alarm, the rota identifies the offender ${formatPercent(selected.flag_off, 0)} of the time.` };
 }
 
 // ---- tabs/tab4.js ----
@@ -874,7 +883,7 @@ function figure2Markup(state, context, reference) {
     ? '<p class="figure2-scope">Figure 2 shows the paper\'s settings; it is not recalculated in simulation mode.</p>' : '';
   return `<details class="figure2-details" id="figure2-details" ${state.figureOpen ? 'open' : ''}>
     <summary>Tune the idealised chart (Figure 2)${unchangedSweepNote ? '<small class="figure2-summary-note">Paper settings; not recalculated in simulation mode</small>' : ''}</summary>
-    <div class="figure2-body">${unchangedSweepNote}<p>The original Figure 2 explorer lives here. It uses +4 expected deaths, 175 units and staff-proportional risk throughout. Its false-alarm <em>crossings</em> must not be compared as Table 4’s falsely flagged unit-years.</p>
+    <div class="figure2-body">${unchangedSweepNote}<p>This reproduces the paper’s Figure 2, with +4 expected deaths, 175 units and risk in proportion to staff. It counts each time the chart crosses its threshold, not unit-years with an alarm, so its ratios are not directly comparable with Table 4.</p>
       <div class="figure2-controls">
         <div><label for="threshold-slider">Idealised chart target</label><output id="threshold-value" data-output="thresholdIndex">1 crossing in ${formatNumber(figure.interval, 0)} unit-years</output><input id="threshold-slider" data-field="thresholdIndex" type="range" min="0" max="${SWEEP.length - 1}" step="1" value="${state.thresholdIndex}"></div>
         <div><label for="figure-prevalence-slider">Base-rate scenario</label><output id="prevalence-value" data-output="prevalencePer10k">${formatNumber(state.prevalencePer10k, 2)} per 10,000</output><input id="figure-prevalence-slider" data-field="prevalencePer10k" data-log="true" type="range" min="0" max="100" step="1" value="${prevalenceToSlider(state.prevalencePer10k)}"></div>
@@ -883,7 +892,7 @@ function figure2Markup(state, context, reference) {
       <svg id="tradeoff-chart" viewBox="0 0 760 440" role="img" aria-labelledby="tradeoff-title tradeoff-desc"><title id="tradeoff-title">Figure 2 threshold trade-off</title><desc id="tradeoff-desc">One-year unit-alarm sensitivity and false-alarm crossings per detected offender-year on logarithmic axes.</desc></svg>
       <p class="graph-note">Both axes are logarithmic in this interactive view; the paper uses a linear vertical axis.</p>
       <div class="figure-foot"><span class="legend-line" aria-hidden="true"></span>Current base-rate scenario <span class="reference-legend"><span class="legend-line reference neonatal" aria-hidden="true"></span>Neonatal reference (1 in 10,000)</span><span class="reference-legend"><span class="legend-line reference national" aria-hidden="true"></span>National reference (0.1 in 10,000)</span></div>
-      <div class="figure2-metrics"><div><span>False-alarm crossings : detected offender-years</span><strong id="ratio-value">${formatRatio(figure.falsePerTrue)}</strong></div><div><span>One-year unit-alarm sensitivity</span><strong id="detection-value">${formatNumber(figure.detectionProbability * 100, 1)}%</strong></div><div><span>Years between detected offender-years</span><strong id="wait-value">${formatNumber(figure.yearsPerDetection, 0)}</strong></div></div>
+      <div class="figure2-metrics"><div><span>False-alarm crossings : detected offender-years</span><strong id="ratio-value">${formatRatio(figure.falsePerTrue)}</strong></div><div><span>One-year unit-alarm sensitivity</span><strong id="detection-value">${formatNumber(figure.detectionProbability * 100, 1)}%</strong></div><div><span>Years between detected offender-years</span><strong id="wait-value">${formatNumber(figure.yearsPerDetection, 0)} years</strong></div></div>
       <svg id="unit-chart" viewBox="0 0 500 240" role="img" aria-labelledby="unit-title unit-desc"><title id="unit-title">One-year unit-alarm sensitivity by unit type</title><desc id="unit-desc">The three unit types at the selected Figure 2 threshold.</desc></svg>
       <p class="method-note"><strong>Detection means the unit alarms during an offender-year.</strong> The alarm may have occurred anyway, and it does not mean the offender is identified. The strictest points are noisier Monte Carlo estimates.</p>
     </div></details>`;
@@ -892,21 +901,21 @@ function figure2Markup(state, context, reference) {
 function renderTab4(state, live, paper, reference, context = {}) {
   const selected = live.ratio[state.rule].current;
   const controls = rangeControl('prevalencePer10k', 'Offender base rate', 0, 100, 1, prevalenceToSlider(state.prevalencePer10k),
-    `${formatNumber(state.prevalencePer10k, 2)} per 10,000 unit-years`, 'Logarithmic slider. The two references are scenarios, not prevalence estimates.')
+    `${formatNumber(state.prevalencePer10k, 2)} per 10,000 unit-years`, 'Offender-years per 10,000 unit-years, on a logarithmic slider. 0.1 matches the national conviction record; 1 takes the single neonatal case at face value. Both are scenarios, not estimates.')
     + `<div class="preset-row">${printedRates.map(rate => `<button type="button" data-set-field="prevalencePer10k" data-value="${rate}" aria-pressed="${state.prevalencePer10k === rate}">${rate}</button>`).join('')}</div>`
     + choiceControl('riskAllocation', 'Risk allocation', [['staff', 'In proportion to staff'], ['equal', 'Equal per unit']], state.riskAllocation);
-  const graph = `<p class="graph-note">Falsely flagged unit-years per detected offender-year · log scale · current base rate ${formatNumber(state.prevalencePer10k, 2)} in 10,000</p>${live.rules.map(rule => ratioBar(rule, live.ratio[rule].current.ratio, live.ratio[rule].current.years, rule === state.rule, context.intervals?.[`ratio|${rule}|${state.prevalencePer10k}`], context.intervals?.[`years|${rule}|${state.prevalencePer10k}`])).join('')}`;
+  const graph = `<p class="graph-note">Falsely flagged unit-years per detected offender-year · log scale · current base rate ${formatNumber(state.prevalencePer10k, 2)} per 10,000</p>${live.rules.map(rule => ratioBar(rule, live.ratio[rule].current.ratio, live.ratio[rule].current.years, rule === state.rule, context.intervals?.[`ratio|${rule}|${state.prevalencePer10k}`], context.intervals?.[`years|${rule}|${state.prevalencePer10k}`])).join('')}`;
   const ratioCell = (rule, rate, current) => compareCell(current.ratio, rate === 'current' ? paper.ratio[rule].current.ratio : paper.ratio[rule].printedRates[rate].ratio, formatRatio, {
     interval: context.intervals?.[`ratio|${rule}|${rate === 'current' ? state.prevalencePer10k : rate}`], intervalBelow: true });
   const rows = live.rules.map(rule => `<tr class="${rule === state.rule ? 'selected-row' : ''} ${rule.startsWith('E') && (Object.values(live.chance[rule].byType).some(cell => cell._pending) || Object.values(live.detection[rule]).some(cell => cell._pending)) ? 'pending-rule' : ''}"><th scope="row">${rule}</th>${printedRates.map(rate => ratioCell(rule, rate, live.ratio[rule].printedRates[rate])).join('')}${ratioCell(rule, 'current', live.ratio[rule].current)}</tr>`);
-  const liveTable = table(['Rule', ...printedRates.map(rate => `${rate} / 10k`), 'Your rate'], rows, 'Table 4 · falsely flagged unit-years per detected offender-year; paper baseline is staff-proportional, +4');
+  const liveTable = table(['Rule', ...printedRates.map(rate => `${rate} per 10,000`), 'Your rate'], rows, 'Table 4 · falsely flagged unit-years per detected offender-year; paper baseline is staff-proportional, +4');
   const weights = selected.weights;
-  const working = `<p><strong>False flagged / yr</strong> = Σ n<sub>t</sub> × (1 − p × w<sub>t</sub>) × alarm share<sub>t</sub> = <strong>${formatNumber(selected.falseFlagged, 3)}</strong>.</p><p><strong>Detected offender-years / yr</strong> = Σ n<sub>t</sub> × p × w<sub>t</sub> × detection sensitivity<sub>t</sub> = <strong>${formatNumber(selected.detected, 5)}</strong>.</p><p class="formula">${formatNumber(selected.falseFlagged, 3)} ÷ ${formatNumber(selected.detected, 5)} = <strong>${formatRatio(selected.ratio)}</strong>; 1 ÷ ${formatNumber(selected.detected, 5)} = <strong>${selected.years === null ? 'not computed' : `${formatNumber(selected.years, 0)} years`}</strong>.</p><p>For this unit mix, the ${state.riskAllocation === 'staff' ? 'staff-proportional' : 'equal'} risk weights are ${Object.entries(weights).map(([type, weight]) => `${type} ${formatNumber(weight, 3)}`).join(' · ')}.</p>`;
+  const working = `<p><strong>Falsely flagged unit-years a year</strong> = Σ n<sub>t</sub> × (1 − p × w<sub>t</sub>) × alarm share<sub>t</sub> = <strong>${formatNumber(selected.falseFlagged, 3)}</strong>.</p><p><strong>Detected offender-years a year</strong> = Σ n<sub>t</sub> × p × w<sub>t</sub> × detection sensitivity<sub>t</sub> = <strong>${formatNumber(selected.detected, 5)}</strong>.</p><p class="formula">${formatNumber(selected.falseFlagged, 3)} ÷ ${formatNumber(selected.detected, 5)} = <strong>${formatRatio(selected.ratio)}</strong>; 1 ÷ ${formatNumber(selected.detected, 5)} = <strong>${selected.years === null ? 'not computed' : `${formatNumber(selected.years, 0)} years`}</strong>.</p><p>For this unit mix, each unit type’s share of offender risk relative to the average unit (${state.riskAllocation === 'staff' ? 'in proportion to staff' : 'equal per unit'}) is ${Object.entries(weights).map(([type, weight]) => `${TYPE_NAMES[type].toLowerCase()} ${formatNumber(weight, 2)}`).join(' · ')}.</p>`;
   return { kicker: 'The ratio', title: 'Rare offenders change the odds', question: 'For every offender-year detected, how many unit-years are falsely flagged?', controls,
     graphTitle: 'Rule by rule', graph, tableTitle: 'Live Table 4', table: liveTable, working,
-    fixed: fixedList(['A detected offender-year is any offender-year in which the unit alarms.', 'Table 4 counts falsely flagged unit-years; the Figure 2 sweep counts CUSUM crossings.', 'The main paper case allocates offender risk in proportion to staffing.', 'The base-rate slider is a scenario, not an estimate of actual prevalence.']),
+    fixed: fixedList(['A detected offender-year is any offender-year in which the unit alarms.', 'Table 4 counts falsely flagged unit-years; Figure 2 counts threshold crossings.', 'The main paper case allocates offender risk in proportion to staffing.', 'The base-rate slider is a scenario, not an estimate of actual prevalence.']),
     extra: figure2Markup(state, context, reference),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}The base rate dominates: changing the rule moves the ratio about fourfold, while the rarity of offenders moves it by hundreds. At ${formatNumber(state.prevalencePer10k, 2)} offender-years per 10,000 unit-years, rule ${state.rule} gives ${formatRatio(selected.ratio)} falsely flagged unit-years per detected offender-year and ${selected.years === null ? 'no computable waiting time' : `one detected offender-year across this system about every ${formatNumber(selected.years, 0)} years`}.` };
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}The base rate dominates: changing the rule moves the ratio about fourfold, while the base rates shown span a 300-fold range and move it in proportion. At ${formatNumber(state.prevalencePer10k, 2)} offender-years per 10,000 unit-years, rule ${state.rule} gives ${formatRatio(selected.ratio)} falsely flagged unit-years per detected offender-year and ${selected.years === null ? 'no computable waiting time' : `one detected offender-year across this system about every ${formatNumber(selected.years, 0)} years`}.` };
 }
 
 // ---- tabs/tab5.js ----
@@ -943,19 +952,25 @@ function renderTab5(state, live, paper, reference, context = {}) {
     + `<div class="preset-row">${[1, .5, .25, .1].map(q => `<button type="button" data-set-field="q" data-value="${q}" aria-pressed="${state.q === q}">q = ${q}</button>`).join('')}</div>`
     + rangeControl('investigationMonths', 'Investigation length', 1, 36, 1, state.investigationMonths, `${state.investigationMonths} months`);
   const graph = `<p class="graph-note">Rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} · ${formatNumber(selected.current, 1)} nurse-flagging episodes a year at your q</p>
-    ${costPlot(state, live, context.intervals)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>flagging episodes per year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
+    ${costPlot(state, live, context.intervals)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>nurse-flagging episodes a year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
     <p class="graph-note">At q = ${formatNumber(state.q, 2)}, ${formatNumber(selected.offWards, 1)} nurses are off wards at any one time if each investigation lasts ${state.investigationMonths} months.</p>
     <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${posteriorDisplay(posteriorValue)}${context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
   const rows = live.rules.map(rule => {
     const now = live.flags[rule];
-    const baseline = paper.flags[rule];
+    // Paper values for the selected rota test, at the paper's q and investigation length.
+    const paperBase = paper.chance[rule].flags[state.rotaTest];
+    const scaled = factor => paperBase === null ? null : paperBase * factor;
+    const baseline = { current: scaled(PAPER_DEFAULT.q), offWards: scaled(PAPER_DEFAULT.q * PAPER_DEFAULT.investigationMonths / 12) };
+    const own = state.rotaTest === 'own';
     const pending = rule.startsWith('E') && (Object.values(live.chance[rule].byType).some(cell => cell._pending)
       || Object.values(live.detection[rule]).some(cell => cell._pending));
     const qCells = printedQs.map(q => {
       const liveText = formatNumber(now.byQ[q], 1);
-      const liveDistinct = state.rotaTest === 'own' ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
-      const paperText = `${formatNumber(baseline.byQ[q], 1)} (${formatNumber(paper.chance[rule].distinctOwn * q, 1)} distinct)`;
-      const same = posteriorAvailable && `${liveText} (${liveDistinct})` === paperText;
+      const liveDistinct = own ? `${formatNumber(live.chance[rule].distinctOwn === null ? null : live.chance[rule].distinctOwn * q, 1)} distinct` : 'distinct not computed';
+      const paperValue = formatNumber(scaled(q), 1);
+      const paperDistinct = `${formatNumber(paper.chance[rule].distinctOwn * q, 1)} distinct`;
+      const paperText = own ? `${paperValue} (${paperDistinct})` : paperValue;
+      const same = liveText === paperValue && (!own || liveDistinct === paperDistinct);
       const interval = context.intervals?.[`flags|${rule}|${q}`];
       return `<td data-source="${interval ? 'derived' : same ? 'paper' : 'derived'}"><span class="live-value">${liveText}${interval ? ` (${formatNumber(interval[0], 1)}–${formatNumber(interval[1], 1)})` : ''}</span><small class="distinct-value">${liveDistinct}</small>${same && !interval ? '' : `<small class="paper-value">paper ${paperText}</small>`}</td>`;
     }).join('');
@@ -967,15 +982,15 @@ function renderTab5(state, live, paper, reference, context = {}) {
       ? `<small class="paper-value">paper ${context.adjustedPosterior ? 'not computed' : `${paperPosterior.odds}<br>${paperPosterior.percentage}`}</small>` : '';
     return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${pending ? 'pending-rule' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${posteriorDisplay(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
   });
-  const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Off wards', 'Chance flagged nurse is offender'], rows,
-    `Table 5 · nurse-flagging episodes per year with distinct nurses underneath; posterior for ${context.adjustedPosterior ? 'maximum-adjusted test, simulated' : 'own-exposure test'}`);
-  const working = `<p><strong>Flagging episodes / yr</strong> = ${formatNumber(selected.base, 3)} × ${formatNumber(state.q, 2)} = <strong>${formatNumber(selected.current, 3)}</strong>.</p>
+  const liveTable = table(['Rule', 'q = 1', 'q = 0.5', 'q = 0.25', 'q = 0.1', 'Your q', 'Nurses off wards at one time', 'Chance flagged nurse is offender'], rows,
+    `Table 5 · nurse-flagging episodes per year with distinct nurses underneath; chance a flagged nurse is the offender, ${context.adjustedPosterior ? 'maximum-adjusted test, simulated' : 'own-exposure test'}`);
+  const working = `<p><strong>Nurse-flagging episodes a year</strong> = ${formatNumber(selected.base, 3)} × ${formatNumber(state.q, 2)} = <strong>${formatNumber(selected.current, 3)}</strong>.</p>
     <p><strong>Off wards at one time</strong> = ${formatNumber(selected.current, 3)} × ${state.investigationMonths} ÷ 12 = <strong>${formatNumber(selected.offWards, 3)}</strong>.</p>
-    ${posteriorAvailable ? `<p><strong>Chance a flagged nurse is the offender</strong> = offender correctly identified ÷ all flags = ${formatNumber(details.offenderFlagged, 6)} ÷ (${formatNumber(details.anyFlaggedWithOffender, 6)} + ${formatNumber(details.backgroundFlags, 6)}) = ${posteriorDisplay(posteriorValue)}. The factor q cancels from numerator and denominator.${context.adjustedPosterior ? ' This maximum-adjusted result is simulated.' : ''}</p>` : `<p><strong>Chance a flagged nurse is the offender: not computed.</strong> The reference run exported offender-identification and any-flag rates for the own-exposure test only; a ${TEST_NAMES[state.rotaTest].toLowerCase()} posterior is unavailable.</p>`}`;
+    ${posteriorAvailable ? `<p><strong>Chance a flagged nurse is the offender</strong> = offender correctly identified ÷ all flags = ${formatNumber(details.offenderFlagged, 6)} ÷ (${formatNumber(details.anyFlaggedWithOffender, 6)} + ${formatNumber(details.backgroundFlags, 6)}) = ${posteriorDisplay(posteriorValue)}. The factor q cancels from numerator and denominator.${context.adjustedPosterior ? ' This maximum-adjusted result is simulated.' : ''}</p>` : `<p><strong>Chance a flagged nurse is the offender: not computed.</strong> The paper’s simulation recorded the rates needed for the own-exposure test only.${state.rotaTest === 'adj' ? ' Change any simulation setting to estimate it for the maximum-adjusted test.' : ''}</p>`}`;
   return { kicker: 'Human cost', title: 'What happens after an alarm', question: 'How many people are flagged, and how likely is a flagged nurse to be the offender?', controls,
     graphTitle: 'People affected as searches change', graph, tableTitle: 'Live Table 5', table: liveTable, working,
-    fixed: fixedList(['The model assumes every searched alarm receives the selected rota test.', 'Posterior estimates count both background and offender-year flags.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
-    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}When the same share of every kind of alarm is searched, q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The offender posterior ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
+    fixed: fixedList(['The model assumes every searched alarm receives the selected rota test.', 'This chance counts flags from years with and without an offender.', 'A flagged nurse is off wards for the full investigation period in this scenario.']),
+    takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}When the same share of every kind of alarm is searched, q sets the volume of harm, not the odds: searching fewer alarms flags fewer innocent nurses and finds proportionally fewer offenders. With q = ${formatNumber(state.q, 2)}, rule ${state.rule} produces ${formatNumber(selected.current, 1)} nurse-flagging episodes a year and ${formatNumber(selected.offWards, 1)} nurses off wards at one time. The chance that a flagged nurse is the offender ${posteriorAvailable ? 'does not depend on q and is' : 'is'} ${posteriorDisplay(posteriorValue)}.` };
 }
 
 // ---- ui.js ----
@@ -1063,7 +1078,7 @@ function updateScenario() {
   ];
   document.querySelector('#scenario-items').innerHTML = items.map(([tab, label]) =>
     '<button type="button" data-go-tab="' + tab + '">' + label + '</button>').join('<span aria-hidden="true">·</span>');
-  document.querySelector('#world-summary').textContent = ['NICU', 'LNU', 'SCU'].map(type => state.unitCounts[type]).join(' / ');
+  document.querySelector('#world-summary').textContent = `· ${['NICU', 'LNU', 'SCU'].reduce((total, type) => total + state.unitCounts[type], 0)}: ${['NICU', 'LNU', 'SCU'].map(type => `${state.unitCounts[type]} ${TYPE_NAMES[type].toLowerCase()}`).join(', ')}`;
 }
 
 function renderWorld(preserve) {
@@ -1081,10 +1096,10 @@ function updateSimulationBanner() {
   const banner = document.querySelector('#simulation-banner');
   banner.hidden = plan.paperMode;
   if (plan.paperMode) return;
-  const status = simulationError ? `Simulation error: ${simulationError}` : loading
-    ? `${recalibratingType ? `Recalibrating rule E for ${TYPE_NAMES[recalibratingType].toLowerCase()} units… · ` : 'Updating · '}${completed} of ${plan.jobs.length} cells` : 'Estimates ready';
-  banner.innerHTML = `<strong>Simulation mode</strong> · estimates from ${REFERENCE.inputs.reps.toLocaleString()} chance / ${REFERENCE.inputs.det_reps.toLocaleString()} detection simulated units per cell · seed ${state.seed}
-    <span class="simulation-progress">${status}</span><button type="button" data-sim-action="baseline">Return to paper baseline</button><button type="button" data-sim-action="seed">Re-run with a new seed</button>`;
+  const status = simulationError ? `The simulation stopped (${simulationError}). Reset to the paper’s settings or reload the page.` : loading
+    ? `${recalibratingType ? `Recalibrating rule E for ${TYPE_NAMES[recalibratingType].toLowerCase()} units… · ` : 'Updating · '}${completed} of ${plan.jobs.length} estimates` : 'Estimates ready';
+  banner.innerHTML = `<strong>Simulation mode</strong> · each estimate uses ${REFERENCE.inputs.reps.toLocaleString()} simulated ten-year unit histories, or ${REFERENCE.inputs.det_reps.toLocaleString()} simulated offender-years for detection · seed ${state.seed}
+    <span class="simulation-progress">${status}</span><button type="button" data-sim-action="baseline">Reset to the paper’s settings</button><button type="button" data-sim-action="seed">Re-run with new random numbers</button>`;
 }
 
 function drawFigure() {
@@ -1114,7 +1129,7 @@ function render(preserveField = null) {
   const context = { reference: currentReference, intervals: loading ? null : intervalCache,
     simMode: !plan.paperMode, loading, adjustedPosterior, plan };
   document.querySelector('.scope-note').textContent = plan.paperMode
-    ? 'The live tables use the validated Python reference run and exact arithmetic. Counts for hypothetical settings are scenarios, not estimates of real offender prevalence.'
+    ? 'The tables start from the paper’s own simulation run and recalculate exactly as you change settings. Counts for hypothetical settings are scenarios, not estimates of real offender prevalence.'
     : 'Simulation estimates carry 95% intervals; paper values remain beside them. This is a hypothetical scenario, not an estimate of real offender prevalence.';
   updateScenario();
   updateSimulationBanner();
@@ -1129,7 +1144,7 @@ function render(preserveField = null) {
     panel.hidden = !active;
     const view = viewFunction(state, live, paper, REFERENCE, context);
     if (!plan.paperMode) view.takeaway = view.takeaway.replace(/^(In the paper’s setting: )([A-Z])/, (_, prefix, first) => prefix + first.toLowerCase());
-    if (!plan.paperMode) view.working = `<p class="source-explainer"><strong>Sources.</strong> “Simulated” cells use the current worker run; “derived” values combine those estimates with the shown scenario. Other cells retain the Python paper baseline. Pending values are dimmed until their new estimates arrive.</p>${view.working}`;
+    if (!plan.paperMode) view.working = `<p class="source-explainer"><strong>Sources.</strong> “Simulated” values come from the simulation running in your browser. “Derived” values are calculated from them. Unlabelled values are the paper’s. Dimmed values are still updating.</p>${view.working}`;
     const markup = renderLayout(tabNumber, view);
     if (preserveField && active) {
       const temp = document.createElement('div');

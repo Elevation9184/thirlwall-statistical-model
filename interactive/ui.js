@@ -96,7 +96,7 @@ function updateScenario() {
   ];
   document.querySelector('#scenario-items').innerHTML = items.map(([tab, label]) =>
     '<button type="button" data-go-tab="' + tab + '">' + label + '</button>').join('<span aria-hidden="true">·</span>');
-  document.querySelector('#world-summary').textContent = ['NICU', 'LNU', 'SCU'].map(type => state.unitCounts[type]).join(' / ');
+  document.querySelector('#world-summary').textContent = `· ${['NICU', 'LNU', 'SCU'].reduce((total, type) => total + state.unitCounts[type], 0)}: ${['NICU', 'LNU', 'SCU'].map(type => `${state.unitCounts[type]} ${TYPE_NAMES[type].toLowerCase()}`).join(', ')}`;
 }
 
 function renderWorld(preserve) {
@@ -114,10 +114,10 @@ function updateSimulationBanner() {
   const banner = document.querySelector('#simulation-banner');
   banner.hidden = plan.paperMode;
   if (plan.paperMode) return;
-  const status = simulationError ? `Simulation error: ${simulationError}` : loading
-    ? `${recalibratingType ? `Recalibrating rule E for ${TYPE_NAMES[recalibratingType].toLowerCase()} units… · ` : 'Updating · '}${completed} of ${plan.jobs.length} cells` : 'Estimates ready';
-  banner.innerHTML = `<strong>Simulation mode</strong> · estimates from ${REFERENCE.inputs.reps.toLocaleString()} chance / ${REFERENCE.inputs.det_reps.toLocaleString()} detection simulated units per cell · seed ${state.seed}
-    <span class="simulation-progress">${status}</span><button type="button" data-sim-action="baseline">Return to paper baseline</button><button type="button" data-sim-action="seed">Re-run with a new seed</button>`;
+  const status = simulationError ? `The simulation stopped (${simulationError}). Reset to the paper’s settings or reload the page.` : loading
+    ? `${recalibratingType ? `Recalibrating rule E for ${TYPE_NAMES[recalibratingType].toLowerCase()} units… · ` : 'Updating · '}${completed} of ${plan.jobs.length} estimates` : 'Estimates ready';
+  banner.innerHTML = `<strong>Simulation mode</strong> · each estimate uses ${REFERENCE.inputs.reps.toLocaleString()} simulated ten-year unit histories, or ${REFERENCE.inputs.det_reps.toLocaleString()} simulated offender-years for detection · seed ${state.seed}
+    <span class="simulation-progress">${status}</span><button type="button" data-sim-action="baseline">Reset to the paper’s settings</button><button type="button" data-sim-action="seed">Re-run with new random numbers</button>`;
 }
 
 function drawFigure() {
@@ -147,7 +147,7 @@ function render(preserveField = null) {
   const context = { reference: currentReference, intervals: loading ? null : intervalCache,
     simMode: !plan.paperMode, loading, adjustedPosterior, plan };
   document.querySelector('.scope-note').textContent = plan.paperMode
-    ? 'The live tables use the validated Python reference run and exact arithmetic. Counts for hypothetical settings are scenarios, not estimates of real offender prevalence.'
+    ? 'The tables start from the paper’s own simulation run and recalculate exactly as you change settings. Counts for hypothetical settings are scenarios, not estimates of real offender prevalence.'
     : 'Simulation estimates carry 95% intervals; paper values remain beside them. This is a hypothetical scenario, not an estimate of real offender prevalence.';
   updateScenario();
   updateSimulationBanner();
@@ -162,7 +162,7 @@ function render(preserveField = null) {
     panel.hidden = !active;
     const view = viewFunction(state, live, paper, REFERENCE, context);
     if (!plan.paperMode) view.takeaway = view.takeaway.replace(/^(In the paper’s setting: )([A-Z])/, (_, prefix, first) => prefix + first.toLowerCase());
-    if (!plan.paperMode) view.working = `<p class="source-explainer"><strong>Sources.</strong> “Simulated” cells use the current worker run; “derived” values combine those estimates with the shown scenario. Other cells retain the Python paper baseline. Pending values are dimmed until their new estimates arrive.</p>${view.working}`;
+    if (!plan.paperMode) view.working = `<p class="source-explainer"><strong>Sources.</strong> “Simulated” values come from the simulation running in your browser. “Derived” values are calculated from them. Unlabelled values are the paper’s. Dimmed values are still updating.</p>${view.working}`;
     const markup = renderLayout(tabNumber, view);
     if (preserveField && active) {
       const temp = document.createElement('div');

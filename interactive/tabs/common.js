@@ -1,6 +1,6 @@
 export const RULE_NAMES = Object.freeze({
-  A: 'A · annual 2σ', B: 'B · annual 3σ', C: 'C · monthly 2σ',
-  D: 'D · doubling', E10: 'E10 · idealised', E50: 'E50 · idealised'
+  A: 'A · annual', B: 'B · annual, stricter', C: 'C · monthly, rolling',
+  D: 'D · doubling', E10: 'E10 · idealised, 1 in 10', E50: 'E50 · idealised, 1 in 50'
 });
 export const TYPE_NAMES = Object.freeze({ NICU: 'Intensive care', LNU: 'Local', SCU: 'Special care' });
 export const TEST_NAMES = Object.freeze({ avg: 'Average-exposure', own: 'Own-exposure', adj: 'Maximum-adjusted' });
