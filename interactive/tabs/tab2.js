@@ -21,7 +21,7 @@ export function renderTab2(state, live, paper, reference, context = {}) {
     + rangeControl('mechanismRoster', 'Nurses on a hypothetical roster', 20, 200, 1, state.mechanismRoster, `${state.mechanismRoster} nurses`)
     + rangeControl('mechanismDeaths', 'Deaths reviewed', 2, 40, 1, state.mechanismDeaths, `${state.mechanismDeaths} deaths`);
   const graph = `<p class="graph-note">Selected rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} test</p>
-    ${bar('Chance alarming unit-years', current.alarmUnitYears, Math.max(current.alarmUnitYears || 0, selectedFlags || 0), formatNumber(current.alarmUnitYears, 1), '', context.intervals?.[`alarmUnitYears|${state.rule}`])}
+    ${bar('Chance unit-years with an alarm', current.alarmUnitYears, Math.max(current.alarmUnitYears || 0, selectedFlags || 0), formatNumber(current.alarmUnitYears, 1), '', context.intervals?.[`alarmUnitYears|${state.rule}`])}
     ${bar('Nurse-flagging episodes', selectedFlags, Math.max(current.alarmUnitYears || 0, selectedFlags || 0), formatNumber(selectedFlags, 1), 'accent-bar', context.intervals?.[`baseFlags|${state.rule}|${state.rotaTest}`])}
     <div class="mechanism-panel"><h4>The mechanism, not Table 2</h4><p>With ${state.mechanismDeaths} deaths and the model’s shift mix, a roster of ${state.mechanismRoster} has a <strong>${formatPercent(live.mechanism.selected, 0)}</strong> chance that at least one nurse passes an unadjusted own-exposure test at ${formatPercent(state.significance, 1)} by chance.</p>${mechanismPlot(live.mechanism, state.mechanismRoster)}</div>`;
   const rows = TYPES.map(type => {
