@@ -25,7 +25,7 @@ function conditionLabel(rule, sd, reference) {
 export function renderTab1(state, live, paper, reference, context = {}) {
   const current = live.chance[state.rule];
   const controls = choiceControl('rule', 'Monitoring rule', live.rules.map(rule => [rule, RULE_NAMES[rule]]), state.rule)
-    + rangeControl('alarmSD', 'Alarm line for rules A and C, in standard deviations (SD) above expected deaths', 1.5, 3.5, .1, state.alarmSD, `${formatNumber(state.alarmSD, 1)} SD`, 'Rule B sits one SD higher. Rules D and E do not use this line.')
+    + rangeControl('alarmSD', 'Alarm line for rules A and C, in standard deviations (SD) above expected deaths', 1.5, 3.5, .1, state.alarmSD, `${formatNumber(state.alarmSD, 1)} SD`, 'SD is shorthand: each line is a one-sided Poisson cut-off at the matching normal percentile (2 SD = 97.7th). Rule B sits one SD higher. Rules D and E do not use this line.')
     + '<p class="control-note">Rule E assumes perfect knowledge of each month’s expected deaths.</p>';
   const graph = `<p class="graph-note">Expected count, a typical year · ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years among ${Object.values(state.unitCounts).reduce((a, b) => a + b, 0)} units</p>
     ${TYPES.map(type => {
@@ -50,6 +50,6 @@ export function renderTab1(state, live, paper, reference, context = {}) {
   const working = `<p><strong>Alarming unit-years a year</strong> = Σ units of each type × chance that type alarms.</p><p class="formula">${terms} = <strong>${formatNumber(current.alarmUnitYears, 1)}</strong>.</p><p>An alarm episode is a run of back-to-back alarmed checks. The Figure 2 slider in Tab 4 does not change this table.</p>${thresholdRows.length ? `<p><strong>Rule E’s threshold is reset</strong> for each unit type whose deaths you changed, using 50,000 simulated ten-year histories with no offender.</p><ul class="threshold-list">${thresholdRows.join('')}</ul>` : ''}`;
   return { kicker: 'Noise', title: 'Chance alarms', question: 'How many alarms does chance alone produce?', controls,
     graphTitle: 'Where the expected alarms land', graph, tableTitle: 'Live Table 1', table: liveTable, working,
-    fixed: fixedList(['Each unit’s death rate varies by about 25% from year to year.', 'Rules A–D compare with the preceding three-year average, never below half a death a year.', 'Four years of history and ten years of monitoring.', 'Rule E is an idealised cumulative-sum (CUSUM) chart: it keeps a running total of deaths above expected and alarms when that total crosses a threshold. It is tuned to catch a doubling of deaths.']),
+    fixed: fixedList(['Each unit’s death rate varies by about 25% from year to year.', 'Rules A–D compare with the preceding three-year average, never below half a death a year.', 'Four years of history and ten years of monitoring.', 'Rule E is an idealised cumulative-sum (CUSUM) chart: it keeps a running score of the evidence that deaths have doubled, and alarms when that score crosses a threshold.']),
     takeaway: `${context.simMode ? 'In the paper’s setting: ' : ''}Chance alone produces between 3 and 34 alarms a year in England and Wales, depending on the rule. Under rule ${state.rule}, chance produces ${formatNumber(current.alarmUnitYears, 1)} alarming unit-years and ${formatNumber(current.episodes, 1)} episodes a year across the selected unit mix.` };
 }

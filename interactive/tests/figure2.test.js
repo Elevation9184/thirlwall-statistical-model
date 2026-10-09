@@ -85,7 +85,7 @@ test('all sweep sensitivities sit strictly inside both plot widths', () => {
 });
 
 test('the delivered file-open browser script matches the tested source modules', async () => {
-  const delivered = readFileSync(fileURLToPath(new URL('../app.js', import.meta.url)), 'utf8');
+  const delivered = readFileSync(fileURLToPath(new URL('../app.js', import.meta.url)), 'utf8').replace(/\r\n/g, '\n');
   assert.equal(delivered, await makeBundle());
   for (const phrase of ['Chance of detecting', 'National wait', 'intensive unit', 'In a intensive']) {
     assert.ok(!delivered.includes(phrase), `Stale wording in app.js: ${phrase}`);
