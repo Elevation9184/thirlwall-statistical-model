@@ -957,7 +957,7 @@ function renderTab5(state, live, paper, reference, context = {}) {
   const graph = `<p class="graph-note">Rule ${state.rule} · ${TEST_NAMES[state.rotaTest]} · ${formatNumber(selected.current, 1)} nurse-flagging episodes a year at your q</p>
     ${costPlot(state, live, context.intervals)}<div class="graph-key"><span class="graph-key-item"><span class="key-swatch teal"></span>nurse-flagging episodes a year</span><span class="graph-key-item"><span class="key-swatch orange"></span>nurses off wards at one time</span></div>
     <p class="graph-note">At q = ${formatNumber(state.q, 2)}, ${formatNumber(selected.offWards, 1)} nurses are off wards at any one time if each investigation lasts ${state.investigationMonths} months.</p>
-    <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${shownPosterior(posteriorValue)}${context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
+    <div class="chart-posterior"><span>Chance a flagged nurse is the offender${context.adjustedPosterior ? ' · maximum-adjusted, simulated' : ''}</span>${shownPosterior(posteriorValue)}${!noSearch && context.intervals?.[`posterior|${state.rule}`] ? `<small>95% ${formatPercent(context.intervals[`posterior|${state.rule}`][0], 3)}–${formatPercent(context.intervals[`posterior|${state.rule}`][1], 3)}</small>` : ''}</div>`;
   const rows = live.rules.map(rule => {
     const now = live.flags[rule];
     // Paper values for the selected rota test, at the paper's q and investigation length.
@@ -980,7 +980,7 @@ function renderTab5(state, live, paper, reference, context = {}) {
     const currentPosterior = posteriorAvailable ? live.posteriors[rule] : null;
     const livePosterior = formatPosterior(currentPosterior);
     const paperPosterior = formatPosterior(paper.posteriors[rule]);
-    const posteriorInterval = context.intervals?.[`posterior|${rule}`];
+    const posteriorInterval = noSearch ? null : context.intervals?.[`posterior|${rule}`];
     const paperComparison = !noSearch && posteriorAvailable && (context.simMode || livePosterior.odds !== paperPosterior.odds || livePosterior.percentage !== paperPosterior.percentage)
       ? `<small class="paper-value">paper ${context.adjustedPosterior ? 'not computed' : `${paperPosterior.odds}<br>${paperPosterior.percentage}`}</small>` : '';
     return `<tr class="${rule === state.rule ? 'selected-row' : ''} ${pending ? 'pending-rule' : ''}"><th scope="row">${rule}</th>${qCells}${compareCell(now.current, baseline.current, value => formatNumber(value, 1), { interval: context.intervals?.[`flags|${rule}|${state.q}`] })}${compareCell(now.offWards, baseline.offWards, value => formatNumber(value, 1), { interval: context.intervals?.[`offWards|${rule}`] })}<td class="posterior-cell" data-source="${posteriorInterval ? 'derived' : context.adjustedPosterior ? 'pending' : 'paper'}">${shownPosterior(currentPosterior)}${posteriorInterval ? `<small class="source-value">simulated · 95% ${formatPercent(posteriorInterval[0], 3)}–${formatPercent(posteriorInterval[1], 3)}</small>` : ''}${paperComparison}</td></tr>`;
