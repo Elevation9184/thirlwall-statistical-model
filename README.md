@@ -143,6 +143,8 @@ Alternative choices and critiques are welcome. This is one inspectable model, no
 
 This analysis is offered in good faith, on a best-efforts basis, as one interpretation of public material. It is not legal, medical or other professional advice, it makes no finding about any individual or case, and it may contain errors or omissions. The author accepts no liability for any decision made in reliance on it. Corrections are welcome.
 
+Claude (Anthropic) and Codex (OpenAI) were used to help review source material, draft and edit the text, and build and cross-check the simulator. The analysis, its assumptions and any errors are the author's own.
+
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
