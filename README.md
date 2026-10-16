@@ -139,6 +139,10 @@ The main inputs are near the top of the script: `TYPES`, `CV`, `EXPOSURE`, `EXP_
 
 Alternative choices and critiques are welcome. This is one inspectable model, not a claim that its assumptions are the only reasonable ones.
 
+## Disclaimer
+
+This analysis is offered in good faith, on a best-efforts basis, as one interpretation of public material. It is not legal, medical or other professional advice, it makes no finding about any individual or case, and it may contain errors or omissions. The author accepts no liability for any decision made in reliance on it. Corrections are welcome.
+
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
